@@ -1,0 +1,23 @@
+{
+  "name": "math-worksheet-gen",
+  "version": "1.0.0",
+  "description": "Comprehensive random generator of highschool mathematical activities and worksheets",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "git": "https://github.com/jmulet/math-worksheet-gen.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mathjs": "^4.1.1",
+    "random-seed": "^0.3.0"
+  },
+  "devDependencies": {
+    "@types/mathjs": "^3.20.0",
+    "@types/random-seed": "^0.3.3"
+  }
+}
