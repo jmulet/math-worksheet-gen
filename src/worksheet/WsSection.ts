@@ -33,4 +33,25 @@ export class WsSection {
         })
         return latex;
     }
+
+    toHtml(): string[] {
+        const latex = [];
+        latex.push("<ol>")
+        latex.push("  <li><h3><b>" + this.title + "</b></h3></li>");
+        latex.push("  <ol>");
+        this.activities.forEach( (activity) => {
+            latex.push(...activity.toHtml());
+        })
+        latex.push("  </ol>"); 
+        latex.push("</ol>"); 
+        return latex;
+    }
+
+    answersToHtml(): string[] {
+        const latex = [];
+        this.activities.forEach( (activity) => {
+            latex.push(...activity.answersToHtml());
+        })
+        return latex;
+    }
 }

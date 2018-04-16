@@ -50,4 +50,27 @@ export class WsActivity {
         
         return latex;
     }
+
+    toHtml(): string[] {
+        const latex = [];
+        latex.push("    <li> " + this.formulation + "</li>");
+        latex.push('    <ol style="list-style-type: lower-alpha;">'); 
+        this.questions.forEach( (question) => {
+            latex.push("      <li> " + question.toHtml() + "</li>");
+        })
+        latex.push("    </ol>");
+        
+        return latex;
+    }
+
+    answersToHtml(): string[] {
+        const latex = [];
+        latex.push('    <ol style="list-style-type: lower-alpha;">');
+        this.questions.forEach( (question) => {
+            latex.push("    <li> " + question.answerToHtml() + "</li>");
+        })
+        latex.push("    </ol>");
+        
+        return latex;
+    }
 }

@@ -30,10 +30,10 @@ export class FractionOpGen implements QuestionGenInterface {
 
     getFormulation(): string {        
         const [f1, f2, f3, f4, f5] = this.fractions;
-        return "$\\frac{" + f1.toString() + " + " + f2.toString()  + "}{\\left(" + f3.toString() + "-" + f4.toString() + "\\right)\\cdot " + f5.toString() + " }$";
+        return "$\\frac{" + f1.toTeX() + " + " + f2.toTeX()  + "}{\\left(" + f3.toTeX() + "-" + f4.toTeX() + "\\right)\\cdot " + f5.toTeX() + " }$";
     }
 
     getAnswer(): string {
-        return "$" + this.answer.toString() + "$";
+        return "$" + this.answer.toTeX() + "$";
     }
 }

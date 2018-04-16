@@ -8,6 +8,7 @@ export class Random {
         for (let i=0; i < length; i++) {
             let random;
             if (i===0) {
+                // First item cannot be zero
                 random = Random.intBetweenNotZero(rnd, -range, range);
             } else {
                 random = rnd.intBetween(-range, range)

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Math worksheet generator</title>
+ <meta charset="utf-8"
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/contrib/auto-render.min.js" integrity="sha384-IiI65aU9ZYub2MY9zhtKd1H2ps7xxf+eb2YFG9lX6uRqpXCvBTOidPRCXCrQ++Uc" crossorigin="anonymous"></script>
+</head>
+<body>
+<ol>
+  <li><h3><b>Algebra</b></h3></li>
+  <ol>
+    <li> Divide these polynomials using Ruffini's rule.</li>
+    <ol style="list-style-type: lower-alpha;">
+      <li> $\left(5 x + 4 \right) : \left( x + 1 \right)$</li>
+      <li> $\left(4 x^{5} + 5 x^{4} + 8 x^{3} + 3 x^{2} + 4 x + 10 \right) : \left( x + 6 \right)$</li>
+      <li> $\left(2 x + 6 \right) : \left( x + 4 \right)$</li>
+      <li> $\left(4 x^{3} +  x^{2} + 5 x + 2 \right) : \left( x + 2 \right)$</li>
+    </ol>
+    <li> Compute these operations with fractions.</li>
+    <ol style="list-style-type: lower-alpha;">
+      <li> $\frac{10 + \frac{50}{7}}{\left(10-10\right)\cdot \frac{20}{3} }$</li>
+      <li> $\frac{10 + 10}{\left(6-10\right)\cdot \frac{10}{3} }$</li>
+    </ol>
+  </ol>
+</ol>
+  <h4><b>Answers</b></h4>
+  <ol>
+    <ol style="list-style-type: lower-alpha;">
+    <li> $Q(x)=5 $; $R=9 $ </li>
+    <li> $Q(x)=12 x^{4} + 19 x^{3} + 106 x^{2} + 633 x + 3794 $; $R=22754 $ </li>
+    <li> $Q(x)=6 $; $R=2 $ </li>
+    <li> $Q(x)=12 x^{2} + 9 x + 13 $; $R=24 $ </li>
+    </ol>
+    <ol style="list-style-type: lower-alpha;">
+    <li> $\frac{3}{140}$</li>
+    <li> $\frac{3}{2}$</li>
+    </ol>
+   </ol>
+<script>
+ var options = {delimiters: [
+     {left: "$", right: "$", display: false}, 
+     {left: "\[", right: "\]", display: true}, 
+     {left: "\(", right: "\)", display: false} 
+ ]};
+ document.addEventListener("DOMContentLoaded", function() {
+   renderMathInElement(document.body, options);
+ });
+</script>
+</body>
+</html>

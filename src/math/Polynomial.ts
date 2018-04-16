@@ -6,6 +6,7 @@ export class Polynomial extends Expression {
     coefs: Numeric[];
     constructor(coefs?: (number | Numeric | string)[]) {
         super();
+      
         this.coefs = (coefs || []).map((e) => {
             if (e instanceof Numeric) {
                 return e;
@@ -21,6 +22,7 @@ export class Polynomial extends Expression {
         while (this.coefs.length > 1 && this.coefs[0].isZero()) {
             this.coefs.splice(0, 1);
         }
+       
     }
 
     degree(): number {
@@ -74,16 +76,16 @@ export class Polynomial extends Expression {
     }
 
     substract(p2: Polynomial) {
-        const p2minus = new Polynomial(p2.coefs.map(e => -e));
+        const p2minus = new Polynomial(p2.coefs.map(e => e.oposite()));
         return this.add(p2minus);
     }
 
-    divide(p2: Polynomial): { quotient: Polynomial, reminder: Polynomial } {
+    divide(p2: Polynomial): { quotient: Polynomial, remainder: Polynomial } {
         const c2 = p2.coefs;
         const l1 = this.coefs.length;
         const l2 = c2.length;
         if (l1 < l2) {
-            return { quotient: new Polynomial([0]), reminder: this };
+            return { quotient: new Polynomial([0]), remainder: this };
         }
         else {
             let quo = new Polynomial([0]);
@@ -93,7 +95,7 @@ export class Polynomial extends Expression {
                 quo = quo.add(step.q);
                 remainder = step.r;
             };
-            return { quotient: quo, reminder: remainder };
+            return { quotient: quo, remainder: remainder };
         }
 
     }
@@ -166,9 +168,9 @@ export class Polynomial extends Expression {
         const withPowers = this.coefs.map((coef, i) => {
             const expd = degree - i;
             if (!coef.isZero())  {
-                let num = "" + coef.toString();
+                let num = "" + coef.toTeX();                 
                 if (coef.isOne() && i !== degree) {
-                    num = "";
+                    num = "";                    
                 }
                 if (!coef.isNegative() && i > 0) {
                     num = "+ " + num;
@@ -179,7 +181,11 @@ export class Polynomial extends Expression {
             }
         })
 
-        return withPowers.join(" ");
+        let result = withPowers.join(" ");
+        if(!result.trim()) {
+            result = "0";
+        }
+        return result;
     }
 
 }

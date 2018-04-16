@@ -10,10 +10,18 @@ export class WsQuestion {
     }
  
     toLaTeX(): string {
-        return this.qsGen.getFormulation();
+        return this.qsGen.getFormulation("latex");
     }
 
     answerToLaTeX(): string {
-        return this.qsGen.getAnswer();
+        return this.qsGen.getAnswer("latex");
+    }
+
+    toHtml(): string {
+        return this.qsGen.getFormulation("html");
+    }
+
+    answerToHtml(): string {
+        return this.qsGen.getAnswer("html");
     }
 }

@@ -1,4 +1,4 @@
 export interface QuestionGenInterface {
-    getFormulation(): string,
-    getAnswer(): string
+    getFormulation(type?: string): string,
+    getAnswer(type?: string): string
 }
