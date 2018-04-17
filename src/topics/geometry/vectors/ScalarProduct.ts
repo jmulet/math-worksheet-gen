@@ -1,40 +1,16 @@
-import { QuestionGenInterface } from '../../interfaces/QuestionGenInterface';
-import { QuestionOptsInterface } from '../../interfaces/QuestionOptsInterface';
-import { Polynomial } from '../../math/Polynomial';
-import { Random } from '../../util/Random';
-import { WsGenerator } from '../../util/WsGenerator';
+import {WsGenerator} from '../../../util/WsGenerator';
 
 @WsGenerator({
-    category: "Algebra/PolyDivision",
+    category: "geometry/vectors/ScalarProduct",
     parameters: [
         {
             name: "interval",
             defaults: 10,
             description: "Range in which random coefficients are generated"
-        },
-        {
-            name: "minDegree",
-            defaults: 3,
-            description: "Lowest degree of the generated polynomial"
-        },
-        {
-            name: "maxDegree",
-            defaults: 6,
-            description: "Highest degree of the generated polynomial"
-        },
-        {
-            name: "ruffini",
-            defaults: false,
-            description: "When set to true only divisions by (x+-a) are generated"
-        },
-        {
-            name: "fractions",
-            defaults: false,
-            description: "Allows fraction coefficients in the quotient and reminder"
         }
     ]
 })
-export class PolyDivision implements QuestionGenInterface {
+export class ScalarProduct implements QuestionGenInterface {
     
     answers: {quotient: Polynomial, remainder: Polynomial};
     polyD: Polynomial;

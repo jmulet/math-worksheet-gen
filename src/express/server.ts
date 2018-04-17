@@ -3,6 +3,8 @@ import * as express from 'express';
 import { wsMathMiddleware } from './wsMathMiddleware';
 
 const app = express();
+//app.use(express.urlencoded());
+//app.use(express.methodOverride());
 app.use(wsMathMiddleware());
 
 app.get('/', function (req, res) {

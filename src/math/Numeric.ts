@@ -144,8 +144,13 @@ export class Numeric {
         return new Numeric(subRe["n"]*subRe["s"], subRe["d"], subIm["n"]*subIm["s"], subIm["d"]);
     }
 
+    copy(): Numeric {
+        return new Numeric(this.Re["s"]*this.Re["n"],
+            this.Re["d"], this.Im["s"]*this.Im["n"],
+            this.Im["d"]);
+    }
+
     power(n: Numeric): Numeric | Power {
-        
         if(!this.isReal()) {
             throw "power of complex not implemented yet";
         }

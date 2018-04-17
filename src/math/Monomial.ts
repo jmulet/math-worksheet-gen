@@ -2,6 +2,7 @@ import { Polynomial } from "./Polynomial";
 import { Power } from "./Power";  
 import { Expression } from "./Expression";
 import { Numeric } from "./Numeric";
+ 
 
 export class Literal {
     constructor(public symbol: string, public exponent: number) {        
@@ -9,7 +10,9 @@ export class Literal {
     static equivalent(l1: Literal, l2: Literal): boolean {
         return l1.symbol === l2.symbol;
     }
-
+    degree() {
+        return this.exponent;
+    }
     copy() {
         return new Literal(this.symbol, this.exponent);
     }
@@ -38,33 +41,22 @@ export class Monomial extends Expression {
         return new Monomial(numeric, []);
     }
 
+    /** Two monomials are equivalent if they have the same literal part
+     * including exponents as well xy is equivalent to 2xy but not 2xy².
+     * Assume that Literals are sorted and reduced
+     */
     static equivalent(m1: Monomial, m2: Monomial): boolean {
-        const s1 = m1.literals.map(e=>e.symbol).sort();
-        const s2 = m2.literals.map(e=>e.symbol).sort();
-    }
-
-    static add(m1: Monomial | Monomial[], m2: Monomial | Monomial[]) : Monomial[] {
-        const addition = <Monomial[]> [];
-
-        return addition;
-    }
-
-    static substract(m1: Monomial | Monomial[], m2: Monomial | Monomial[]) : Monomial[] {
-        const sub = <Monomial[]> [];
-
-        return sub;
-    }
-
-    static multiply(m1: Monomial | Monomial[], m2: Monomial | Monomial[]) : Monomial[] {
-        const product = <Monomial[]> [];
-
-        return product;
-    }
-
-    static power(m1: Monomial | Monomial[], n: number) : Monomial[] {
-        const pow = <Monomial[]> [];
-
-        return pow;
+        if (m1.literals.length !== m2.literals.length) {
+            return false;
+        }
+        for (var i = 0; i < m1.literals.length; i++) {
+            const l1 = m1.literals[i];
+            const l2 = m2.literals[i];
+            if (l1.symbol!==l2.symbol || l1.exponent !== l2.exponent) {
+                return false;
+            }
+        }
+        return true;
     }
 
     constructor(coef: Numeric | number, literals: Literal[] | string) {
@@ -79,7 +71,7 @@ export class Monomial extends Expression {
         } 
         this.coef = coef;
         this.literals = literals;
-        this.reduceLiterals()
+        this.reduceLiterals();
     }
 
     // Literals which have the same symbol can be merged into one by adding exponents
@@ -97,8 +89,19 @@ export class Monomial extends Expression {
                 symbolsFound[literal.symbol].exponent += literal.exponent;
             }
         });
+        // get rid of 0 exponents
         this.literals = newLiterals.filter( (e) => e.exponent!==0 );
+        // sort by symbol
+        this.literals = this.literals.sort( (x, y) => {
+            return x.symbol.localeCompare(y.symbol);
+        });
         symbolsFound = null;
+    }
+
+    oposite(): Monomial {
+        const clone = this.copy();
+        clone.coef = clone.coef.oposite();
+        return clone;
     }
 
     multiply(m2: Monomial): Monomial {
@@ -109,7 +112,7 @@ export class Monomial extends Expression {
     inverse(): Monomial {
         const literals2 = this.literals.map( e => {
             const e2 = e.copy();
-            e2.exponent = - e.exponent;
+            e2.exponent = -e.exponent;
             return e2;
         });
         return new Monomial(<Numeric> this.coef.inverse(), literals2);
@@ -144,8 +147,23 @@ export class Monomial extends Expression {
         return this.coef.isInt() && !this.coef.isNegative() && this.literals.length === 0;
     }
 
+    copy(): Monomial {
+        const literalsCopy = this.literals.map( e => e.copy() );
+        return new Monomial(this.coef.copy(), literalsCopy);
+    }
+
+    degree(): number {
+        let deg = 0;
+        this.literals.forEach( (x) => deg += x.degree());
+        return deg;
+    }
+
+    literalsToString() {
+        return this.literals.map( e => e.toString() ).join(" ");
+    }
+
     toString(): string {
-        const literalPart = this.literals.map( e => e.toString() ).join(" ");
+        const literalPart = this.literalsToString();
         if (this.coef.isZero()) {
             return "0";
         } else if (this.coef.is(-1)) {

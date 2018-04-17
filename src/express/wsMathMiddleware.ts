@@ -13,6 +13,8 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
     const url = (options.basePrefix || '') + '/wsmath';
 
     router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
+        const seed = req.query.seed; 
+        console.log(seed)
         let body = req.body;
         if (!body) {
             body = generateSampleBody();
@@ -20,6 +22,7 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         if (typeof (body) === 'string') {
             body = JSON.parse(body);
         }
+        body.seed = seed;
         const generator = new WsMathGenerator(body);
         const html = generator.exportAs(WsExportFormats.HTML);
         res.setHeader("Content-Type", "text/html");
