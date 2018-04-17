@@ -3,8 +3,11 @@ import { WsSection } from "./WsSection";
 import  * as Random from 'random-seed'; 
 import { FractionOpGen } from "../topics/arithmetics/FractionOpGen";
 import { WsMathGenOpts, Worksheet } from "../interfaces/WsMathGenOpts";
-import { PolyDivision } from "../topics/algebra/PolyDivision";
+import { PolyDivision } from "../topics/algebra/polynomials/PolyDivision";
 import { Container } from "../util/WsGenerator";
+import { PolyIdentities } from "../topics/algebra/polynomials/PolyIdentities";
+import { PolyCommonFactor } from "../topics/algebra/polynomials/PolyCommonFactor";
+import { PolyFactorize } from "../topics/algebra/polynomials/PolyFactorize";
  
 
 export enum WsExportFormats {
@@ -15,7 +18,10 @@ export enum WsExportFormats {
 
 export const WsTopics = {
     Algebra: {
-        PolyDivision: PolyDivision
+        PolyDivision: PolyDivision,
+        PolyIdentities: PolyIdentities,
+        PolyCommonFactor: PolyCommonFactor,
+        PolyFactorize: PolyFactorize
     },
     Arithmetics: {
         FractionOp: FractionOpGen
@@ -54,7 +60,7 @@ export class WsMathGenerator {
                     if(clazz) {
                         act.use(clazz, question.options || {}).repeat(question.repeat || 1);
                     } else {
-                        console.log("Error ", question.clazz, " not found");
+                        console.log("Error:: generator clazz ", question.clazz, " not found");
                     }
                 });
             });
@@ -121,9 +127,34 @@ export class WsMathGenerator {
             '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" crossorigin="anonymous">',
             '<script src="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.js" crossorigin="anonymous"></script>',
             '<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/contrib/auto-render.min.js" integrity="sha384-IiI65aU9ZYub2MY9zhtKd1H2ps7xxf+eb2YFG9lX6uRqpXCvBTOidPRCXCrQ++Uc" crossorigin="anonymous"></script>',
+            '<style>',
+           `
+            .olalpha {
+            counter-reset: list;
+            margin: 10px; 
+            font-size: 120%;
+            }
+            
+            .olalpha > li {
+            list-style: none;
+            position: relative; }
+            
+            .olalpha > li:before {
+            counter-increment: list;
+            content: counter(list, lower-alpha) ") ";
+            position: absolute;
+            left: -1.4em; }
+           `,
+            '</style>',
             "</head>",
             "<body>"
         ];
+
+        /*
+        ol li:before {
+  content: counter(level1) ") "; 
+  counter-increment: level1;
+    }*/
         this.sections.forEach((section) => {
             code.push(...section.toHtml());
         })

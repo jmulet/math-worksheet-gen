@@ -54,10 +54,10 @@ export class WsActivity {
     toHtml(): string[] {
         const latex = [];
         latex.push("    <li> " + this.formulation + "</li>");
-        latex.push('    <ol style="list-style-type: lower-alpha;">'); 
+        latex.push('    <ol class="olalpha">'); 
         this.questions.forEach( (question) => {
             latex.push("      <li> " + question.toHtml() + "</li>");
-        })
+        });
         latex.push("    </ol>");
         
         return latex;
@@ -65,11 +65,13 @@ export class WsActivity {
 
     answersToHtml(): string[] {
         const latex = [];
-        latex.push('    <ol style="list-style-type: lower-alpha;">');
+        latex.push('  <li>');
+        latex.push('    <ol class="olalpha">');
         this.questions.forEach( (question) => {
             latex.push("    <li> " + question.answerToHtml() + "</li>");
-        })
+        });
         latex.push("    </ol>");
+        latex.push("  </li>");
         
         return latex;
     }

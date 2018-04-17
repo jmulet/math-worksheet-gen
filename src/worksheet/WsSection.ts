@@ -49,9 +49,11 @@ export class WsSection {
 
     answersToHtml(): string[] {
         const latex = [];
-        this.activities.forEach( (activity) => {
-            latex.push(...activity.answersToHtml());
-        })
+        latex.push("<ol>");
+        this.activities.forEach( (activity) => {           
+            latex.push(...activity.answersToHtml());            
+        });
+        latex.push("</ol>");
         return latex;
     }
 }

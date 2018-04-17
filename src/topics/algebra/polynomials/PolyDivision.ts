@@ -1,11 +1,11 @@
-import { QuestionGenInterface } from '../../interfaces/QuestionGenInterface';
-import { QuestionOptsInterface } from '../../interfaces/QuestionOptsInterface';
-import { Polynomial } from '../../math/Polynomial';
-import { Random } from '../../util/Random';
-import { WsGenerator } from '../../util/WsGenerator';
+import { QuestionGenInterface } from '../../../interfaces/QuestionGenInterface';
+import { QuestionOptsInterface } from '../../../interfaces/QuestionOptsInterface';
+import { Polynomial } from '../../../math/Polynomial';
+import { Random } from '../../../util/Random';
+import { WsGenerator } from '../../../util/WsGenerator';
 
 @WsGenerator({
-    category: "Algebra/PolyDivision",
+    category: "algebra/polynomial/division",
     parameters: [
         {
             name: "interval",

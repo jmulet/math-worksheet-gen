@@ -4,6 +4,25 @@ import * as math from "mathjs";
 
 export class Polynomial extends Expression {
     coefs: Numeric[];
+
+    // Constructs the polynomial given all complex roots
+    static fromRoots(roots: Numeric[]): Polynomial {
+        const binomials = roots.map( (e) => {
+            let coef1 = 1;
+            let coef2 = e.oposite();
+            if(coef2.Re["d"] > 1) {
+                coef1 = coef2.Re["d"];
+                coef2 = coef2.multiply(Numeric.fromNumber(coef1));
+            }
+            return new Polynomial([coef1, coef2]);
+        });
+        let poly = binomials[0];
+        for(var i=0; i<binomials.length; i++) {
+            poly = poly.multiply(binomials[i]);
+        }
+        return poly;
+    }
+
     constructor(coefs?: (number | Numeric | string)[]) {
         super();
       

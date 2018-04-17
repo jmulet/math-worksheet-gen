@@ -2,31 +2,7 @@ import { Polynomial } from "./Polynomial";
 import { Power } from "./Power";  
 import { Expression } from "./Expression";
 import { Numeric } from "./Numeric";
- 
-
-export class Literal {
-    constructor(public symbol: string, public exponent: number) {        
-    }
-    static equivalent(l1: Literal, l2: Literal): boolean {
-        return l1.symbol === l2.symbol;
-    }
-    degree() {
-        return this.exponent;
-    }
-    copy() {
-        return new Literal(this.symbol, this.exponent);
-    }
-    toString(): string {
-        if (this.exponent === 0) {
-            return "1";
-        } else if(this.exponent > 0) {
-            return this.symbol + "^{" + this.exponent + "}";
-        } else {
-            return "\\frac{1}{" + this.symbol + "^{" + Math.abs(this.exponent) + "}}";
-        }        
-    }
-}
-
+import { Literal } from "./Literal";
 
 export class Monomial extends Expression {
     
@@ -40,6 +16,15 @@ export class Monomial extends Expression {
     static fromNumeric(numeric: Numeric) {
         return new Monomial(numeric, []);
     }
+
+    static One(): Monomial {
+        return new Monomial(Numeric.fromNumber(1), []);
+    }
+
+    /*
+    static parse(str: string): Monomial {
+    }
+    */
 
     /** Two monomials are equivalent if they have the same literal part
      * including exponents as well xy is equivalent to 2xy but not 2xy².
@@ -70,7 +55,7 @@ export class Monomial extends Expression {
             ]
         } 
         this.coef = coef;
-        this.literals = literals;
+        this.literals = literals || [];
         this.reduceLiterals();
     }
 
@@ -154,12 +139,19 @@ export class Monomial extends Expression {
 
     degree(): number {
         let deg = 0;
+        if(this.literals.length===0) {
+            return 0;
+        }
         this.literals.forEach( (x) => deg += x.degree());
         return deg;
     }
 
     literalsToString() {
         return this.literals.map( e => e.toString() ).join(" ");
+    }
+
+    literalsToTeX() {
+        return this.literals.map( e => e.toTeX() ).join(" ");
     }
 
     toString(): string {
@@ -172,6 +164,19 @@ export class Monomial extends Expression {
             return literalPart.trim() || "1";
         } else {
             return this.coef.toString() + " " + literalPart;
+        }
+    }
+
+    toTeX(): string {
+        const literalPart = this.literalsToTeX();
+        if (this.coef.isZero()) {
+            return "0";
+        } else if (this.coef.is(-1)) {
+            return "-" + (literalPart.trim() || 1);
+        } else if (this.coef.is(1)) {
+            return literalPart.trim() || "1";
+        } else {
+            return this.coef.toTeX() + " " + literalPart;
         }
     }
 }

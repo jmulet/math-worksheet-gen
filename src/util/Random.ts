@@ -52,4 +52,19 @@ export class Random {
     static pickOne(rnd: RS.RandomSeed, list: any[]): any {
         return list[rnd.intBetween(0, list.length-1)];
     }
+
+
+    static shuffle(rnd: RS.RandomSeed, list: any[]): any[] {
+        const copy = list.slice();
+        return copy.sort(() => rnd.random() - 0.5);
+    }
+
+    static pickMany(rnd: RS.RandomSeed, list: any[], n: number): any[] {
+        const shuffled = Random.shuffle(rnd, list);
+        if (n <= shuffled.length) {
+            return shuffled.slice(0, n);
+        } else {
+            return shuffled;
+        }
+    }
 }

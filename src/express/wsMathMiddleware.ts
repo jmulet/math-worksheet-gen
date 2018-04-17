@@ -14,7 +14,7 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
 
     router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
         const seed = req.query.seed; 
-        console.log(seed)
+         
         let body = req.body;
         if (!body) {
             body = generateSampleBody();
@@ -44,12 +44,30 @@ function generateSampleBody() {
                     name: "Polynomials", activities: [
                         {
                             formulation: "Dividide these polinomials using Ruffini's rule", questions: [
-                                { gen: "Algebra/PolyDivision", repeat: 4, options: {ruffini: true} }
+                                { gen: "algebra/polynomial/division", repeat: 4, options: {ruffini: true} }
                             ]
                         },
                         {
                             formulation: "Dividide these polinomials", questions: [
-                                { gen: "Algebra/PolyDivision", repeat: 4, options: {fraction: false, maxDegree: 4} }
+                                { gen: "algebra/polynomial/division", repeat: 4, options: {fraction: false, maxDegree: 4, interval: 5} }
+                            ]
+                        },
+                        {
+                            formulation: "Expand these algebraic identities", questions: [
+                                { gen: "algebra/polynomial/identities", repeat: 2, options: {interval: 5, complexity: 1}},
+                                { gen: "algebra/polynomial/identities", repeat: 2, options: {interval: 5, complexity: 2}},
+                                { gen: "algebra/polynomial/identities", repeat: 2, options: {interval: 5, complexity: 3}}
+                            ]
+                        },
+                        {
+                            formulation: "Write these polynomials as an algebraic identity", questions: [
+                                { gen: "algebra/polynomial/identities", repeat: 2, options: {interval: 5, complexity: 1, indirect: true} },
+                                { gen: "algebra/polynomial/identities", repeat: 2, options: {interval: 5, complexity: 3, indirect: true} }
+                            ]
+                        },
+                        {
+                            formulation: "Extract common factor from these polynomials", questions: [
+                                { gen: "algebra/polynomial/commonfactor", repeat: 3, options: {interval: 5, complexity: 1} } 
                             ]
                         }
                     ]
