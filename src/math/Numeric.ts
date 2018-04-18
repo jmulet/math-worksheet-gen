@@ -173,6 +173,11 @@ export class Numeric {
         }
     }
 
+    abs(): number {
+        const mod2 = this.modulus2();
+        return Math.sqrt(mod2["n"]/mod2["d"]);
+    }
+
     toTeX(): string {
         let tex = "";
         if (this.Re["s"] < 0) {

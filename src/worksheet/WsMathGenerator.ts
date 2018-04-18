@@ -8,6 +8,7 @@ import { Container } from "../util/WsGenerator";
 import { PolyIdentities } from "../topics/algebra/polynomials/PolyIdentities";
 import { PolyCommonFactor } from "../topics/algebra/polynomials/PolyCommonFactor";
 import { PolyFactorize } from "../topics/algebra/polynomials/PolyFactorize";
+import { ScalarProduct } from "../topics/geometry/vectors/ScalarProduct";
  
 
 export enum WsExportFormats {
@@ -18,13 +19,20 @@ export enum WsExportFormats {
 
 export const WsTopics = {
     Algebra: {
-        PolyDivision: PolyDivision,
-        PolyIdentities: PolyIdentities,
-        PolyCommonFactor: PolyCommonFactor,
-        PolyFactorize: PolyFactorize
+        Polynomial: {
+            Division: PolyDivision,
+            Identitities: PolyIdentities,
+            CommonFactor: PolyCommonFactor,
+            Factorize: PolyFactorize
+        }
     },
     Arithmetics: {
         FractionOp: FractionOpGen
+    },
+    Geometry: {
+        Vectors: {
+            ScalarProduct: ScalarProduct
+        }
     }
 };
  
