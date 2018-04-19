@@ -19,6 +19,7 @@ const fse = require('fs-extra')
 export function latexToPdf(src: string | Stream, options?: any): Stream {
   const outputStream = through()
   options = options || {}
+  
   /**
    * Emits the given error to the returned output stream.
    */
@@ -58,8 +59,7 @@ export function latexToPdf(src: string | Stream, options?: any): Stream {
     errorLogStream.on('end', () => {
       const errMessage = `LaTeX Syntax Error\n${errors.join('\n')}`
       const error = new Error(errMessage)
-
-      outputStream.emit('error', error)
+      outputStream.emit('error', error);
     })
   }
   const dirname = "node-latex-" + Math.random().toString(32).substring(2);
@@ -68,7 +68,7 @@ export function latexToPdf(src: string | Stream, options?: any): Stream {
       handleErrors(err)
     }
 
-    let inputStream
+    let inputStream;
 
     if (!src) {
       handleErrors(new Error('Error: No TeX document provided.'))

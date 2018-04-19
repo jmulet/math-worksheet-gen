@@ -17,9 +17,24 @@ import { Polynomial } from '../../../math/Polynomial';
             description: "Range in which random coefficients are generated"
         },
         {
+            name: "minDegree",
+            defaults: 2,
+            description: "Minimal degree of the generated polynomial"
+        },
+        {
+            name: "maxDegree",
+            defaults: 10,
+            description: "Maximum degree of the generated polynomial"
+        },
+        {
+            name: "allowFractions",
+            defaults: false,
+            description: "Allow rational roots, so factor is of the form (ax+b)"
+        },
+        {
             name: "complexity",
             defaults: 1,
-            description: "Complexity. From 0-1"
+            description: "Complexity. From 0-1. with 1 includes irreductible polynomials"
         } 
     ]
 })
@@ -30,14 +45,20 @@ export class PolyFactorize implements QuestionGenInterface {
     
     constructor(private qGenOpts: QuestionOptsInterface) {
         const rnd = qGenOpts.rand;
-        const r = qGenOpts.question.interval || 10;
+        const r = qGenOpts.question.interval || 7;
         const complexity = qGenOpts.question.complexity || 1;
+        const minDegree = qGenOpts.question.minDegree || 2;
+        const maxDegree = qGenOpts.question.maxDegree || 4;
     
-        const numRoots = rnd.intBetween(2, 5);
+        const numRoots = rnd.intBetween(minDegree, maxDegree);
         const roots = Random.intList(rnd, numRoots, r).map( (e) => Numeric.fromNumber(e) );
+        if (qGenOpts.question.allowFractions) {
+            // At most two rational roots are allowed
+            roots[0] = Random.fractionBetweenNotZero(rnd, -r, r);  
+        } 
         
         const poly = Polynomial.fromRoots(roots);
-        this.question = poly.toString();
+        this.question = poly.toTeX();
         this.answer = poly.toFactorForm();
     }
 

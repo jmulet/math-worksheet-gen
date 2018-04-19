@@ -37,7 +37,7 @@ export class Numeric {
         if (reDen) {
             this.Re = math.fraction(reNum, reDen);
         } else {
-            this.Re = math.fraction(reNum);
+            this.Re = math.fraction(reNum | 0);
         }        
         if (imDen) {
             this.Im = math.fraction(imNum | 0, imDen);

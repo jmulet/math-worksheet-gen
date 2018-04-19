@@ -62,13 +62,13 @@ export class WsMathGenerator {
         worksheet.sections.forEach( (section) => {
             const sec = this.addSection(section.name);
             section.activities.forEach( (activity) => {
-                const act = sec.createActivity(activity.formulation);
+                const act = sec.createActivity(activity.formulation, activity.scope);
                 activity.questions.forEach( (question) => {
                     const clazz = (Container[question.gen] || {}).clazz;
                     if(clazz) {
                         act.use(clazz, question.options || {}).repeat(question.repeat || 1);
                     } else {
-                        console.log("Error:: generator clazz ", question.clazz, " not found");
+                        console.log("Error:: generator clazz ", question, " not found");
                     }
                 });
             });
@@ -103,25 +103,25 @@ export class WsMathGenerator {
     private exportLatex(){
         const latex = [
             "\\documentclass[a4paper]{article}",
+            "\\usepackage{geometry}",
+            "\\geometry{a4paper, total={170mm,257mm}, left=20mm, top=20mm}",
             "\\usepackage{tasks}",
+            "\\usepackage{enumitem}",
             "\\usepackage{amsmath}",
-            "\\begin{document}",
-            "     \\begin{enumerate}"
+            "\\begin{document}",           
         ];
         this.sections.forEach((section) => {
             latex.push(...section.toLaTeX());
         })
 
         if (this.showKeys) {
-            latex.push("  \\begin{*section}{Answers}");
+            latex.push("  \\section*{Answers}");
             latex.push("  \\begin{enumerate}");
             this.sections.forEach((section) => {
                 latex.push(...section.answersToLaTeX());
             });
-            latex.push("  \\end{enumerate}");
-            latex.push("  \\end{*section}");
-        }
-        latex.push("     \\end{enumerate}");
+            latex.push("  \\end{enumerate}"); 
+        }        
         latex.push("\\end{document}");
         return latex.join("\n");
     }    

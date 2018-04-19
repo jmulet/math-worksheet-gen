@@ -4,6 +4,7 @@ import * as math from "mathjs";
 
 export class Polynomial extends Expression {
     coefs: Numeric[];
+    roots: Numeric[];
 
     // Constructs the polynomial given all complex roots
     static fromRoots(roots: Numeric[]): Polynomial {
@@ -17,9 +18,10 @@ export class Polynomial extends Expression {
             return new Polynomial([coef1, coef2]);
         });
         let poly = binomials[0];
-        for(var i=0; i<binomials.length; i++) {
+        for(var i=1; i<binomials.length; i++) {
             poly = poly.multiply(binomials[i]);
         }
+        poly.roots = roots;
         return poly;
     }
 
@@ -182,7 +184,7 @@ export class Polynomial extends Expression {
     }
 
 
-    toString(bar?: string): string  {
+    toString(bar="x"): string  {
         const degree = this.degree();
         const withPowers = this.coefs.map((coef, i) => {
             const expd = degree - i;
@@ -205,6 +207,55 @@ export class Polynomial extends Expression {
             result = "0";
         }
         return result;
+    }
+
+    toTeX(bar="x"): string {
+        return this.toString(bar);
+    }
+
+    toFactorForm(bar="x"): string {
+        if (this.roots) {
+            // Sort roots by multiplicity
+            const multiRoots = {};
+            this.roots.forEach( (root) => {
+                let coef1: number = 1;
+                let coef2: Numeric = root.oposite();
+                if(coef2.Re["d"] > 1) {
+                    coef1 = coef2.Re["d"];
+                    coef2 = coef2.multiply(Numeric.fromNumber(coef1));
+                }
+                const id = root.toString();
+                let obj = multiRoots[id];
+                if (!obj) {
+                    multiRoots[id] = {coef1: coef1, coef2: coef2, multiplicity: 1};
+                } else {
+                    obj.multiplicity += 1;
+                }
+            });
+            return Object.keys(multiRoots).map( (key) => {
+                const e = multiRoots[key];
+                let exponent = "";
+                if (e.multiplicity > 1) {
+                    exponent = "^{" + e.multiplicity + "}";
+                }
+                let str1: string = "";
+                if (e.coef1 !== 1) {
+                    str1 = e.coef1.toString();
+                }
+                let str2: string = e.coef2.toTeX();
+                if (e.coef2.isZero()) {
+                    return str1 + " x " + exponent;
+                } else {
+                    if (!e.coef2.isNegative()) {
+                        str2 = " + " + str2;
+                    }
+                    return "\\left(" + str1 + " x " + str2 + "\\right)" + exponent;
+                }
+                
+            }).join(" \\cdot ");
+        } else {
+            return this.toTeX(bar);
+        }
     }
 
 }

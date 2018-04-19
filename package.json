@@ -2,8 +2,9 @@
   "name": "math-worksheet-gen",
   "version": "1.0.0",
   "description": "Comprehensive random generator of highschool mathematical activities and worksheets",
-  "main": "index.js",
+  "main": "src/express/server.ts",
   "scripts": {
+    "serve": "ts-node-dev --respawn --ignore-watch node_modules ./src/express/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
