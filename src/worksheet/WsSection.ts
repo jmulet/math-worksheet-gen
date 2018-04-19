@@ -17,11 +17,9 @@ export class WsSection {
     toLaTeX(): string[] {
         const latex = [];
         latex.push("  \\begin{section}{" + this.title + "}");
-        latex.push("  \\begin{itemize}");
         this.activities.forEach( (activity) => {
             latex.push(...activity.toLaTeX());
         })
-        latex.push("  \\end{itemize}");
         latex.push("  \\end{section}");
         return latex;
     }

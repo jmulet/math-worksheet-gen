@@ -42,6 +42,7 @@ export class WsActivity {
 
     answersToLaTeX(): string[] {
         const latex = [];
+        latex.push("    \\item ");
         latex.push("    \\begin{tasks}(2)");
         this.questions.forEach( (question) => {
             latex.push("      \\task " + question.answerToLaTeX());

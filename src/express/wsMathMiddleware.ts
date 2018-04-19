@@ -1,5 +1,6 @@
 import * as express from "express";
 import { WsMathGenerator, WsExportFormats } from "../worksheet/WsMathGenerator";
+import { latexToPdf } from '../util/latexToPdf';
 
 export interface wsMathMdwOptions {
     basePrefix: string;
@@ -32,11 +33,12 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         } else if (type === 'tex' || type === 'pdf') {
             const tex = generator.exportAs(WsExportFormats.LATEX);
             if (type === 'tex') {
-                res.setHeader("Content-Type", "text/plain;charset=utf-8");
+                res.setHeader("Content-type", "text/plain;charset=utf-8");
                 res.status(200).send(tex);
             } else {
-                //convert tex to pdf and send pdf
-
+                res.setHeader("Content-type", "application/pdf");
+                const outputStream = latexToPdf(tex);
+                outputStream.pipe(res);
             }
         }
         // next();
@@ -52,6 +54,7 @@ function generateSampleBody() {
         worksheet: {
             includeKeys: true,
             sections: [
+                /*
                 {
                     name: "Vectors", activities: [
                         {
@@ -67,6 +70,7 @@ function generateSampleBody() {
                         }
                     ]
                 },
+                */
                 {
                     name: "Polynomials", activities: [
                         {

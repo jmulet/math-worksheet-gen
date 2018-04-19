@@ -1,4 +1,4 @@
-'use strict'
+import { Stream } from "stream";
 
 const strToStream = require('string-to-stream')
 const spawn = require('child_process').spawn
@@ -6,6 +6,7 @@ const through = require('through2')
 const temp = require('temp')
 const path = require('path')
 const fs = require('fs')
+const fse = require('fs-extra')
 
 /**
  * Generates a PDF stream from a LaTeX document.
@@ -15,9 +16,9 @@ const fs = require('fs')
  *
  * @return {DestroyableTransform}
  */
-function latex(src, options) {
+export function latexToPdf(src: string | Stream, options?: any): Stream {
   const outputStream = through()
-
+  options = options || {}
   /**
    * Emits the given error to the returned output stream.
    */
@@ -61,8 +62,8 @@ function latex(src, options) {
       outputStream.emit('error', error)
     })
   }
-
-  temp.mkdir('node-latex', (err, tempPath) => {
+  const dirname = "node-latex-" + Math.random().toString(32).substring(2);
+  temp.mkdir(dirname, (err, tempPath) => {
     if (err) {
       handleErrors(err)
     }
@@ -180,9 +181,7 @@ function latex(src, options) {
 
     // Start the first run.
     runLatex(inputStream)
-  })
+  });
 
   return outputStream
 }
-
-module.exports = latex

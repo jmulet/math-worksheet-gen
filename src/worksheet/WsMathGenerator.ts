@@ -102,23 +102,26 @@ export class WsMathGenerator {
 
     private exportLatex(){
         const latex = [
-            "\\documentclass[a4paper]{book}",
-            "\\begin{document}"
+            "\\documentclass[a4paper]{article}",
+            "\\usepackage{tasks}",
+            "\\usepackage{amsmath}",
+            "\\begin{document}",
+            "     \\begin{enumerate}"
         ];
         this.sections.forEach((section) => {
             latex.push(...section.toLaTeX());
         })
 
         if (this.showKeys) {
-            latex.push("  \\begin{section}{Answers}");
-            latex.push("     \\begin{itemize}");
+            latex.push("  \\begin{*section}{Answers}");
+            latex.push("  \\begin{enumerate}");
             this.sections.forEach((section) => {
                 latex.push(...section.answersToLaTeX());
             });
-            latex.push("     \\end{itemize}");
-            latex.push("  \\end{section}");
+            latex.push("  \\end{enumerate}");
+            latex.push("  \\end{*section}");
         }
-
+        latex.push("     \\end{enumerate}");
         latex.push("\\end{document}");
         return latex.join("\n");
     }    
