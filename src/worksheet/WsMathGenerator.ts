@@ -1,15 +1,28 @@
+import * as path from 'path';
+import * as Random from 'random-seed';
+import { Container } from '../util/WsGenerator';
+import { importClassesFromDirectories } from '../util/importClassesFromDirectories';
+import { Worksheet, WsMathGenOpts } from '../interfaces/WsMathGenOpts';
+import { WsSection } from './WsSection';
  
-import { WsSection } from "./WsSection"; 
-import  * as Random from 'random-seed'; 
-import { FractionOpGen } from "../topics/arithmetics/FractionOpGen";
-import { WsMathGenOpts, Worksheet } from "../interfaces/WsMathGenOpts";
-import { PolyDivision } from "../topics/algebra/polynomials/PolyDivision";
-import { Container } from "../util/WsGenerator";
-import { PolyIdentities } from "../topics/algebra/polynomials/PolyIdentities";
-import { PolyCommonFactor } from "../topics/algebra/polynomials/PolyCommonFactor";
-import { PolyFactorize } from "../topics/algebra/polynomials/PolyFactorize";
-import { ScalarProduct } from "../topics/geometry/vectors/ScalarProduct";
  
+ // Load all generators
+const topics = path.resolve('src//topics/');
+const genClasses = importClassesFromDirectories([path.join(topics,'/algebra/**/*.ts'), 
+                                                 path.join(topics, '/algebra/**/*.js'),
+                                                 path.join(topics, '/arithmetics/**/*.ts'),
+                                                 path.join(topics, '/arithmetics/**/*.js'),
+                                                 path.join(topics, '/calculus/**/*.ts'),
+                                                 path.join(topics, '/calculus/**/*.js'),
+                                                 path.join(topics, '/geometry/**/*.ts'),
+                                                 path.join(topics, '/geometry/**/*.js'),
+                                                 path.join(topics, '/probability/**/*.ts'),
+                                                 path.join(topics, '/probability/**/*.js'),
+                                                 path.join(topics, '/statistics/**/*.ts'),
+                                                 path.join(topics, '/statistics/**/*.js')
+                                                ]);
+console.log("WsMathGenerator:: Loaded generator classes ...");
+console.log(genClasses.map( (clazz) => clazz.name ).join(", "));
 
 export enum WsExportFormats {
     LATEX = 0,
@@ -17,25 +30,6 @@ export enum WsExportFormats {
     PDF = 2,    
 }
 
-export const WsTopics = {
-    Algebra: {
-        Polynomial: {
-            Division: PolyDivision,
-            Identitities: PolyIdentities,
-            CommonFactor: PolyCommonFactor,
-            Factorize: PolyFactorize
-        }
-    },
-    Arithmetics: {
-        FractionOp: FractionOpGen
-    },
-    Geometry: {
-        Vectors: {
-            ScalarProduct: ScalarProduct
-        }
-    }
-};
- 
 export class WsMathGenerator { 
     rand: Random.RandomSeed;
     showKeys: boolean = false;
