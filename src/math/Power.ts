@@ -1,4 +1,3 @@
-import { Fraction } from "./Fraction";
 import { Monomial } from "./Monomial";
 import { Numeric } from "./Numeric";
 import { Expression } from "./Expression";

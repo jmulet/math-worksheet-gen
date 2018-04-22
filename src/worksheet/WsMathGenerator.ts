@@ -3,9 +3,27 @@ import * as Random from 'random-seed';
 import { Worksheet, WsMathGenOpts } from '../interfaces/WsMathGenOpts';
 import { Container } from '../util/WsGenerator';
 import { WsSection } from './WsSection';
-
+import * as path from 'path';
+import { importClassesFromDirectories } from '../util/importClassesFromDirectories';
  
  
+ // Load all generators
+const topics = path.resolve('src//topics/');
+const genClasses = importClassesFromDirectories([path.join(topics,'/algebra/**/*.ts'), 
+                                                 path.join(topics, '/algebra/**/*.js'),
+                                                 path.join(topics, '/arithmetics/**/*.ts'),
+                                                 path.join(topics, '/arithmetics/**/*.js'),
+                                                 path.join(topics, '/calculus/**/*.ts'),
+                                                 path.join(topics, '/calculus/**/*.js'),
+                                                 path.join(topics, '/geometry/**/*.ts'),
+                                                 path.join(topics, '/geometry/**/*.js'),
+                                                 path.join(topics, '/probability/**/*.ts'),
+                                                 path.join(topics, '/probability/**/*.js'),
+                                                 path.join(topics, '/statistics/**/*.ts'),
+                                                 path.join(topics, '/statistics/**/*.js')
+                                                ]);
+console.log("WsMathGenerator:: Loaded generator classes ...");
+console.log(genClasses.map( (clazz) => clazz.name ).join(", "));
 
 export enum WsExportFormats {
     LATEX = 0,
@@ -65,13 +83,13 @@ export class WsMathGenerator {
                 } 
                 const act = sec.createActivity(activity.formulation, activity.scope, clazz, activity.options);
                 activity.questions.forEach( (question) => {
-                    let clazz = (Container[question.gen] || {}).clazz;
-                    if(clazz) {
-                        act.useRepeat(clazz, question.options || {}, question.repeat || 1);
-                    } else {
-                        console.log("Error:: generator clazz ", question, " not found");
-                    }
-                });
+                        let clazz = (Container[question.gen] || {}).clazz;
+                        if(clazz) {
+                            act.useRepeat(clazz, question.options || {}, question.repeat || 1, activity.scope!=null);
+                        } else {
+                            console.log("Error:: generator clazz ", question, " not found");
+                        }
+                });                
             });
             this.includeKeys(worksheet.includeKeys);
         })
