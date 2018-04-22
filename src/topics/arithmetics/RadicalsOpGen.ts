@@ -22,7 +22,7 @@ export class RadicalsOpGen implements QuestionGenInterface {
             const index1 = rnd.intBetween(minIndex, maxIndex);
             const base = Random.pickOne(rnd, ["a", "b", "x", "y", rnd.intBetween(2, r)]);
             const power1 = new Power(base, Random.intBetween(rnd, 1, r));
-            const radical1 = new Radical(index1, power1);
+            const radical1 = new Radical();
             this.radicals[i] = radical1;
         }
  

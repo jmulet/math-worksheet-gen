@@ -3,27 +3,26 @@ import { ActivityOptsInterface } from "../interfaces/ActivityOptsInterface";
 import { GenClass } from "../interfaces/GenClass";
 import { QuestionOptsInterface } from "../interfaces/QuestionOptsInterface";
 
-export class WsActivity {
-    qGenOpts: any;
-    qClass: GenClass;
+export class WsActivity { 
     questions: WsQuestion[] = []
-    constructor(private formulation: string, private opts: ActivityOptsInterface) {
+    constructor(private formulation: string, private opts: ActivityOptsInterface, private qClass?: GenClass, private qGenOpts?: any) {
     }
 
-    use(qClass: GenClass, qGenOpts?: any): WsActivity {
-        this.qClass = qClass;
-        this.qGenOpts = qGenOpts;
-        return this;
-    }
+    // if times < 0, then reuse the same question gen object for all times
+    useRepeat(qClass?: GenClass, qGenOpts?: any, times=1, reuse?: boolean): WsActivity {
+        qClass = qClass || this.qClass;
+        qGenOpts = qGenOpts || this.qGenOpts || {};        
 
-    repeat(times: number): WsActivity {
+        let question;
         for (var i = 0; i < times; i++ ) {
-            const question = new WsQuestion(this.qClass, {question: this.qGenOpts, ...this.opts});
+            if(!reuse || !question) {
+                question = new WsQuestion(qClass, {question: qGenOpts, ...this.opts});
+            }
             this.questions.push(question);
         }
         return this;
     }
-
+  
     getQuestions(): WsQuestion[] {
         return this.questions;
     }

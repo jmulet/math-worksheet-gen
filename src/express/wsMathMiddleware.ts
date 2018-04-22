@@ -119,7 +119,7 @@ function generateSampleBody() {
                                 vecW: "Vector.random(rnd, 2, 'w', 10)"
                             },
                             questions: [
-                                { gen: "geometry/vector/scalar_product", repeat: 1, options: {} }
+                                { gen: "geometry/vectors/scalar_product", repeat: 4, options: {} }
                             ]
                         }
                     ]

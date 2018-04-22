@@ -4,6 +4,7 @@ import { Random } from '../util/Random';
 
 export class Vector {
     
+    arrow: string;
     symbol: string;
     components: Numeric[];
 
@@ -26,10 +27,16 @@ export class Vector {
         });
 
         this.symbol = symbol;
+        this.arrow = symbol? `\\vec{${symbol}}` : "";
     }
 
     dimension(): number {
         return this.components.length;
+    }
+
+    times(n: Numeric): Vector {
+        const components2 = this.components.map( (c) => c.multiply(n));
+        return new Vector(components2);
     }
 
     dotProduct(v: Vector): Numeric {

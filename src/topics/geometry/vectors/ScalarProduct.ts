@@ -2,6 +2,8 @@ import { WsGenerator } from '../../../util/WsGenerator';
 import { QuestionGenInterface } from '../../../interfaces/QuestionGenInterface';
 import { QuestionOptsInterface } from '../../../interfaces/QuestionOptsInterface';
 import { Vector } from '../../../math/Vector';
+import { Random } from '../../../util/Random';
+import { Formatter } from '../../../util/Formatter';
 
 @WsGenerator({
     category: "geometry/vectors/scalar_product",
@@ -29,28 +31,76 @@ import { Vector } from '../../../math/Vector';
     ]
 })
 export class ScalarProduct implements QuestionGenInterface {
+    index: number;
+    apartats: any[];
    
-    vecU: Vector;
-    vecV: Vector;
-    vecW: Vector;
-    
     constructor(private qGenOpts: QuestionOptsInterface) {
         const rnd = qGenOpts.rand;
         const r = qGenOpts.question.interval || 10;
-        this.vecV = qGenOpts.question.vecV;
-        this.vecU = qGenOpts.question.vecU;
-        this.vecW = qGenOpts.question.vecW;        
-    }
-
-    getFormulation(): string {
-        const bar = this.qGenOpts.question.bar || "x";
-        let str = "Given the vectors $"+ this.vecU.toTeX(true) 
-                  +"$ and $" + this.vecV.toTeX(true) + "$";
-        return str;
-    }
-
-    getAnswer(): string {
+        const shuffle: boolean = qGenOpts.question.shuffle;
+        const vecV = <Vector> qGenOpts.scope.vecV;
+        const vecU = <Vector> qGenOpts.scope.vecU;
+        const vecW = <Vector> qGenOpts.scope.vecW;      
         
-        return "$$";
+        const num1 = Random.intBetweenNotZero(rnd, -r, r);
+        const num2 = Random.intBetweenNotZero(rnd, -r, r);
+
+        const combLineal = vecV.times(num1).add(vecW.times(num2));
+        const op1 = vecU.dotProduct(combLineal);
+        let term2 = Formatter.numericXstring( num1, vecV.arrow, num2, vecW.arrow );
+        const apartats = [
+            {
+                question: `$ ${vecU.arrow} \\cdot \\left( ${term2} \\right) $` ,
+                answer: '$' + op1.toTeX() + '$'
+            },
+            {
+                question: '',
+                answer: ''
+            },
+            {
+                question: '',
+                answer: ''
+            },
+            {
+                question: '',
+                answer: ''
+            },
+            {
+                question: '',
+                answer: ''
+            },
+            {
+                question: '',
+                answer: ''
+            },
+            {
+                question: '',
+                answer: ''
+            },
+            {
+                question: '',
+                answer: ''
+            },
+            {
+                question: '',
+                answer: ''
+            }
+        ];
+                
+        this.apartats = Random.shuffle(rnd, apartats);
+        this.index = -1;
+
+    }
+
+    getFormulation(): string {        
+        this.index += 1;
+        if (this.index > this.apartats.length - 1) {
+            this.index = -1;
+        }
+        return this.apartats[this.index];
+    }
+
+    getAnswer(): string {        
+        return '';
     }
 }
