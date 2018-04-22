@@ -1,6 +1,7 @@
 import { WsActivity } from "./WsActivity";
 import { SectionOptsInterface } from "../interfaces/SectionOptsInterface";
 import { Vector } from "../math/Vector";
+import { GenClass } from "../interfaces/GenClass";
 const vm = require('vm');
 
 export class WsSection {
@@ -10,25 +11,27 @@ export class WsSection {
     constructor(private title: string, private opts: SectionOptsInterface) {
     }
 
-    createActivity(formulation: string, scope?: any) {
-        console.log(scope, formulation);
-        if (scope) {            
-            const context: any = {rnd: this.opts.rand, Vector: Vector};
-            vm.createContext(context);
+    createActivity(formulation: string, scope?: any, qClass?: GenClass, qGenOpts?: any) {        
+        if (scope && Object.keys(scope).length) {            
+            try {
+                const context: any = {rnd: this.opts.rand, Vector: Vector};
+                vm.createContext(context);
 
-            // Must evaluate this scope into objects
-            for (let key in scope) {
-                vm.runInContext(key + "=" + scope[key], context);
-                scope[key] = context[key];
+                // Must evaluate this scope into objects
+                for (let key in scope) {
+                    vm.runInContext(key + "=" + scope[key], context);
+                    scope[key] = context[key];
+                }
+
+                // Finally eval formulation into the given scope
+                vm.runInContext("_formulation = \`" + formulation + "\`", context);
+                formulation = context["_formulation"];
+            } catch(Ex) {
+                console.log(Ex);
             }
-
-            // Finally eval formulation into the given scope
-            vm.runInContext("_formulation = \`" + formulation + "\`", context);
-            formulation = context["_formulation"];
         } 
-        console.log("AFTER")
-        console.log(scope, formulation);
-        const activity = new WsActivity(formulation, {scope: scope, ...this.opts});
+        
+        const activity = new WsActivity(formulation, {scope: scope, ...this.opts}, qClass, qGenOpts);
         this.activities.push(activity);
         return activity;
     }

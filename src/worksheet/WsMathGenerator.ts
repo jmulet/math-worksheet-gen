@@ -1,14 +1,10 @@
+import * as Random from 'random-seed';
+
+import { Worksheet, WsMathGenOpts } from '../interfaces/WsMathGenOpts';
+import { Container } from '../util/WsGenerator';
+import { WsSection } from './WsSection';
+
  
-import { WsSection } from "./WsSection"; 
-import  * as Random from 'random-seed'; 
-import { FractionOpGen } from "../topics/arithmetics/FractionOpGen";
-import { WsMathGenOpts, Worksheet } from "../interfaces/WsMathGenOpts";
-import { PolyDivision } from "../topics/algebra/polynomials/PolyDivision";
-import { Container } from "../util/WsGenerator";
-import { PolyIdentities } from "../topics/algebra/polynomials/PolyIdentities";
-import { PolyCommonFactor } from "../topics/algebra/polynomials/PolyCommonFactor";
-import { PolyFactorize } from "../topics/algebra/polynomials/PolyFactorize";
-import { ScalarProduct } from "../topics/geometry/vectors/ScalarProduct";
  
 
 export enum WsExportFormats {
@@ -17,6 +13,7 @@ export enum WsExportFormats {
     PDF = 2,    
 }
 
+/*
 export const WsTopics = {
     Algebra: {
         Polynomial: {
@@ -35,6 +32,7 @@ export const WsTopics = {
         }
     }
 };
+*/
  
 export class WsMathGenerator { 
     rand: Random.RandomSeed;
@@ -57,16 +55,19 @@ export class WsMathGenerator {
     }
 
     create(worksheet: Worksheet) {
-        console.log(worksheet);
-
+        
         worksheet.sections.forEach( (section) => {
             const sec = this.addSection(section.name);
             section.activities.forEach( (activity) => {
-                const act = sec.createActivity(activity.formulation, activity.scope);
+                let clazz = null;
+                if (activity.gen) {
+                    clazz = (Container[activity.gen] || {}).clazz;
+                } 
+                const act = sec.createActivity(activity.formulation, activity.scope, clazz, activity.options);
                 activity.questions.forEach( (question) => {
-                    const clazz = (Container[question.gen] || {}).clazz;
+                    let clazz = (Container[question.gen] || {}).clazz;
                     if(clazz) {
-                        act.use(clazz, question.options || {}).repeat(question.repeat || 1);
+                        act.useRepeat(clazz, question.options || {}, question.repeat || 1);
                     } else {
                         console.log("Error:: generator clazz ", question, " not found");
                     }
