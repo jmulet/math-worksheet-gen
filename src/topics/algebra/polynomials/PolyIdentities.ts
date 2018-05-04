@@ -38,11 +38,11 @@ export class PolyIdentities implements QuestionGenInterface {
     static Symbols = ["x", "y", "z", "t", "a", "b", "c", "m", "n"];
 
     constructor(private qGenOpts: QuestionOptsInterface) {
-        const rnd = qGenOpts.rand;
+        const rnd = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
         const complexity = qGenOpts.question.complexity || 1;
 
-        let [ letter1, letter2 ] = Random.pickMany(rnd, PolyIdentities.Symbols, 2);
+        let [ letter1, letter2 ] = rnd.pickMany(PolyIdentities.Symbols, 2);
         
         let mono1: Monomial, mono2: Monomial;
         let identityType = rnd.intBetween(0, 2); //0 = + square, 1 = - square, 2 = + x -
@@ -68,7 +68,7 @@ export class PolyIdentities implements QuestionGenInterface {
                 mono1 = new Monomial(coef1, [new Literal(letter1, exp2)]);
                 mono2 = new Monomial(coef2, [new Literal(letter2, exp1)]);
             default:
-                coef1 = Random.fractionBetweenNotZero(rnd, 1, r);
+                coef1 = rnd.fractionBetweenNotZero(1, r);
                 coef2 = rnd.intBetween(1, r);
                 exp1 =  rnd.intBetween(2, r);
                 exp2 =  rnd.intBetween(2, r);

@@ -8,13 +8,6 @@ export class Vector {
     symbol: string;
     components: Numeric[];
 
-    static VECTOR_NAMES = ['u', 'v', 'w', 'a', 'b', 'c'];
-    // Generates a random vector
-    static random(rnd: RandomSeed, dim=2, symbol='v', range=10): Vector {
-        symbol = symbol || Random.pickOne(rnd, Vector.VECTOR_NAMES);
-        const coefs = Random.intList(rnd, dim, range);
-        return new Vector(coefs, symbol);
-    }
 
     constructor(components: (number | Numeric)[], symbol?: string) {
         
@@ -56,7 +49,7 @@ export class Vector {
         }
     }
 
-    modulus2(): Numeric {
+    norm2(): Numeric {
         return this.dotProduct(this);
     }
 

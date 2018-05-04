@@ -34,17 +34,17 @@ export class PolyCommonFactor implements QuestionGenInterface {
     static Symbols = ["x", "y", "z", "t", "a", "b", "c", "m", "n"];
 
     constructor(private qGenOpts: QuestionOptsInterface) {
-        const rnd = qGenOpts.rand;
+        const rnd: Random = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
         const complexity = qGenOpts.question.complexity || 1;
 
-        let [letter1, letter2, letter3] = Random.pickMany(rnd, PolyCommonFactor.Symbols, 3);
+        let [letter1, letter2, letter3] = rnd.pickMany(PolyCommonFactor.Symbols, 3);
 
         let coef1: Numeric, coef2: Numeric, coef3: Numeric, coef4: Numeric;
-        coef1 = Random.intBetweenNotZero(rnd, -r, r);
-        coef2 = Random.intBetweenNotZero(rnd, -r, r);
-        coef3 = Random.intBetweenNotZero(rnd, -r, r);
-        coef4 = Random.intBetweenNotZero(rnd, 1, r);
+        coef1 = rnd.numericBetweenNotZero(-r, r);
+        coef2 = rnd.numericBetweenNotZero(-r, r);
+        coef3 = rnd.numericBetweenNotZero(-r, r);
+        coef4 = rnd.numericBetweenNotZero(1, r);
         const expo1 = rnd.intBetween(1, r);
         const expo2 = rnd.intBetween(1, r);
 

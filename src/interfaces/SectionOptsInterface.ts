@@ -1,5 +1,5 @@
-import  * as Random from 'random-seed';
+import { Random } from "../util/Random";
 
 export interface SectionOptsInterface {
-    rand: Random.RandomSeed;
+    rand: Random;
 }

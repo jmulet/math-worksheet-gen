@@ -1,10 +1,11 @@
 // Minimal express server
 import * as express from 'express';
-import { wsMathMiddleware } from './wsMathMiddleware';
+import { wsMathMiddleware } from './wsMathMiddleware'; 
+import * as methodOverride from 'method-override';
 
 const app = express();
-//app.use(express.urlencoded());
-//app.use(express.methodOverride());
+app.use(express.urlencoded({ extended: true })); 
+app.use(express.json());   
 app.use(wsMathMiddleware());
 
 app.get('/', function (req, res) {

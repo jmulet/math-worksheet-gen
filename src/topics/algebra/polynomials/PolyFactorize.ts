@@ -44,17 +44,20 @@ export class PolyFactorize implements QuestionGenInterface {
     question: any; 
     
     constructor(private qGenOpts: QuestionOptsInterface) {
-        const rnd = qGenOpts.rand;
+        const rnd = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 7;
         const complexity = qGenOpts.question.complexity || 1;
         const minDegree = qGenOpts.question.minDegree || 2;
         const maxDegree = qGenOpts.question.maxDegree || 4;
     
         const numRoots = rnd.intBetween(minDegree, maxDegree);
-        const roots = Random.intList(rnd, numRoots, r).map( (e) => Numeric.fromNumber(e) );
+        const roots = rnd.intList(numRoots, r).map( (e) => Numeric.fromNumber(e) );
         if (qGenOpts.question.allowFractions) {
             // At most two rational roots are allowed
-            roots[0] = Random.fractionBetweenNotZero(rnd, -r, r);  
+            const numFrac = rnd.intBetween(1, 2);
+            for (let i=0; i<numFrac; i++) {
+                roots[i] = rnd.fractionBetweenNotZero(-r, r);  
+            }
         } 
         
         const poly = Polynomial.fromRoots(roots);

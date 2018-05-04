@@ -1,10 +1,9 @@
-import * as Random from 'random-seed';
-
 import { Worksheet, WsMathGenOpts } from '../interfaces/WsMathGenOpts';
 import { Container } from '../util/WsGenerator';
 import { WsSection } from './WsSection';
 import * as path from 'path';
 import { importClassesFromDirectories } from '../util/importClassesFromDirectories';
+import { Random } from '../util/Random';
  
  
  // Load all generators
@@ -53,7 +52,7 @@ export const WsTopics = {
 */
  
 export class WsMathGenerator { 
-    rand: Random.RandomSeed;
+    rand: Random;
     showKeys: boolean = false;
     sections: WsSection[] = [];
     wsGenOpts: WsMathGenOpts;
@@ -63,7 +62,7 @@ export class WsMathGenerator {
         this.wsGenOpts = wsGenOpts;
         if (!wsGenOpts.rand) {
             const seed = (wsGenOpts.seed || new Date().getTime()).toString(36);
-            this.rand = Random.create(seed);
+            this.rand = new Random(seed);
             wsGenOpts.rand = this.rand;
         }
 

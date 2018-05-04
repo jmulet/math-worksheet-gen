@@ -1,10 +1,32 @@
 import { Expression } from "./Expression";
 import { Numeric } from "./Numeric";
-import * as math from "mathjs";
-
+import * as mathjs from "mathjs";
+import { Giac } from "./Giac";
+ 
 export class Polynomial extends Expression {
     coefs: Numeric[];
     roots: Numeric[];
+
+    /**
+     * The allowed string must be of the form
+     * (x^4 + 4*x^3 - 6*x^2 + 4*x + 1)
+     * parenthesis and * are optional
+     * @param str Parses the string into a Polynomial object
+     */
+    static parse(str: string | mathjs.MathNode): Polynomial {
+        let symbols = 0;
+        const coefs = []; 
+        let tree;
+        if (typeof(str) === 'string') {
+            tree = mathjs.parse(str);
+        } else {
+            tree = <mathjs.MathNode> str;
+        } 
+        tree.forEach((child, path, parent) => {
+            console.log(child, path, parent);
+        });
+        return new Polynomial(coefs);
+    }
 
     // Constructs the polynomial given all complex roots
     static fromRoots(roots: Numeric[]): Polynomial {
@@ -32,7 +54,7 @@ export class Polynomial extends Expression {
             if (e instanceof Numeric) {
                 return e;
             } else if (typeof (e) === "string") {
-                const frac = math.fraction(e);
+                const frac = mathjs.fraction(e);
                 return new Numeric(frac["n"], frac["d"]);
             } else if (typeof (e) === "number") {
                 return new Numeric(e);
@@ -254,7 +276,8 @@ export class Polynomial extends Expression {
                 
             }).join(" \\cdot ");
         } else {
-            return this.toTeX(bar);
+            // Fallback to giac
+            return Giac.factor(this.toString(bar), true);
         }
     }
 

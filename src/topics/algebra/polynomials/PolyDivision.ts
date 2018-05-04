@@ -40,18 +40,18 @@ export class PolyDivision implements QuestionGenInterface {
     polyD: Polynomial;
     polyd: Polynomial;
     constructor(private qGenOpts: QuestionOptsInterface) {
-        const rnd = qGenOpts.rand;
+        const rnd = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
         const minDegree = qGenOpts.question.minDegree || 3;
         const maxDegree = qGenOpts.question.maxDegree || 6;
-        const coefs = Random.intList(rnd, rnd.intBetween(minDegree, maxDegree), r);
+        const coefs = rnd.intList(rnd.intBetween(minDegree, maxDegree), r);
         while (coefs[0] === 0) {
             coefs[0] = rnd.intBetween(-r, r);
         }
        
         if (qGenOpts.question.ruffini) {
             this.polyD = new Polynomial(coefs);
-            this.polyd = new Polynomial([1, Random.intBetweenNotZero(rnd, -r, r)]);
+            this.polyd = new Polynomial([1, rnd.intBetweenNotZero(-r, r)]);
             this.answers = this.polyD.divide(this.polyd);
         } else {
             if(!qGenOpts.question.fractions) {
@@ -61,15 +61,15 @@ export class PolyDivision implements QuestionGenInterface {
                 const rDegree = rnd.intBetween(0, dDegree - 2);
                 const qDegree = DDegree - dDegree;     
                 
-                this.polyd = new Polynomial(Random.intList(rnd, dDegree + 1, r)); 
+                this.polyd = new Polynomial(rnd.intList(dDegree + 1, r)); 
                 this.answers = {
-                    quotient: new Polynomial(Random.intList(rnd, qDegree + 1, r)),
-                    remainder: new Polynomial(Random.intList(rnd, rDegree + 1, r))
+                    quotient: new Polynomial(rnd.intList(qDegree + 1, r)),
+                    remainder: new Polynomial(rnd.intList(rDegree + 1, r))
                 };
                 this.polyD = this.polyd.multiply(this.answers.quotient).add(this.answers.remainder);
             } else {
                 this.polyD = new Polynomial(coefs);
-                const coefs2 = Random.intList(rnd, rnd.intBetween(minDegree, this.polyD.degree()), r);
+                const coefs2 = rnd.intList(rnd.intBetween(minDegree, this.polyD.degree()), r);
                 this.polyd = new Polynomial(coefs2);
                 this.answers = this.polyD.divide(this.polyd);
             } 

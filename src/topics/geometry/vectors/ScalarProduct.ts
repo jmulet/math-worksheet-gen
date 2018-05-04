@@ -35,15 +35,15 @@ export class ScalarProduct implements QuestionGenInterface {
     apartats: any[];
    
     constructor(private qGenOpts: QuestionOptsInterface) {
-        const rnd = qGenOpts.rand;
+        const rnd = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
         const shuffle: boolean = qGenOpts.question.shuffle;
         const vecV = <Vector> qGenOpts.scope.vecV;
         const vecU = <Vector> qGenOpts.scope.vecU;
         const vecW = <Vector> qGenOpts.scope.vecW;      
         
-        const num1 = Random.intBetweenNotZero(rnd, -r, r);
-        const num2 = Random.intBetweenNotZero(rnd, -r, r);
+        const num1 = rnd.numericBetweenNotZero(-r, r);
+        const num2 = rnd.numericBetweenNotZero(-r, r);
 
         const combLineal = vecV.times(num1).add(vecW.times(num2));
         const op1 = vecU.dotProduct(combLineal);
@@ -87,7 +87,7 @@ export class ScalarProduct implements QuestionGenInterface {
             }
         ];
                 
-        this.apartats = Random.shuffle(rnd, apartats);
+        this.apartats = rnd.shuffle(apartats);
         this.index = -1;
 
     }

@@ -1,23 +1,37 @@
 import * as express from "express";
 import { WsMathGenerator, WsExportFormats } from "../worksheet/WsMathGenerator";
 import { latexToPdf } from '../util/latexToPdf';
+import { Stream } from "stream";
 
 export interface wsMathMdwOptions {
     basePrefix: string;
 }
+
+const DOCUMENT_CACHE: any = {};
+const deltaTime = 5*60*1000;
+//Cache is cleared after 5 minutes
+setInterval(function() {
+    const now = new Date().getTime();
+    for (let key in DOCUMENT_CACHE) {
+        const doc = DOCUMENT_CACHE[key];
+        if (now - doc.generated >= deltaTime) {
+            delete DOCUMENT_CACHE[key];
+        }
+    }   
+}, deltaTime);
 
 export function wsMathMiddleware(options?: wsMathMdwOptions) {
     options = options || { basePrefix: '' };
 
     const router = express.Router();
 
-    let url = (options.basePrefix || '') + '/wsmath/gen';
+    const base = (options.basePrefix || '') + '/wsmath';
+    let url = base + '/gen';
 
-    router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
+    router.post(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
         const seed = req.query.seed;
         const type = req.query.type || 'html';
-        console.log(req.query.body);
-        let body = JSON.parse(req.query.body);
+        let body = req.body; 
 
         if (!body) {
             body = generateSampleBody();
@@ -27,31 +41,87 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         }
         body.seed = seed;
         const generator = new WsMathGenerator(body);
+        const id = Math.random().toString(32).substring(2);
+        res.setHeader("Content-Type", "application/json");
 
         if (type === 'html') {
             const html = generator.exportAs(WsExportFormats.HTML);
-            res.setHeader("Content-Type", "text/html");
-            res.status(200).send(html);
-        } else if (type === 'tex' || type === 'pdf') {
+            DOCUMENT_CACHE[id] = {
+                generated: new Date().getTime(),
+                type: 'html',
+                data: html
+            };
+            res.status(200).send({ link: base + '/get?id=' + id });
+
+        } else if (type === 'tex' || type === 'latex' || type === 'pdf') {
             const tex = generator.exportAs(WsExportFormats.LATEX);
-            if (type === 'tex') {
-                res.setHeader("Content-type", "text/plain;charset=utf-8");
-                res.status(200).send(tex);
-            } else {                
-                    res.setHeader("Content-type", "application/pdf");
-                    const outputStream = latexToPdf(tex);
-                    outputStream.on('error', function(err: any) {
-                        res.setHeader("Content-type", "text/plain;charset=utf-8");
-                        res.send(err + "\n\n" + Array(80).join("-") + "\n\n" + tex);
-                    });
-                    outputStream.pipe(res);
-                
+            if (type === 'tex' || type === 'latex') {
+                DOCUMENT_CACHE[id] = {
+                    generated: new Date().getTime(),
+                    type: 'tex',
+                    data: tex
+                };
+                res.status(200).send({ link: base + '/get?id=' + id });
+            } else {
+                const outputStream = latexToPdf(tex);
+                DOCUMENT_CACHE[id] = {
+                    generated: new Date().getTime(),
+                    type: 'pdf',
+                    data: outputStream
+                };
+                res.status(200).send({ link: base + '/get?id=' + id });
             }
         }
-        // next();
     });
 
-    
+    url = base + '/get';
+
+    router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
+        const id = req.query.id; 
+        let doc = DOCUMENT_CACHE[id];
+        if (!doc) {
+            const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <title>Math worksheet generator</title>
+            <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+            </style>
+            </head>
+            <body>
+            <h1>Link not found or expired</h1>
+            </body>
+            </html>
+            `;
+            res.setHeader("Content-type", "text/html");
+            res.status(200).send(html);
+        } else {
+            switch(doc.type) {
+                case 'html': 
+                    res.setHeader("Content-type", "text/html");
+                    res.status(200).send(doc.data);
+                    break;
+                case 'tex': 
+                    res.setHeader("Content-type", "text/plain");
+                    res.status(200).send(doc.data);
+                    break;
+                case 'pdf': 
+                    res.setHeader("Content-type", "application/pdf");
+                    const outputStream = <Stream> doc.data;
+                    outputStream.pipe(res);
+                    break;
+            }
+        }
+    });
+
+
+
+
+
+
     url = (options.basePrefix || '') + '/wsmath';
     router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
 
@@ -78,17 +148,44 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         <textarea style="width:99%;" rows="35">
         </textarea>
         <br/>
-        <a href="${uri}" target="_blank">Generate PDF</a>
+        Seed <input id="seed" type="number" min="0"/>
+        <br/>
+        <button class="btn" data-type="latex">Generate LaTeX</button>
+        <button class="btn" data-type="html">Generate HTML</button>
+        <button class="btn" data-type="pdf">Generate PDF</button>
         <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
         <script>
             $(function(){
                 $("textarea").val("${textarea}");
-                $("a").on("click", function(evt) {
-                    evt.preventDefault();
-                    var bodyEncoded = encodeURIComponent($("textarea").val());
-                    var seed = 0;
-                    var type = "pdf";                
-                    window.open(evt.currentTarget.href + '?seed='+seed+'&type='+type+'&body='+bodyEncoded, "_blank");
+                $(".btn").on("click", function(evt) {
+                    var target = evt.currentTarget;
+                    var type = $(target).data("type") || 'pdf';
+                    var bodyEncoded = $("textarea").val();
+                    try {
+                        bodyEncoded = JSON.parse(bodyEncoded);
+                    } catch(Ex) {
+                        console.log(Ex);
+                        return;
+                    }
+                    var seed = $("#seed").val() || 0;
+                    var contentType = "text/html";
+                    var fileName = "";
+                    if (type === 'text' || type === 'latex') {
+                        contentType = "text/plain;charset=UTF-8";
+                        fileName = "mathgen.tex";
+                    } else if (type === 'pdf') {
+                        contentType = "application/pdf";
+                        fileName = "mathgen.pdf";
+                    }
+                    $.ajax({
+                        method: 'POST',
+                        data: bodyEncoded,
+                        responseType: 'aplication/json',
+                        url: '${url}/gen?seed='+seed+'&type='+type 
+                    }).then(function(data){           
+                        window.open( data.link, '_blank' )                        
+                    });
+
                 });
             });
         </script>
@@ -114,9 +211,9 @@ function generateSampleBody() {
                         {
                             formulation: "Given the vectors $${vecU.toTeX(true)}$, $${vecV.toTeX(true)}$ and $${vecW.toTeX(true)}$",
                             scope: {
-                                vecU: "Vector.random(rnd, 2, 'u', 10)",
-                                vecV: "Vector.random(rnd, 2, 'v', 10)",
-                                vecW: "Vector.random(rnd, 2, 'w', 10)"
+                                vecU: "rnd.vector(2, {symbol:'u', range: 10})",
+                                vecV: "rnd.vector(2, {symbol:'v', range: 10})",
+                                vecW: "rnd.vector(2, {symbol:'w', range: 10})"
                             },
                             questions: [
                                 { gen: "geometry/vectors/scalar_product", repeat: 4, options: {} }
@@ -124,7 +221,7 @@ function generateSampleBody() {
                         }
                     ]
                 },
-                
+
                 {
                     name: "Polynomials", activities: [
                         {

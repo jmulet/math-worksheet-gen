@@ -1,5 +1,5 @@
-import  * as Random from 'random-seed';
-import { WsSection } from '../worksheet/WsSection';
+ import { WsSection } from '../worksheet/WsSection';
+import { Random } from '../util/Random';
 
 export interface Worksheet {
     sections: any[];
@@ -8,6 +8,6 @@ export interface Worksheet {
 
 export interface WsMathGenOpts {
     seed?: number,
-    rand?: Random.RandomSeed,
+    rand?: Random,
     worksheet?: Worksheet
 }

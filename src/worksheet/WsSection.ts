@@ -2,6 +2,10 @@ import { WsActivity } from "./WsActivity";
 import { SectionOptsInterface } from "../interfaces/SectionOptsInterface";
 import { Vector } from "../math/Vector";
 import { GenClass } from "../interfaces/GenClass";
+import { Polynomial } from "../math/Polynomial";
+import { PolyMonomial } from "../math/PolyMonomial";
+import { AlgebraicFraction } from "../math/AlgebraicFraction";
+import { Numeric } from "../math/Numeric";
 const vm = require('vm');
 
 export class WsSection {
@@ -14,7 +18,8 @@ export class WsSection {
     createActivity(formulation: string, scope?: any, qClass?: GenClass, qGenOpts?: any) {        
         if (scope && Object.keys(scope).length) {            
             try {
-                const context: any = {rnd: this.opts.rand, Vector: Vector};
+                const context: any = {rnd: this.opts.rand, Vector: Vector, Polynomial: Polynomial,
+                    PolyMonomial: PolyMonomial, Numeric: Numeric, AlgebraicFraction: AlgebraicFraction};
                 vm.createContext(context);
 
                 // Must evaluate this scope into objects

@@ -11,7 +11,7 @@ export class RadicalsOpGen implements QuestionGenInterface {
     answer: any;
    
     constructor(private qGenOpts: QuestionOptsInterface) {
-        const rnd = qGenOpts.rand;
+        const rnd = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
         const minIndex = qGenOpts.question.minIndex || 2;
         const maxIndex = qGenOpts.question.maxIndex || 12;
@@ -20,8 +20,8 @@ export class RadicalsOpGen implements QuestionGenInterface {
 
         for (let i=0; i < rnd.intBetween(2, 3); i++) {
             const index1 = rnd.intBetween(minIndex, maxIndex);
-            const base = Random.pickOne(rnd, ["a", "b", "x", "y", rnd.intBetween(2, r)]);
-            const power1 = new Power(base, Random.intBetween(rnd, 1, r));
+            const base = rnd.pickOne(["a", "b", "x", "y", rnd.intBetween(2, r)]);
+            const power1 = new Power(base, rnd.numericBetween(1, r));
             const radical1 = new Radical();
             this.radicals[i] = radical1;
         }

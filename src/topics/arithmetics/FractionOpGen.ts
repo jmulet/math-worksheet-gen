@@ -12,7 +12,7 @@ export class FractionOpGen implements QuestionGenInterface {
     answer: any;
    
     constructor(private qGenOpts: QuestionOptsInterface) {
-        const rnd = qGenOpts.rand;
+        const rnd = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
         const min = qGenOpts.question.min || -10;
         const max = qGenOpts.question.max || 10;
@@ -20,7 +20,7 @@ export class FractionOpGen implements QuestionGenInterface {
         this.fractions = [];
 
         for (let i=0; i < 5; i++) {
-            this.fractions[i] = Random.fractionBetweenNotZero(rnd, min, max);
+            this.fractions[i] = rnd.fractionBetweenNotZero(min, max);
         }
         
         const [f1, f2, f3, f4, f5] = this.fractions;

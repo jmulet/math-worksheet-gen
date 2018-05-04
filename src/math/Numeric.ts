@@ -21,7 +21,7 @@ export class Numeric {
         }
     }
 
-    static fromNumber(num: number) {
+    static fromNumber(num: number): Numeric {
         if (Math.round(num) === num) {
             return new Numeric(num, 1);
         } else {
@@ -29,8 +29,17 @@ export class Numeric {
         }    
     }
  
-    static fromFraction(a: number, b: number) {
+    static fromFraction(a: number, b: number): Numeric {
         return new Numeric(a, b);
+    }
+
+    static parse(str: string): Numeric {
+        if(str.indexOf('i') >= 0) {
+            throw 'Numeric:: parse with complex numbers not implemented yet';
+        } else {
+            const f = math.fraction(str);
+            return new Numeric(f["n"]*f["n"], f["d"]);
+        }
     }
   
     constructor(reNum: number, reDen?: number, imNum?: number, imDen?: number) {
