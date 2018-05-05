@@ -11,6 +11,19 @@ export class PolyMonomial extends Expression {
         return new PolyMonomial(monomials);
     }
 
+    static fromNumber(num: number): PolyMonomial {
+        return new PolyMonomial([Monomial.fromNumber(num)]);
+    }
+
+    static fromNumeric(num: Numeric): PolyMonomial {
+        return new PolyMonomial([Monomial.fromNumeric(num)]);
+    }
+
+    static fromMonomial(mono: Monomial): PolyMonomial {
+        return new PolyMonomial([mono]);
+    }
+
+ 
     static add(m1: Monomial | PolyMonomial, m2: Monomial | PolyMonomial) : PolyMonomial {
         let x1, x2;
         if (m1 instanceof PolyMonomial) {
@@ -44,6 +57,28 @@ export class PolyMonomial extends Expression {
     }
 
     static multiply(m1: Monomial | PolyMonomial, m2: Monomial | PolyMonomial): PolyMonomial {
+        const products = <Monomial[]> [];
+        let x1, x2;
+        if (m1 instanceof PolyMonomial) {
+            x1 = m1.monomials;
+        } else {
+            x1 = [m1];
+        }
+        if (m2 instanceof PolyMonomial) {
+            x2 = m2.monomials;
+        } else {
+            x2 = [m2];
+        }
+        x1.forEach((term1) => {
+            x2.forEach((term2) => {
+                products.push(term1.multiply(term2));
+            });
+        });
+        return new PolyMonomial(products);
+    }
+
+
+    static divide(m1: Monomial | PolyMonomial, m2: Monomial): PolyMonomial {
         const products = <Monomial[]> [];
         let x1, x2;
         if (m1 instanceof PolyMonomial) {
@@ -135,7 +170,7 @@ export class PolyMonomial extends Expression {
         return new PolyMonomial(list);
     }
 
-    toString() {
+    toString(bar?: string) {
         return this.monomials.map( (e, i) => {
             let str = "";
             if (!e.coef.isNegative() && i > 0) {
@@ -146,7 +181,7 @@ export class PolyMonomial extends Expression {
         }).join(" ");
     }
 
-    toTeX() {
+    toTeX(bar?: string) {
         const str = this.monomials.map( (e, i) => {
             let str = "";
             if (!e.coef.isNegative() && i > 0) {

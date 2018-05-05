@@ -1,4 +1,6 @@
 import { Numeric } from "../math/Numeric";
+import { Monomial } from "../math/Monomial";
+import { SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG } from "constants";
 
 export class Formatter {
     /**
@@ -6,15 +8,27 @@ export class Formatter {
      * to produce a string x - z
      * @param args Numeric, string, Numeric, String, ...
      */
-    static numericXstring(...args: (Numeric | string)[]): string {
+    static numericXstringTeX(...args: (Numeric | Monomial | string)[]): string {
         const n = args.length;
         if (n%2 !== 0) {
             throw "numericXstring: the number of arguments must be even.";
         }
         let str = [];
         for (let i=0; i < n; i+=2) {
-            const numeric = <Numeric> args[i];
-            const symbol = <string> args[i+1];
+            let numeric;
+            let literal = '';
+            if (args[i] instanceof Numeric) {
+                numeric = <Numeric> args[i];
+            } else if (args[i] instanceof Monomial) {
+                const monomial = <Monomial> args[i];
+                numeric = monomial.coef;
+                literal = monomial.literals.map((e)=> e.toTeX()).join(" \\cdot ") || '';
+            }
+                        
+            let symbol = <string> args[i+1];
+            if (literal) {
+                symbol = literal + (symbol? (" \\cdot " + symbol) : '');
+            }
             if (!numeric.isZero()) {
                 if (numeric.is(1)) {   
                     if (i > 0) {
@@ -27,7 +41,52 @@ export class Formatter {
                     if (!numeric.isNegative() && i > 0) {
                         str.push(" + ");
                     } 
-                    str.push(numeric.toTeX() + " " + symbol);                    
+                    let nn = numeric.toTeX().trim();
+                    if(nn && symbol.trim()!=='1') {
+                        nn += " \\cdot " + symbol;
+                    }
+                    str.push(nn);                    
+                }
+            }
+        }
+        return str.join('');
+    }
+
+
+    static numericXstring(...args: (Numeric | Monomial | string)[]): string {
+        const n = args.length;
+        if (n%2 !== 0) {
+            throw "numericXstring: the number of arguments must be even.";
+        }
+        let str = [];
+        for (let i=0; i < n; i+=2) {
+            let numeric;
+            let literal = '';
+            if (args[i] instanceof Numeric) {
+                numeric = <Numeric> args[i];
+            } else if (args[i] instanceof Monomial) {
+                const monomial = <Monomial> args[i];
+                numeric = monomial.coef;
+                literal = monomial.literals.map((e)=> e.toString()).join("*") || '';
+            }
+                        
+            let symbol = <string> args[i+1];
+            if (literal) {
+                symbol = literal + (symbol? ("*" + symbol) : '');
+            }
+            if (!numeric.isZero()) {
+                if (numeric.is(1)) {   
+                    if (i > 0) {
+                        str.push(" + ");
+                    }                 
+                    str.push(symbol? symbol: ' 1 '); 
+                } else if (numeric.is(-1)) {   
+                    str.push(symbol? (' -' + symbol): ' -1 '); 
+                } else  {
+                    if (!numeric.isNegative() && i > 0) {
+                        str.push(" + ");
+                    } 
+                    str.push(numeric.toString() + "*" + symbol);                    
                 }
             }
         }

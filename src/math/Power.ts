@@ -5,7 +5,7 @@ import { Expression } from "./Expression";
 export class Power {
     base: Monomial;
     exponent: Monomial;
-    constructor(base: Numeric | Monomial, exponent?: Numeric | Monomial) {      
+    constructor(base: number | Numeric | Monomial, exponent?: Numeric | Monomial) {      
         if (base == null) {
             this.base = Monomial.fromNumber(0);
         } else if (base instanceof Numeric) {

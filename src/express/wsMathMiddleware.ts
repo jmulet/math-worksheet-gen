@@ -206,7 +206,7 @@ function generateSampleBody() {
         worksheet: {
             includeKeys: true,
             sections: [
-                {
+               /* {
                     name: "Vectors", activities: [
                         {
                             formulation: "Given the vectors $${vecU.toTeX(true)}$, $${vecV.toTeX(true)}$ and $${vecW.toTeX(true)}$",
@@ -221,7 +221,7 @@ function generateSampleBody() {
                         }
                     ]
                 },
-
+            */
                 {
                     name: "Polynomials", activities: [
                         {
@@ -255,6 +255,11 @@ function generateSampleBody() {
                         {
                             formulation: "Factorize these polynomials", questions: [
                                 { gen: "algebra/polynomial/factorize", repeat: 4, options: { interval: 5, complexity: 1, maxDegree: 4, allowFractions: true } }
+                            ]
+                        },
+                        {
+                            formulation: "Simplify these algebraic fractions", questions: [
+                                { gen: "algebra/fractions/simplify", repeat: 4, options: { interval: 5, maxDegree: 3 } }
                             ]
                         }
                     ]

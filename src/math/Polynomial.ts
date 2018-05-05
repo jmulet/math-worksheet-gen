@@ -218,7 +218,11 @@ export class Polynomial extends Expression {
                 if (!coef.isNegative() && i > 0) {
                     num = "+ " + num;
                 }
-                return num + " " + (expd ? (bar + (expd === 1 ? "" : "^{" + expd + "}")) : "");
+                let literal =  (expd ? (bar + (expd === 1 ? "" : "^(" + expd + ")")) : "");
+                if (literal) {
+                    literal = "*" + literal;
+                }
+                return num + literal ;
             } else {
                 return "";
             }
@@ -232,7 +236,32 @@ export class Polynomial extends Expression {
     }
 
     toTeX(bar="x"): string {
-        return this.toString(bar);
+        const degree = this.degree();
+        const withPowers = this.coefs.map((coef, i) => {
+            const expd = degree - i;
+            if (!coef.isZero())  {
+                let num = "" + coef.toTeX();                 
+                if (coef.isOne() && i !== degree) {
+                    num = "";                    
+                }
+                if (!coef.isNegative() && i > 0) {
+                    num = "+ " + num;
+                }
+                let literal =  (expd ? (bar + (expd === 1 ? "" : "^{" + expd + "}")) : "");
+                if (literal) {
+                    literal = " " + literal;
+                }
+                return num + literal ;
+            } else {
+                return "";
+            }
+        })
+
+        let result = withPowers.join(" ");
+        if(!result.trim()) {
+            result = "0";
+        }
+        return result;
     }
 
     toFactorForm(bar="x"): string {

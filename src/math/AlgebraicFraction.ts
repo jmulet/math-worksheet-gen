@@ -2,13 +2,14 @@ import { Polynomial } from "./Polynomial";
 import { Numeric } from "./Numeric";
 import { RandomSeed } from "random-seed"; 
 import { Giac } from "./Giac";
+import { PolyMonomial } from "./PolyMonomial";
 /**
  * We define an algebraic fraction as the quotient of two Polynomials
  */
 export class AlgebraicFraction {
 
-    polyDen: Polynomial;
-    polyNum: Polynomial;
+    polyDen: Polynomial | PolyMonomial;
+    polyNum: Polynomial | PolyMonomial;
     /**
      * Converts the string into a Fraction object by
      * splitting the str by the  /  symbol and parsing
@@ -19,7 +20,7 @@ export class AlgebraicFraction {
        return Giac.parseAlgebraicFraction(str);
     }
 
-    constructor(polyNum: Polynomial | (number | Numeric)[], polyDen: Polynomial | (number | Numeric)[]) {   
+    constructor(polyNum: Polynomial | PolyMonomial | (number | Numeric)[], polyDen: Polynomial | PolyMonomial | (number | Numeric)[]) {   
         if (Array.isArray(polyNum)) {
             const coefs = <Numeric[]> polyNum.map( (e) => {
                 if (e instanceof Numeric) {
@@ -81,6 +82,6 @@ export class AlgebraicFraction {
         if (den === '1') {
             return num;
         }
-        return "\\frac{" + num + "}{" + den + "}";
+        return "\\dfrac{" + num + "}{" + den + "}";
     }
 }

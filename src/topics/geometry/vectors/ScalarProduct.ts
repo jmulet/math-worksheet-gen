@@ -47,7 +47,8 @@ export class ScalarProduct implements QuestionGenInterface {
 
         const combLineal = vecV.times(num1).add(vecW.times(num2));
         const op1 = vecU.dotProduct(combLineal);
-        let term2 = Formatter.numericXstring( num1, vecV.arrow, num2, vecW.arrow );
+        let term2 = Formatter.numericXstringTeX( num1, vecV.arrow, num2, vecW.arrow );
+        
         const apartats = [
             {
                 question: `$ ${vecU.arrow} \\cdot \\left( ${term2} \\right) $` ,

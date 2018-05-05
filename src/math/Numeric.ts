@@ -1,6 +1,7 @@
 import * as math from 'mathjs';
 import { Power } from './Power';
-
+import { Giac } from './Giac';
+ 
 /**
  *  Numeric is a wrapper around number and fraction
  *  it can hold any rational number in the complex plane
@@ -12,6 +13,42 @@ export class Numeric {
 
     Re: math.Fraction | number[] | number[][] | math.Matrix;
     Im: math.Fraction | number[] | number[][] | math.Matrix;
+
+    static factorize(n: number): string {
+        if (Math.abs(n)<250) {
+            return n + '';
+        } else {
+           const factors = <number[]> JSON.parse(Giac.ifactors(n));
+           if (!factors.length) {
+             return n + '';
+           }
+           let str = "";
+           let sep = "";
+           for (let i=0; i<factors.length; i+=2) {
+             const expo = factors[i+1];
+             str += sep + factors[i] + (expo > 1? ('^{' + expo + '}') : '')
+             sep = " \\cdot ";
+           }
+           return str;
+        }
+    }
+
+    static listDivisors(n: number): number[] {
+        if (n < 1)
+            throw "Argument error";
+        var small = [];
+        var large = [];
+        var end = Math.floor(Math.sqrt(n));
+        for (var i = 1; i <= end; i++) {
+            if (n % i == 0) {
+                small.push(i);
+                if (i * i != n)  // Don't include a square root twice
+                    large.push(n / i);
+            }
+        }
+        large.reverse();
+        return small.concat(large);
+    }
 
     static max(a: Numeric, b: Numeric): Numeric {
         if (a["n"]/a["d"] > b["n"]/b["d"]) {
@@ -159,7 +196,10 @@ export class Numeric {
             this.Im["d"]);
     }
 
-    power(n: Numeric): Numeric | Power {
+    power(n: Numeric | number): Numeric | Power {
+        if(typeof(n) === "number") {
+            n = Numeric.fromNumber(n);
+        }
         if(!this.isReal()) {
             throw "power of complex not implemented yet";
         }
@@ -193,9 +233,9 @@ export class Numeric {
             tex = "-";
         }
         if (this.Re["d"] === 1) {
-            tex +=  this.Re["n"];
+            tex +=  Numeric.factorize(this.Re["n"]);
         } else {
-            tex += "\\frac{" + this.Re["n"] + "}{" + this.Re["d"] + "}";
+            tex += "\\frac{" + Numeric.factorize(this.Re["n"]) + "}{" + Numeric.factorize(this.Re["d"]) + "}";
         }
 
         if(this.Im["n"]) {
@@ -207,9 +247,9 @@ export class Numeric {
             }
 
             if (this.Im["d"] === 1) {
-                tex +=  this.Im["n"];
+                tex +=  Numeric.factorize(this.Im["n"]);
             } else {
-                tex = "\\frac{" + this.Im["n"] + "}{" + this.Im["d"] + "}";
+                tex = "\\frac{" + Numeric.factorize(this.Im["n"]) + "}{" + Numeric.factorize(this.Im["d"]) + "}";
             }
             tex +="\\cdot i";
         }

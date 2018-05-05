@@ -48,13 +48,19 @@ export class Giac {
         }
     }   
 
-    static factor(expr: any, latex: boolean): string {
+    static factor(expr: any, latex?: boolean): string {
         let str = 'factor(' + expr.toString() + ')';
         if (latex) {
             str = 'latex(' + str + ')';
         }
         return giac.evaluate(latex);
     }
+ 
+    static ifactors(expr: any): string {
+        let str = 'ifactors(' + expr.toString() + ')';        
+        return giac.evaluate(str);
+    }
+
 
     static lcm( ...args: any[] ): string {
         return giac.evaluate('lcm(' + args.map(e => e.toString()).join(",") + ')');

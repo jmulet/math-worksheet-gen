@@ -6,6 +6,8 @@ import { PolyMonomial } from '../math/PolyMonomial';
 import { AlgebraicFraction } from '../math/AlgebraicFraction';
 import { Monomial } from '../math/Monomial';
 import { Literal } from '../math/Literal';
+import { Radical } from '../math/Radical';
+import { Giac } from '../math/Giac';
 
 /**
  *
@@ -151,6 +153,61 @@ const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
         return v;
     }
 
+    monomial(options?: any): Monomial {
+        const opts = { minDegree: 1, maxDegree: 5, range: 10, domain: 'Z', maxVars: 1, ...options};
+        const degree = this.intBetween(opts.minDegree, opts.maxDegree);
+
+        const literals = [];
+        if (opts.maxVars > 1) {
+            const nvars = this.intBetween(1, opts.maxVars);
+            const symbols = this.pickMany(BAR_NAMES, nvars);
+            symbols.forEach( (symb) => {
+                literals.push(new Literal(symb, this.intBetween(opts.minDegree, opts.maxDegree)));
+            });            
+        } else {
+            literals.push(new Literal(this.pickOne(BAR_NAMES), this.intBetween(opts.minDegree, opts.maxDegree)));
+        }
+        return new Monomial(this.numericBetweenNotZero(-opts.range, opts.range, opts.domain), literals);
+    }
+    
+    radical(options?: any): Radical {
+        const opts = { minIndex: 2, maxIndex: 10, minDegree: 1, maxDegree: 5, range: 10, domain: 'Z', maxVars: 1, algebraic: false, simplificable: false, ...options};
+        
+        const index = this.intBetween(opts.minIndex, opts.maxIndex);
+        let divisorsOfIndex = Numeric.listDivisors(index);
+        divisorsOfIndex.splice(divisorsOfIndex.length - 1, 1);
+        
+        let mono1, mono2;
+        if (opts.algebraic) {
+            mono1 = this.monomial(opts);
+            (<Monomial> mono1).coef.Re["s"] = 1; // Make positive
+            mono2 = this.monomial(opts);
+            if (opts.simplificable) {
+                const oneDivisor = this.pickOne(divisorsOfIndex);
+                (<Monomial> mono1).coef.power(oneDivisor);
+                (<Monomial> mono1).literals.forEach( (literal) => {
+                    const times = this.intBetween(0, 3);                  
+                    literal.exponent *= oneDivisor;
+                    literal.exponent += times*index;
+                });                
+            }            
+        } else {
+            mono2 = this.numericBetweenNotZero(-opts.range, opts.range, opts.domain);
+            if (opts.simplificable) {
+                const oneDivisor = this.pickOne(divisorsOfIndex);
+                const e1 = this.intBetween(0, 3);
+                const e2 = this.intBetween(0, 2);
+                const e3 = this.intBetween(0, 1);
+                const number = Math.pow(2, e1*oneDivisor)* Math.pow(3, e2*oneDivisor)*Math.pow(5, e3*oneDivisor);                
+                mono1 = Numeric.fromNumber(number);                
+            } else {
+                mono1 = this.numericBetween(2, opts.range, opts.domain);                
+            }
+        }
+            
+        return new Radical(mono1, index, mono2);
+    }
+
     polynomial(options?: any): Polynomial {
         const opts = { minDegree: 1, maxDegree: 5, range: 10, domain: 'Z', algIdentities: false, factorizable: false, ...options};
         const degree = this.intBetween(opts.minDegree, opts.maxDegree);
@@ -203,8 +260,21 @@ const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
  
     algebraicFraction(options?: any): AlgebraicFraction {
         const opts = { range: 10, maxDegree: 4, domain: 'Z', ...options};
-        const numerator = this.polynomial(opts);
-        const denominator = this.polynomial(opts);
+        let numerator, denominator;
+        if (opts.simplificable) {
+            const factor = this.polynomial({range: 4, maxDegree: this.intBetween(1, 2)});
+            opts.maxDegree -= factor.degree();
+            opts.range = 5;
+            if(opts.maxDegree < 1) {
+                opts.maxDegree = 1;
+            }
+            numerator = this.polynomial(opts).multiply(factor);
+            denominator = this.polynomial(opts).multiply(factor);
+        } else {
+            numerator = this.polynomial(opts);
+            denominator = this.polynomial(opts);
+        }
+        
         return new AlgebraicFraction(numerator, denominator);
     }
 
