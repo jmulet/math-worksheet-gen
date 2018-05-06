@@ -14,11 +14,21 @@ export class Numeric {
     Re: math.Fraction | number[] | number[][] | math.Matrix;
     Im: math.Fraction | number[] | number[][] | math.Matrix;
 
-    static factorize(n: number): string {
-        if (Math.abs(n)<250) {
+    static factorize(n: number, opts: any): string {
+        if(!opts || !opts.factorizeAbove) {
+            return n + '';
+        }
+        if (Math.abs(n) < opts.factorizeAbove) {
             return n + '';
         } else {
-           const factors = <number[]> JSON.parse(Giac.ifactors(n));
+           let factors;
+           try {
+                factors = <number[]> JSON.parse(Giac.ifactors(n));
+           } catch(Ex) {
+               console.log("Unable to factor ", n);
+               console.log(Ex);
+               return n + '';
+           }
            if (!factors.length) {
              return n + '';
            }
@@ -72,7 +82,7 @@ export class Numeric {
 
     static parse(str: string): Numeric {
         if(str.indexOf('i') >= 0) {
-            throw 'Numeric:: parse with complex numbers not implemented yet';
+            throw 'Numeric:: parse ' + str + ' with complex numbers not implemented yet';
         } else {
             const f = math.fraction(str);
             return new Numeric(f["n"]*f["n"], f["d"]);
@@ -227,15 +237,15 @@ export class Numeric {
         return Math.sqrt(mod2["n"]/mod2["d"]);
     }
 
-    toTeX(): string {
+    toTeX(opts?: any): string {
         let tex = "";
         if (this.Re["s"] < 0) {
             tex = "-";
         }
         if (this.Re["d"] === 1) {
-            tex +=  Numeric.factorize(this.Re["n"]);
+            tex +=  Numeric.factorize(this.Re["n"], opts);
         } else {
-            tex += "\\frac{" + Numeric.factorize(this.Re["n"]) + "}{" + Numeric.factorize(this.Re["d"]) + "}";
+            tex += "\\frac{" + Numeric.factorize(this.Re["n"], opts) + "}{" + Numeric.factorize(this.Re["d"], opts) + "}";
         }
 
         if(this.Im["n"]) {
@@ -247,9 +257,9 @@ export class Numeric {
             }
 
             if (this.Im["d"] === 1) {
-                tex +=  Numeric.factorize(this.Im["n"]);
+                tex +=  Numeric.factorize(this.Im["n"], opts);
             } else {
-                tex = "\\frac{" + Numeric.factorize(this.Im["n"]) + "}{" + Numeric.factorize(this.Im["d"]) + "}";
+                tex = "\\frac{" + Numeric.factorize(this.Im["n"], opts) + "}{" + Numeric.factorize(this.Im["d"], opts) + "}";
             }
             tex +="\\cdot i";
         }

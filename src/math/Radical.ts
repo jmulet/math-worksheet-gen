@@ -7,6 +7,19 @@ import { Literal } from "./Literal";
 import { Giac } from "./Giac";
 import { Formatter } from "../util/Formatter";
 
+function factor2TeX(factors: any[]): string {
+    let y = "";
+    let sep = "";
+    for (let i=0; i < factors.length; i+=2) {
+        let expo = factors[i+1];
+        if (expo.toTeX) {
+            expo = expo.toTeX();
+        }
+        y += sep + factors[i] + "^{"+ expo +"} ";        
+        sep = "\\cdot ";
+    }
+    return y || "1";
+}
 
 function factor2Number(factors: number[]): number {
     let y = 1;
@@ -44,10 +57,20 @@ export class Radical {
         }
     }
 
+    copy(): Radical {
+        return new Radical(this.radicand.copy(), this.index, this.coefficient.copy());
+    }
+
+    opposite(): Radical {
+        const clone = this.copy();
+        clone.coefficient.coef = clone.coefficient.coef.oposite();
+        return clone;
+    }
+
     multiply(r: Radical): Radical {
         const lcm = mathjs.lcm(r.index, this.index);
-        const e1 = lcm/r.index;
-        const e2 = lcm/this.index;
+        const e1 = lcm/this.index;
+        const e2 = lcm/r.index;
         const newCoefficent = this.coefficient.multiply(r.coefficient);
         const rad1 = this.radicand.power(e1);
         const rad2 = r.radicand.power(e2);
@@ -56,8 +79,8 @@ export class Radical {
 
     divide(r: Radical): Radical {
         const lcm = mathjs.lcm(r.index, this.index);
-        const e1 = lcm/r.index;
-        const e2 = lcm/this.index;
+        const e1 = lcm/this.index;
+        const e2 = lcm/r.index;
         const newCoefficent = this.coefficient.divide(r.coefficient);
         const rad1 = this.radicand.power(e1);
         const rad2 = r.radicand.power(e2);
@@ -99,8 +122,22 @@ export class Radical {
         });
 
                 // Factorize the coefficients in array form [prime1, expo1, prime2, expo2, ....]
-                const numFactors = JSON.parse(Giac.ifactors(this.radicand.coef.Re['n']));
-                const denFactors = JSON.parse(Giac.ifactors(this.radicand.coef.Re['d']));
+                
+                let numFactors, denFactors;
+
+                try {
+                    numFactors = JSON.parse(Giac.ifactors(this.radicand.coef.Re['n']));                    
+                } catch(Ex) {
+                    console.log(Ex);
+                    numFactors = [this.radicand.coef.Re['n'], 1]
+                }
+
+                try {
+                    denFactors = JSON.parse(Giac.ifactors(this.radicand.coef.Re['d']));
+                } catch(Ex) {
+                    console.log(Ex);
+                    denFactors = [this.radicand.coef.Re['d'], 1]
+                }
         
                 const outNumFactors = [];
                 const outDenFactors = [];
@@ -166,13 +203,13 @@ export class Radical {
         
         if (this.index > 2) {     
             if (opts.coef) {       
-                str = Formatter.numericXstringTeX( this.coefficient, " \\sqrt[" + this.index + "]{" + this.radicand.toTeX().trim() + "}" );
+                str = Formatter.numericXstringTeX(false, this.coefficient, " \\sqrt[" + this.index + "]{" + this.radicand.toTeX().trim() + "}" );
             } else {
                 str = " \\sqrt[" + this.index + "]{" + this.radicand.toTeX().trim() + "}";
             }
         } else if (this.index === 2) {
             if (opts.coef) {       
-                str = Formatter.numericXstringTeX( this.coefficient, " \\sqrt{" + this.radicand.toTeX().trim() + "}" );
+                str = Formatter.numericXstringTeX(false, this.coefficient, " \\sqrt{" + this.radicand.toTeX().trim() + "}" );
             } else {
                 str = " \\sqrt{" + this.radicand.toTeX().trim() + "}";
             }
@@ -210,6 +247,60 @@ export class Radical {
                 str = this.radicand.toString();
             }
         }
+
+        return str;
+    }
+
+
+    /**
+     * Displays the radical in power form
+     */
+    toPowerTeX(): string {
+        let str = "";
+        let numFactors, denFactors;
+
+        try {
+            numFactors = JSON.parse(Giac.ifactors(this.radicand.coef.Re['n']));                    
+        } catch(Ex) {
+            console.log(Ex);
+            numFactors = [this.radicand.coef.Re['n'], 1]
+        }
+
+        try {
+            denFactors = JSON.parse(Giac.ifactors(this.radicand.coef.Re['d']));
+        } catch(Ex) {
+            console.log(Ex);
+            denFactors = [this.radicand.coef.Re['d'], 1]
+        }
+
+        // Add to num or den factors those from the literal part depending on sign
+        this.radicand.literals.forEach( (literal) => {
+            if (literal.exponent > 0) {
+                numFactors.push(literal.symbol, literal.exponent);
+            } else if (literal.exponent < 0) {
+                denFactors.push(literal.symbol, Math.abs(literal.exponent));
+            }
+        });
+
+        // Map all factors exponents from i ==> i/index fraction in simplified form
+        for (let i=0; i < numFactors.length; i+=2) {
+            numFactors[i+1] = new Numeric(numFactors[i+1], this.index);    
+        }
+
+        for (let i=0; i < denFactors.length; i+=2) {
+            denFactors[i+1] = new Numeric(denFactors[i+1], this.index);    
+        }
+
+        const num = factor2TeX(numFactors).trim();
+        const den = factor2TeX(denFactors).trim();
+
+        if (den==='1') {
+            str = num;
+        } else {
+            str = "\\frac{" + num + "}{" + den + "}";
+        }
+
+        str = Formatter.numericXstringTeX(true, this.coefficient, str);
 
         return str;
     }

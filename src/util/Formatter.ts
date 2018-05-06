@@ -8,7 +8,7 @@ export class Formatter {
      * to produce a string x - z
      * @param args Numeric, string, Numeric, String, ...
      */
-    static numericXstringTeX(...args: (Numeric | Monomial | string)[]): string {
+    static numericXstringTeX(useCdot: boolean, ...args: (Numeric | Monomial | string)[]): string {
         const n = args.length;
         if (n%2 !== 0) {
             throw "numericXstring: the number of arguments must be even.";
@@ -24,10 +24,13 @@ export class Formatter {
                 numeric = monomial.coef;
                 literal = monomial.literals.map((e)=> e.toTeX()).join(" \\cdot ") || '';
             }
-                        
+            let cdot = " ";
+            if (useCdot) {
+                cdot = " \\cdot ";
+            }            
             let symbol = <string> args[i+1];
             if (literal) {
-                symbol = literal + (symbol? (" \\cdot " + symbol) : '');
+                symbol = literal + (symbol? (cdot + symbol) : '');
             }
             if (!numeric.isZero()) {
                 if (numeric.is(1)) {   
@@ -43,7 +46,7 @@ export class Formatter {
                     } 
                     let nn = numeric.toTeX().trim();
                     if(nn && symbol.trim()!=='1') {
-                        nn += " \\cdot " + symbol;
+                        nn += cdot + symbol;
                     }
                     str.push(nn);                    
                 }

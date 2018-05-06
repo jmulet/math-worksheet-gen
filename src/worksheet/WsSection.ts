@@ -61,22 +61,22 @@ export class WsSection {
         return latex;
     }
 
-    toHtml(): string[] {
-        const latex = [];
-        latex.push("<ol>")
-        latex.push("  <li><h3><b>" + this.title + "</b></h3></li>");
-        latex.push("  <ol>");
+    toHtml(activityCounter: number): string[] {
+        const latex = []; 
+        latex.push('<ol class="olsection">')
+        latex.push('  <li><h3 style="display: inline-block;"><b>' + this.title + "</b></h3></li>");
+        latex.push('  <ol start="' + activityCounter + '">');
         this.activities.forEach( (activity) => {
             latex.push(...activity.toHtml());
         })
         latex.push("  </ol>"); 
-        latex.push("</ol>"); 
+        latex.push("</ol><hr/>"); 
         return latex;
     }
 
-    answersToHtml(): string[] {
+    answersToHtml(activityCounter: number): string[] {
         const latex = [];
-        latex.push("<ol>");
+        latex.push('<ol start="' + activityCounter + '">');
         this.activities.forEach( (activity) => {           
             latex.push(...activity.answersToHtml());            
         });

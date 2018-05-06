@@ -1,51 +1,91 @@
 import { QuestionGenInterface } from "../../interfaces/QuestionGenInterface";
 import { Polynomial } from "../../math/Polynomial";
 import { QuestionOptsInterface } from "../../interfaces/QuestionOptsInterface";
-import { Random } from "../../util/Random";
+import { Random, BAR_NAMES } from "../../util/Random";
 import { Radical } from "../../math/Radical";
 import { Power } from "../../math/Power";
+import { WsGenerator } from "../../util/WsGenerator";
 
+@WsGenerator({
+    category: "arithmetics/radicals/operations",
+    parameters: [
+        {
+            name: "interval",
+            defaults: 4,
+            description: "Range in which random coefficients are generated"
+        }, 
+        {
+            name: "maxIndex",
+            defaults: 5,
+            description: "Max radical index"
+        }, 
+        {
+            name: "algebraic",
+            defaults: false,
+            description: "Whether radicand and coefficent are algebraic or numeric"
+        },
+        {
+            name: "operators",
+            defaults: '*/',
+            description: "Which operations must include"
+        }
+    ]
+})
 export class RadicalsOpGen implements QuestionGenInterface {
     
+    question: string;
     radicals: any[];
     answer: any;
    
     constructor(private qGenOpts: QuestionOptsInterface) {
         const rnd = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
-        const minIndex = qGenOpts.question.minIndex || 2;
-        const maxIndex = qGenOpts.question.maxIndex || 12;
-
+        const maxIndex = qGenOpts.question.maxIndex || 5;
+        const algebraic = qGenOpts.question.algebraic || false;
+        const operators = qGenOpts.question.operators || '*/^r';
+         
         this.radicals = [];
 
-        for (let i=0; i < rnd.intBetween(2, 3); i++) {
-            const index1 = rnd.intBetween(minIndex, maxIndex);
-            const base = rnd.pickOne(["a", "b", "x", "y", rnd.intBetween(2, r)]);
-            const power1 = new Power(base, rnd.numericBetween(1, r));
-            const radical1 = new Radical();
-            this.radicals[i] = radical1;
+        const bar = rnd.pickOne(BAR_NAMES);
+        const options = {range: r, maxIndex: maxIndex, algebraic: algebraic, useCoeff: false, maxVars: 1, bar: bar};
+        const n = rnd.intBetween(1, 3);
+        for (let i=0; i < n; i++) {           
+            this.radicals[i] = rnd.radical(options);
         }
  
-        if (this.radicals.length === 2) {
+        if (this.radicals.length === 1) {
+            const [r1, ...r2] = this.radicals;
+            const rindex = rnd.intBetween(2, maxIndex);
+            if (rnd.intBetween(0, 1) === 0) {               
+                this.question = "$\\sqrt[" + rindex + "]{" + r1.toTeX() + " }$";
+                this.answer = (<Radical> r1).enterCoefficient().root(rindex);
+            } else {
+                this.question = "$\\left( " + r1.toTeX() + " \\right)^{" + rindex + "}$"
+                this.answer = (<Radical> r1).power(rindex);
+            }
+        }
+        else if (this.radicals.length === 2) {
             const [r1, r2, ...r3] = this.radicals;
-            this.answer = r1.multiply(r2);
+            if (rnd.intBetween(0, 1) === 1) {
+                this.question = "$\\dfrac{" + r1.toTeX() + " }{ " + r2.toTeX() + "}$"
+                this.answer = r1.divide(r2);
+            } else {
+                this.question = "$" + r1.toTeX() + " \\cdot " + r2.toTeX() + "$";
+                this.answer = r1.multiply(r2);
+            }
+            
         } else {
             const [r1, r2, r3, ...r4] = this.radicals;
             this.answer = r1.multiply(r2).divide(r3);
+            this.question = "$\\dfrac{" + this.radicals[0].toTeX() + " \\cdot " + this.radicals[1].toTeX() + "}{" + this.radicals[2].toTeX() + "}$";
         }
     }
 
-    getFormulation(): string {
-        if (this.radicals.length === 2) {
-
-        } else {
-            
-        }
-        const bar = this.qGenOpts.question.bar || "x";
-        return "$\\left(" +   "\\right)$";
+    getFormulation(): string {        
+       return this.question;
     }
 
     getAnswer(): string {
-        return "$" + this.answer.toString() + "$ ";
+        return "$" + this.answer.simplify().toTeX() + "$";
     }
 }

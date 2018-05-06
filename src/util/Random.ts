@@ -14,8 +14,8 @@ import { Giac } from '../math/Giac';
  *  Wrapper around RadomSeed
  *
  */
-const VECTOR_NAMES = ['u', 'v', 'w', 'a', 'b', 'c'];
-const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
+export const VECTOR_NAMES = ['u', 'v', 'w', 'a', 'b', 'c'];
+export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
 
  export class Random {
     private rnd: Ran.RandomSeed;
@@ -27,15 +27,19 @@ const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
         this.rnd = Ran.create(seed);
     }
 
-    intList(length: number, range: number): number[] {
+    intList(length: number, range: number, rangeMax?: number): number[] {
         const array = [];
+        if (!rangeMax) {
+            rangeMax = range;
+            range = -range;
+        }
         for (let i=0; i < length; i++) {
             let random;
             if (i===0) {
                 // First item cannot be zero
-                random = this.intBetweenNotZero(-range, range);
+                random = this.intBetweenNotZero(range, rangeMax);
             } else {
-                random = this.rnd.intBetween(-range, range)
+                random = this.rnd.intBetween(range, rangeMax)
             }
             array.push(random);
         }   
@@ -154,7 +158,7 @@ const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
     }
 
     monomial(options?: any): Monomial {
-        const opts = { minDegree: 1, maxDegree: 5, range: 10, domain: 'Z', maxVars: 1, ...options};
+        const opts = { minDegree: 1, maxDegree: 5, range: 10, domain: 'Z', maxVars: 1, bar: '', ...options};
         const degree = this.intBetween(opts.minDegree, opts.maxDegree);
 
         const literals = [];
@@ -165,15 +169,20 @@ const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
                 literals.push(new Literal(symb, this.intBetween(opts.minDegree, opts.maxDegree)));
             });            
         } else {
-            literals.push(new Literal(this.pickOne(BAR_NAMES), this.intBetween(opts.minDegree, opts.maxDegree)));
+            const bar = opts.bar || this.pickOne(BAR_NAMES);
+            literals.push(new Literal(bar, this.intBetween(opts.minDegree, opts.maxDegree)));
         }
         return new Monomial(this.numericBetweenNotZero(-opts.range, opts.range, opts.domain), literals);
     }
     
     radical(options?: any): Radical {
-        const opts = { minIndex: 2, maxIndex: 10, minDegree: 1, maxDegree: 5, range: 10, domain: 'Z', maxVars: 1, algebraic: false, simplificable: false, ...options};
+        const opts = { minIndex: 2, maxIndex: 10, minDegree: 1, maxDegree: 5, range: 10,
+                       domain: 'Z', maxVars: 1, bar: '', algebraic: false, simplificable: false, 
+                       useCoeff: true,
+                       ...options};
         
         const index = this.intBetween(opts.minIndex, opts.maxIndex);
+      
         let divisorsOfIndex = Numeric.listDivisors(index);
         divisorsOfIndex.splice(divisorsOfIndex.length - 1, 1);
         
@@ -181,7 +190,11 @@ const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
         if (opts.algebraic) {
             mono1 = this.monomial(opts);
             (<Monomial> mono1).coef.Re["s"] = 1; // Make positive
-            mono2 = this.monomial(opts);
+            if (opts.useCoeff) {
+                mono2 = this.monomial(opts);
+            } else {
+                mono2 = Monomial.fromNumber(1);
+            }
             if (opts.simplificable) {
                 const oneDivisor = this.pickOne(divisorsOfIndex);
                 (<Monomial> mono1).coef.power(oneDivisor);
@@ -192,7 +205,12 @@ const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
                 });                
             }            
         } else {
-            mono2 = this.numericBetweenNotZero(-opts.range, opts.range, opts.domain);
+            if(opts.useCoeff) {
+                mono2 = this.numericBetweenNotZero(-opts.range, opts.range, opts.domain);
+            } else {
+                mono2 = Numeric.fromNumber(1);    
+            }
+
             if (opts.simplificable) {
                 const oneDivisor = this.pickOne(divisorsOfIndex);
                 const e1 = this.intBetween(0, 3);

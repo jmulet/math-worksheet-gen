@@ -19,7 +19,8 @@ export class Literal {
         } else if(this.exponent > 1) {
             return this.symbol + "^{" + this.exponent + "} ";
         } else {
-            return "1/" + this.symbol + "^{" + Math.abs(this.exponent) + "} ";
+            const exponentAbs = Math.abs(this.exponent);
+            return "1/" + this.symbol + (exponentAbs!==1? ("^{" + exponentAbs + "} "):"");
         }        
     }
     toTeX(): string {

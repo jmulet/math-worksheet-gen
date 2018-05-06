@@ -213,16 +213,16 @@ export class Polynomial extends Expression {
             if (!coef.isZero())  {
                 let num = "" + coef.toTeX();                 
                 if (coef.isOne() && i !== degree) {
-                    num = "";                    
-                }
+                    num = "1";                    
+                }  
                 if (!coef.isNegative() && i > 0) {
                     num = "+ " + num;
                 }
                 let literal =  (expd ? (bar + (expd === 1 ? "" : "^(" + expd + ")")) : "");
                 if (literal) {
-                    literal = "*" + literal;
+                    literal = "" + literal;
                 }
-                return num + literal ;
+                return (num? (num + (literal?"*":"")): "") + literal ;
             } else {
                 return "";
             }

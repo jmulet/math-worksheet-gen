@@ -39,7 +39,7 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         if (typeof (body) === 'string') {
             body = JSON.parse(body);
         }
-        body.seed = seed;
+        body.seed = (seed == 0? '': seed);
         const generator = new WsMathGenerator(body);
         const id = Math.random().toString(32).substring(2);
         res.setHeader("Content-Type", "application/json");
@@ -206,22 +206,43 @@ function generateSampleBody() {
         worksheet: {
             includeKeys: true,
             sections: [
-               /* {
-                    name: "Vectors", activities: [
+                {
+                    name: "Radicals", activities: [
                         {
-                            formulation: "Given the vectors $${vecU.toTeX(true)}$, $${vecV.toTeX(true)}$ and $${vecW.toTeX(true)}$",
-                            scope: {
-                                vecU: "rnd.vector(2, {symbol:'u', range: 10})",
-                                vecV: "rnd.vector(2, {symbol:'v', range: 10})",
-                                vecW: "rnd.vector(2, {symbol:'w', range: 10})"
-                            },
+                            formulation: "Escriu les potències en forma d'arrel i viceversa",                           
                             questions: [
-                                { gen: "geometry/vectors/scalar_product", repeat: 4, options: {} }
+                                { gen: "arithmetics/radicals/notation", repeat: 6, options: {maxIndex: 5} }                                
+                            ]
+                        },
+                        {
+                            formulation: "Treu factors i simplifica els radicals si és possible",                           
+                            questions: [
+                                { gen: "arithmetics/radicals/simplify", repeat: 4, options: {maxIndex: 5} }                                
+                            ]
+                        },
+                        {
+                            formulation: "Opera els radicals",                           
+                            questions: [
+                                { gen: "arithmetics/radicals/operations", repeat: 4, options: {} },
+                                { gen: "arithmetics/radicals/operations", repeat: 2, options: {algebraic: true} }
+                            ]
+                        },                        
+                        {
+                            formulation: "Simplifica els radicals",                           
+                            questions: [
+                                { gen: "arithmetics/radicals/gather", repeat: 2, options: {maxIndex: 2} },
+                                { gen: "arithmetics/radicals/gather", repeat: 2, options: {domain: 'Q'} }
+                            ]
+                        },
+                        {
+                            formulation: "Racionalitza els radicals",                           
+                            questions: [
+                                { gen: "arithmetics/radicals/rationalize", repeat: 2, options: {} },
+                                { gen: "arithmetics/radicals/rationalize", repeat: 2, options: {conjugate: true} }
                             ]
                         }
                     ]
-                },
-            */
+                },        
                 {
                     name: "Polynomials", activities: [
                         {

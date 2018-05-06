@@ -163,7 +163,7 @@ export class Monomial extends Expression {
         } else if (this.coef.is(1)) {
             return literalPart.trim() || "1";
         } else {
-            return this.coef.toString() + " " + literalPart;
+            return this.coef.toString() + "*" + literalPart;
         }
     }
 
@@ -176,7 +176,7 @@ export class Monomial extends Expression {
         } else if (this.coef.is(1)) {
             return literalPart.trim() || "1";
         } else {
-            return this.coef.toTeX() + " " + literalPart;
+            return this.coef.toTeX({factorizeAbove: 150}) + " " + literalPart;
         }
     }
 }

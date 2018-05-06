@@ -75,7 +75,7 @@ export class WsMathGenerator {
         
         worksheet.sections.forEach( (section) => {
             const sec = this.addSection(section.name);
-            section.activities.forEach( (activity) => {
+            section.activities.forEach( (activity) => {               
                 let clazz = null;
                 if (activity.gen) {
                     clazz = (Container[activity.gen] || {}).clazz;
@@ -158,21 +158,36 @@ export class WsMathGenerator {
             '<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/contrib/auto-render.min.js" integrity="sha384-IiI65aU9ZYub2MY9zhtKd1H2ps7xxf+eb2YFG9lX6uRqpXCvBTOidPRCXCrQ++Uc" crossorigin="anonymous"></script>',
             '<style>',
            `
+           .olsection:first-of-type { counter-reset: sectioncounter }           
+           .olsection > li { counter-increment: sectioncounter; list-style-type: none; }
+           .olsection > li:before { 
+               font-size: 120%;
+               font-weight: bold;
+               content: counter(sectioncounter) ". "; 
+            }
+
+           .olactivity:first-of-type { counter-reset: activitycounter }           
+           .olactivity > li { counter-increment: activitycounter; list-style-type: none; }       
+           .olactivity > li:before { content: counter(activitycounter) ". "; }
+
             .olalpha {
-            counter-reset: list;
-            margin: 10px; 
-            font-size: 120%;
+                counter-reset: alphacounter;
+                margin: 10px; 
+                font-size: 120%;
             }
             
             .olalpha > li {
-            list-style: none;
-            position: relative; }
+                list-style: none;
+                position: relative;
+                margin-bottom: 15px;
+            }
             
             .olalpha > li:before {
-            counter-increment: list;
-            content: counter(list, lower-alpha) ") ";
-            position: absolute;
-            left: -1.4em; }
+                counter-increment: alphacounter;
+                content: counter(alphacounter, lower-alpha) ") ";
+                position: absolute;
+                left: -1.4em; 
+            }
            `,
             '</style>',
             "</head>",
@@ -184,15 +199,19 @@ export class WsMathGenerator {
   content: counter(level1) ") "; 
   counter-increment: level1;
     }*/
+        let activityCounter = 1;
         this.sections.forEach((section) => {
-            code.push(...section.toHtml());
+            code.push(...section.toHtml(activityCounter));
+            activityCounter += section.activities.length;
         })
 
         if (this.showKeys) {
-            code.push("  <h4><b>Answers</b></h4>");
+            activityCounter = 1;
+            code.push("<hr/><h4><b>Answers</b></h4>");
             code.push("  <ol>");
             this.sections.forEach((section) => {
-                code.push(...section.answersToHtml());
+                code.push(...section.answersToHtml(activityCounter));
+                activityCounter += section.activities.length;
             });
             code.push("   </ol>");            
         }

@@ -4,7 +4,7 @@ import { PolyMonomial } from "./PolyMonomial";
 
 // + or - of Radical objects
 export class PolyRadical {
-    constructor(private radicals: Radical[]) {        
+    constructor(public radicals: Radical[]) {        
     }
 
     simplify(): PolyRadical{
@@ -46,7 +46,7 @@ export class PolyRadical {
             args.push(r.toTeX({coef: false}));
         });
 
-        return Formatter.numericXstringTeX(...args);
+        return Formatter.numericXstringTeX(false, ...args);
     }
 
     toString(): string {

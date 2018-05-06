@@ -16,18 +16,19 @@ export class Giac {
     }
 
     static coeffs(polynomial: string, bar='x'): Numeric[] {
+        console.log("Trying to parse polynomial", polynomial, bar);
         const str = Giac.evaluate('coeffs(' + polynomial + ', '+ bar + ')');
         const list = str.slice(str.indexOf('[')+1, str.length - 1).split(",");
+        console.log("Trying to numeric parse ", list);
         return list.filter( (e) => e!=='undef').map( (e) => Numeric.parse(e) );
     }
 
-    static parsePolynomial(str: string, bar='x'): Polynomial {
+    static parsePolynomial(str: string, bar='x'): Polynomial {        
         const coeffs = Giac.coeffs(str, bar);
         return new Polynomial(coeffs);
     }
 
     static parseAlgebraicFraction(str: string, bar='x'): AlgebraicFraction {
-        const coeffs = Giac.coeffs(str, bar);
         const numer = giac.evaluate('numer(' + str + ')');
         const denom = giac.evaluate('denom(' + str + ')');
         return new AlgebraicFraction(Giac.parsePolynomial(numer), Giac.parsePolynomial(denom));
