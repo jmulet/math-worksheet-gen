@@ -46,29 +46,34 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
 
         if (type === 'html') {
             const html = generator.exportAs(WsExportFormats.HTML);
+            /*
             DOCUMENT_CACHE[id] = {
                 generated: new Date().getTime(),
                 type: 'html',
                 data: html
             };
-            res.status(200).send({ link: base + '/get?id=' + id });
+            */
+            res.status(200).send({ link: base + '/get?id=' + id, data: html });
 
         } else if (type === 'tex' || type === 'latex' || type === 'pdf') {
             const tex = generator.exportAs(WsExportFormats.LATEX);
             if (type === 'tex' || type === 'latex') {
-                DOCUMENT_CACHE[id] = {
+                /* DOCUMENT_CACHE[id] = {
                     generated: new Date().getTime(),
                     type: 'tex',
                     data: tex
                 };
-                res.status(200).send({ link: base + '/get?id=' + id });
+                */
+                res.status(200).send({ link: base + '/get?id=' + id, data: tex });
             } else {
                 const outputStream = latexToPdf(tex);
+                
                 DOCUMENT_CACHE[id] = {
                     generated: new Date().getTime(),
                     type: 'pdf',
                     data: outputStream
                 };
+                
                 res.status(200).send({ link: base + '/get?id=' + id });
             }
         }
@@ -157,7 +162,11 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         <script>
             $(function(){
                 $("textarea").val("${textarea}");
-                $(".btn").on("click", function(evt) {
+
+                var extraSeed = 0;
+
+                var doAJAX = function(evt){
+
                     var target = evt.currentTarget;
                     var type = $(target).data("type") || 'pdf';
                     var bodyEncoded = $("textarea").val();
@@ -176,16 +185,35 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
                     } else if (type === 'pdf') {
                         contentType = "application/pdf";
                         fileName = "mathgen.pdf";
-                    }
+                    }        
+
                     $.ajax({
                         method: 'POST',
                         data: bodyEncoded,
                         responseType: 'aplication/json',
-                        url: '${url}/gen?seed='+seed+'&type='+type 
-                    }).then(function(data){           
-                        window.open( data.link, '_blank' )                        
+                        url: '${url}/gen?seed=' + seed + (extraSeed? ("." + extraSeed): "") + '&type='+type 
+                    }).then(function(res){           
+                        if(type==='pdf') {
+                            window.open( res.link, '_blank' )                        
+                        } else {
+                            var appType = "text/plain";
+                            if (type==='html') {
+                                appType = "text/html";
+                            }
+                            // show data in a new page
+                            var file = new Blob([res.data], {type: appType});
+                            var fileURL = URL.createObjectURL(file);
+                            window.open(fileURL);
+                        }
+                    }, function(err){
+                        extraSeed += 1;
+                        doAJAX(evt);
                     });
+                };
+                
 
+                $(".btn").on("click", function(evt) {                                
+                    doAJAX(evt);
                 });
             });
         </script>
@@ -205,6 +233,8 @@ function generateSampleBody() {
 
         worksheet: {
             includeKeys: true,
+            title: "Feina d'estiu alumnes que han de cursar MAT-I a 1r de Batxillerat",
+            instructions: "Realitzeu aquesta tasca en el quadern de l'assignatura del proper curs i entregeu-lo al professor del proper any. Aquesta feina serà comptava com a nota de la 1a avaluació.",
             sections: [
                 {
                     name: "Radicals", activities: [
@@ -244,42 +274,42 @@ function generateSampleBody() {
                     ]
                 },        
                 {
-                    name: "Polynomials", activities: [
+                    name: "Polinomis", activities: [
                         {
-                            formulation: "Dividide these polinomials using Ruffini's rule", questions: [
+                            formulation: "Divideix aquests polinomis utilitzant la regla de Ruffini", questions: [
                                 { gen: "algebra/polynomial/division", repeat: 4, options: { ruffini: true } }
                             ]
                         },
                         {
-                            formulation: "Dividide these polinomials", questions: [
+                            formulation: "Divideix els polinomis", questions: [
                                 { gen: "algebra/polynomial/division", repeat: 4, options: { fraction: false, maxDegree: 4, interval: 5 } }
                             ]
                         },
                         {
-                            formulation: "Expand these algebraic identities", questions: [
+                            formulation: "Expandeix les identitats notables.", questions: [
                                 { gen: "algebra/polynomial/identities", repeat: 2, options: { interval: 5, complexity: 1 } },
                                 { gen: "algebra/polynomial/identities", repeat: 2, options: { interval: 5, complexity: 2 } },
                                 { gen: "algebra/polynomial/identities", repeat: 2, options: { interval: 5, complexity: 3 } }
                             ]
                         },
                         {
-                            formulation: "Write these polynomials as an algebraic identity", questions: [
+                            formulation: "Escriu, si és possible, aquests polinomis com una identitat notable.", questions: [
                                 { gen: "algebra/polynomial/identities", repeat: 2, options: { interval: 5, complexity: 1, indirect: true } },
                                 { gen: "algebra/polynomial/identities", repeat: 2, options: { interval: 5, complexity: 3, indirect: true } }
                             ]
                         },
                         {
-                            formulation: "Extract common factor from these polynomials", questions: [
+                            formulation: "Extreu factor comú dels polinomis", questions: [
                                 { gen: "algebra/polynomial/commonfactor", repeat: 3, options: { interval: 5, complexity: 1 } }
                             ]
                         },
                         {
-                            formulation: "Factorize these polynomials", questions: [
+                            formulation: "Factoritza els polinomis", questions: [
                                 { gen: "algebra/polynomial/factorize", repeat: 4, options: { interval: 5, complexity: 1, maxDegree: 4, allowFractions: true } }
                             ]
                         },
                         {
-                            formulation: "Simplify these algebraic fractions", questions: [
+                            formulation: "Simplifica les fraccions algebraiques", questions: [
                                 { gen: "algebra/fractions/simplify", repeat: 4, options: { interval: 5, maxDegree: 3 } }
                             ]
                         }

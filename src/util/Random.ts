@@ -18,13 +18,16 @@ export const VECTOR_NAMES = ['u', 'v', 'w', 'a', 'b', 'c'];
 export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
 
  export class Random {
+    seed: string;
     private rnd: Ran.RandomSeed;
     
     constructor(seed?: string) {
+        this.seed = seed;
         if(!seed) {
-            seed = (new Date().getTime()).toString(36);            
+            this.seed = (new Date().getTime()).toString(36);            
         }
-        this.rnd = Ran.create(seed);
+        this.seed = this.seed.toLowerCase();
+        this.rnd = Ran.create(this.seed);
     }
 
     intList(length: number, range: number, rangeMax?: number): number[] {

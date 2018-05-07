@@ -32,7 +32,13 @@ export class WsActivity {
         latex.push("    \\item " + this.formulation );
         latex.push("    \\begin{tasks}(2)");
         this.questions.forEach( (question) => {
-            latex.push("      \\task " + question.toLaTeX());
+            try {
+                latex.push("      \\task " + question.toLaTeX());
+            } catch (Ex) {
+                console.log('EXCEPTION:: Skipping question:: ', Ex);
+                const ind = this.questions.indexOf(question);
+                this.questions.splice(ind, 1);
+            }            
         })
         latex.push("    \\end{tasks}");
         
@@ -56,7 +62,13 @@ export class WsActivity {
         latex.push("    <li> " + this.formulation + "</li>");
         latex.push('    <ol class="olalpha">'); 
         this.questions.forEach( (question) => {
-            latex.push("      <li> " + question.toHtml() + "</li>");
+            try {
+                latex.push("      <li> " + question.toHtml() + "</li>");
+            } catch (Ex) {
+                console.log('EXCEPTION:: Skipping question:: ', Ex);
+                const ind = this.questions.indexOf(question);
+                this.questions.splice(ind, 1);
+            }            
         });
         latex.push("    </ol>");
         

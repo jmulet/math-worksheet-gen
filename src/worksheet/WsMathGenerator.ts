@@ -52,6 +52,7 @@ export const WsTopics = {
 */
  
 export class WsMathGenerator { 
+    worksheet: Worksheet;
     rand: Random;
     showKeys: boolean = false;
     sections: WsSection[] = [];
@@ -72,7 +73,7 @@ export class WsMathGenerator {
     }
 
     create(worksheet: Worksheet) {
-        
+        this.worksheet = worksheet;
         worksheet.sections.forEach( (section) => {
             const sec = this.addSection(section.name);
             section.activities.forEach( (activity) => {               
@@ -128,12 +129,25 @@ export class WsMathGenerator {
             "\\usepackage{amsmath}",
             "\\begin{document}",           
         ];
+
+        if (this.worksheet) {
+            if (this.worksheet.title) {
+                latex.push("\\begin{center}\\large \\textbf{" + this.worksheet.title + "} \\end{center}\n");
+            }
+            if (this.worksheet.instructions) {
+                latex.push("" + this.worksheet.instructions + "");
+            }
+
+            latex.push("\n \\textbf{Referència:} " + this.rand.seed + ". \\textbf{Nom i llinatges:} ........................................................ \n");
+        }
+
+
         this.sections.forEach((section) => {
             latex.push(...section.toLaTeX());
         })
 
         if (this.showKeys) {
-            latex.push("  \\section*{Answers}");
+            latex.push("  \\section*{Respostes}");
             latex.push("  \\begin{enumerate}");
             this.sections.forEach((section) => {
                 latex.push(...section.answersToLaTeX());
@@ -188,17 +202,36 @@ export class WsMathGenerator {
                 position: absolute;
                 left: -1.4em; 
             }
+            
+            .arial {
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            .instructions {                
+                border: 2px solid blue;
+                border-radius: 5px;
+                background-color: rgb(220,250,255);
+                width: 90%;
+                padding: 10px;
+                font-size: 110%;
+            }
            `,
             '</style>',
             "</head>",
             "<body>"
         ];
 
-        /*
-        ol li:before {
-  content: counter(level1) ") "; 
-  counter-increment: level1;
-    }*/
+        if (this.worksheet) {
+            if (this.worksheet.title) {
+                code.push("<h2 class=\"arial\" style=\"color:blue;text-align:center;\"><b>" + this.worksheet.title + "</b></h2>")
+            }
+            if (this.worksheet.instructions) {
+                code.push("<center><div class=\"arial instructions\">" + this.worksheet.instructions + "</div></center>")
+            }
+
+            code.push("<p class=\"arial\"><b>Referència:</b> " + this.rand.seed + ". <b>Nom i llinatges:</b> ........................................................</p>")
+        }
+
         let activityCounter = 1;
         this.sections.forEach((section) => {
             code.push(...section.toHtml(activityCounter));
@@ -207,7 +240,7 @@ export class WsMathGenerator {
 
         if (this.showKeys) {
             activityCounter = 1;
-            code.push("<hr/><h4><b>Answers</b></h4>");
+            code.push("<hr/><h4><b>Respostes</b></h4>");
             code.push("  <ol>");
             this.sections.forEach((section) => {
                 code.push(...section.answersToHtml(activityCounter));

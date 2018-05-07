@@ -4,6 +4,8 @@ import { Random } from '../util/Random';
 export interface Worksheet {
     sections: any[];
     includeKeys: boolean;
+    title?: string,
+    instructions?: string
 }
 
 export interface WsMathGenOpts {
