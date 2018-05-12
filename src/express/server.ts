@@ -2,16 +2,17 @@
 import * as express from 'express';
 import { wsMathMiddleware } from './wsMathMiddleware'; 
 import * as methodOverride from 'method-override';
+import * as helmet from 'helmet';
+import { MysqlStorage } from './MsqlStorage';
+import * as ejs from 'ejs';
 
 const app = express();
 app.use(express.urlencoded({ extended: true })); 
 app.use(express.json());   
+app.use(helmet());
+app.set('view engine', 'ejs');  
 app.use(wsMathMiddleware());
 
-app.get('/', function (req, res) {
-    res.send('hello to ws math gen!')
-})
-
 app.listen(3100, function(err) {
-    console.log("Listening to port 3100");   
+    console.log("math-worksheet-gen:: Listening to port 3100");   
 })

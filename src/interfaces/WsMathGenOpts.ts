@@ -5,7 +5,8 @@ export interface Worksheet {
     sections: any[];
     includeKeys: boolean;
     title?: string,
-    instructions?: string
+    instructions?: string,
+    fullname?: string
 }
 
 export interface WsMathGenOpts {

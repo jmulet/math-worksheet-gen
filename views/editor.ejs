@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Math worksheet generator</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" crossorigin="anonymous">
+<style>
+</style>
+</head>
+<body>
+<h2><b>Generate Maths Worksheets</b></h2>
+<h4>Define the worksheet here</h4>
+<textarea style="width:99%;" rows="35">
+</textarea>
+<br/>
+Seed <input id="seed" type="number" min="0"/>
+<br/>
+<button class="btn" data-type="latex">Generate LaTeX</button>
+<button class="btn" data-type="html">Generate HTML</button>
+<button class="btn" data-type="pdf">Generate PDF</button>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script>
+    $(function(){
+        $("textarea").val("<%-textarea%>");
+
+        var extraSeed = 0;
+
+        var doAJAX = function(evt){
+
+            var target = evt.currentTarget;
+            var type = $(target).data("type") || 'pdf';
+            var bodyEncoded = $("textarea").val();
+            try {
+                bodyEncoded = JSON.parse(bodyEncoded);
+            } catch(Ex) {
+                console.log(Ex);
+                return;
+            }
+            var seed = $("#seed").val() || 0;
+            var contentType = "text/html";
+            var fileName = "";
+            if (type === 'text' || type === 'latex') {
+                contentType = "text/plain;charset=UTF-8";
+                fileName = "mathgen.tex";
+            } else if (type === 'pdf') {
+                contentType = "application/pdf";
+                fileName = "mathgen.pdf";
+            }        
+            $.ajax({
+                method: 'POST',
+                data: bodyEncoded,
+                responseType: 'aplication/json',
+                url: '<%=url%>/store?seed=' + seed + (extraSeed? ("." + extraSeed): "") + '&type=' + type
+            }).then(function(res){           
+                if(res.id) {
+                    var link = '<%=url%>/?id=' + res.id +'&seed=' + seed + (extraSeed? ("." + extraSeed): "") + '&type=' + type 
+                    window.open(link, '_blank' )                        
+                } 
+            }, function(err){
+                extraSeed += 1;
+                //doAJAX(evt);
+            });
+        };
+        
+
+        $(".btn").on("click", function(evt) {                                
+            doAJAX(evt);
+        });
+    });
+</script>
+</body>
+</html>

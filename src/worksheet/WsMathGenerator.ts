@@ -138,7 +138,9 @@ export class WsMathGenerator {
                 latex.push("" + this.worksheet.instructions + "");
             }
 
-            latex.push("\n \\textbf{Referència:} " + this.rand.seed + ". \\textbf{Nom i llinatges:} ........................................................ \n");
+            latex.push("\n \\textbf{Referència:} " + this.rand.seed + ". \\textbf{Nom i llinatges:} " +
+            (this.worksheet.fullname? this.worksheet.fullname :
+            "........................................................... \n"));
         }
 
 
@@ -229,7 +231,8 @@ export class WsMathGenerator {
                 code.push("<center><div class=\"arial instructions\">" + this.worksheet.instructions + "</div></center>")
             }
 
-            code.push("<p class=\"arial\"><b>Referència:</b> " + this.rand.seed + ". <b>Nom i llinatges:</b> ........................................................</p>")
+            code.push("<p class=\"arial\"><b>Referència:</b> " + this.rand.seed + ". <b>Nom i llinatges:</b> " +
+            (this.worksheet.fullname? this.worksheet.fullname : "..........................................................</p>"))
         }
 
         let activityCounter = 1;
