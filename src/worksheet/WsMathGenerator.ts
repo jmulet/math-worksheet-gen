@@ -7,7 +7,7 @@ import { Random } from '../util/Random';
  
  
  // Load all generators
-const topics = path.resolve('src//topics/');
+const topics = path.resolve('src/topics/');
 const genClasses = importClassesFromDirectories([path.join(topics,'/algebra/**/*.ts'), 
                                                  path.join(topics, '/algebra/**/*.js'),
                                                  path.join(topics, '/arithmetics/**/*.ts'),

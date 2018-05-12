@@ -6,7 +6,7 @@ const path = require("path");
 const importClassesFromDirectories_1 = require("../util/importClassesFromDirectories");
 const Random_1 = require("../util/Random");
 // Load all generators
-const topics = path.resolve('src//topics/');
+const topics = path.resolve('src/topics/');
 const genClasses = importClassesFromDirectories_1.importClassesFromDirectories([path.join(topics, '/algebra/**/*.ts'),
     path.join(topics, '/algebra/**/*.js'),
     path.join(topics, '/arithmetics/**/*.ts'),
