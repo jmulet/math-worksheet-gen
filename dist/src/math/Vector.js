@@ -1,0 +1,112 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Numeric_1 = require("./Numeric");
+class Vector {
+    constructor(components, symbol) {
+        this.components = components.map((e) => {
+            if (typeof (e) === 'number') {
+                return Numeric_1.Numeric.fromNumber(e);
+            }
+            else {
+                return e;
+            }
+        });
+        this.symbol = symbol;
+        this.arrow = symbol ? `\\vec{${symbol}}` : "";
+    }
+    dimension() {
+        return this.components.length;
+    }
+    times(n) {
+        const components2 = this.components.map((c) => c.multiply(n));
+        return new Vector(components2);
+    }
+    dotProduct(v) {
+        const n = this.dimension();
+        if (n === v.dimension()) {
+            const products = this.components.map((e, i) => e.multiply(v.components[i]));
+            let scalar = products[0];
+            for (let i = 1; i < n; i++) {
+                scalar = scalar.add(products[i]);
+            }
+            return scalar;
+        }
+        else {
+            throw "Invalid vector dimension";
+        }
+    }
+    norm2() {
+        return this.dotProduct(this);
+    }
+    oposite() {
+        const components2 = this.components.map(e => e.oposite());
+        return new Vector(components2, "(-" + this.symbol + ")");
+    }
+    copy() {
+        const components2 = this.components.map(e => e.copy());
+        return new Vector(components2, this.symbol);
+    }
+    add(v) {
+        const n = this.dimension();
+        if (n === v.dimension()) {
+            const components2 = this.components.map((e, i) => e.add(v.components[i]));
+            return new Vector(components2, this.symbol + "+" + v.symbol);
+        }
+        else {
+            throw "Invalid vector dimension";
+        }
+    }
+    substract(v) {
+        return this.add(v.oposite());
+    }
+    isZero() {
+        const n = this.dimension();
+        for (var i = 0; i < n; i++) {
+            if (!this.components[i].isZero()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    firstComponentNonZero() {
+        let comp = this.components[0];
+        const n = this.dimension();
+        let i = 1;
+        while (comp.isZero() && i < n) {
+            comp = this.components[i];
+            i += 1;
+        }
+        if (comp.isZero()) {
+            return null;
+        }
+        return comp;
+    }
+    isParallelTo(v, accuracy = 1e-10) {
+        const n = this.dimension();
+        if (n === v.dimension()) {
+            if (this.isZero()) {
+                return false;
+            }
+            const first = this.firstComponentNonZero();
+            const pos = this.components.indexOf(first);
+            const ratio = v.components[pos].divide(first).abs();
+        }
+        else {
+            throw "Invalid vector dimension";
+        }
+    }
+    isPerpendicularTo(v, accuracy = 1e-8) {
+        return this.dotProduct(v).abs() <= accuracy;
+    }
+    toTeX(printSymbol) {
+        let str = "";
+        if (printSymbol) {
+            str = "\\vec " + this.symbol;
+        }
+        return str + " \\left("
+            + this.components.map(e => e.toTeX()).join(", ")
+            + "\\right) ";
+    }
+}
+exports.Vector = Vector;
+//# sourceMappingURL=Vector.js.map
