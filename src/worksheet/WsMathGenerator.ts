@@ -4,9 +4,8 @@ import { WsSection } from './WsSection';
 import * as path from 'path';
 import { importClassesFromDirectories } from '../util/importClassesFromDirectories';
 import { Random } from '../util/Random';
- 
- 
- // Load all generators
+  
+// Load all generators
 const topics = path.resolve('src/topics/');
 const genClasses = importClassesFromDirectories([path.join(topics,'/algebra/**/*.ts'), 
                                                  path.join(topics, '/algebra/**/*.js'),
@@ -125,6 +124,8 @@ export class WsMathGenerator {
             "\\usepackage{geometry}",
             "\\geometry{a4paper, total={170mm,257mm}, left=20mm, top=20mm}",
             "\\usepackage{tasks}",
+            "\\usepackage[utf8]{inputenc}",
+            "\\usepackage[T1]{fontenc}",
             "\\usepackage{enumitem}",
             "\\usepackage{amsmath}",
             "\\begin{document}",           

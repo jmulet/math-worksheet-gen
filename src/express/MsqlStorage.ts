@@ -102,7 +102,7 @@ export class MysqlStorage implements Storage {
             if (results.length) {
                 return JSON.parse(results[0].json || {});
             } else {
-                return {};
+                return null;
             }
         } catch (Ex) {
             console.log(Ex);

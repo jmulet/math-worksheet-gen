@@ -5,6 +5,7 @@ import { Stream } from "stream";
 import { Response } from "express-serve-static-core";
 import { MysqlStorage } from "./MsqlStorage";
 import { Storage } from "./Storage"; 
+import { Container } from "../util/WsGenerator";
 
 export interface wsMathMdwOptions {
     basePrefix: string;
@@ -81,24 +82,9 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         let doc = await options.storage.load(id);
 
         if (!doc) {
-            const html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-            <title>Math worksheet generator</title>
-            <meta charset="utf-8">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <style>
-            </style>
-            </head>
-            <body>
-            <h1>Document ${id} not found</h1>
-            </body>
-            </html>
-            `;
-            res.setHeader("Content-type", "text/html");
-            res.status(200).send(html);
+            res.render('notfound', {
+                id: id
+            });
         } else {
             console.log(req.query);
             // Pass extra information from query params
@@ -110,8 +96,7 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
             }
             if (req.query.fullname) {
                 doc.worksheet.fullname = req.query.fullname;
-            }
-            console.log(doc);
+            } 
 
             // Generate document
             try {
@@ -132,7 +117,9 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         const uri = (options.basePrefix || '') + '/wsmath';         
         res.render("editor", {
             textarea: textarea,
-            url: uri
+            url: uri,
+            questionTypesList: Object.keys(Container).sort(),
+            questionTypesMeta: Container
         });
     });
 

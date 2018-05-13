@@ -3,6 +3,7 @@ export interface WsGeneratorInterface {
     parameters: {
         name: string,
         defaults: any,
+        typeof?: string,
         description: string
     }[]
 }
@@ -16,13 +17,13 @@ export const Container = {
  */
  export function WsGenerator(meta: WsGeneratorInterface) {
 
+    meta.parameters.forEach( (p) => p.typeof= typeof(p.defaults) );
+
     return function(target) {
         Container[meta.category] = {
             meta: meta,
             clazz: target
         }
-
-        console.log(Container);
     }
 
  }
