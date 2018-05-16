@@ -55,6 +55,7 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarCollapse">
                         <ul class="navbar-nav mr-auto">
+                            <li><%=user.username%></li>
                         </ul>
                     </div>
                 </nav>
@@ -62,6 +63,7 @@
 
 
     <div ng-controller="wsMathController" class="container-fluid">
+            <h5>Hi <%=user.fullname%>!</h5>
 
             <ul class="nav nav-tabs">
                     <li class="nav-item">
@@ -184,7 +186,8 @@
 
         var ngApp = angular.module("wsMathEditor", []);
         
-        ngApp.controller("wsMathController", function ($scope, $http) {           
+        ngApp.controller("wsMathController", function ($scope, $http) {  
+            $scope.user = <%-JSON.stringify(user)%>; 
             $scope.textarea = "<%-textarea%>";
             $scope.ws = JSON.parse($scope.textarea).worksheet;
             $scope.questionTypesList = questionTypesList;
@@ -232,7 +235,7 @@
                     return;
                 } 
                 var url = '<%=url%>/store?seed=' + $scope.seed + (extraSeed ? ("." + extraSeed) : "") + '&type=' + type
-                    + "idUser=0&persist=" + ($scope.store? 1 : 0);
+                    + "idUser=" + $scope.user.id + "&persist=" + ($scope.store? 1 : 0);
                 $http.post(url, bodyEncoded).then(function (res) {
                     var data = res.data;
                     console.log(data);
@@ -333,14 +336,11 @@
 
         ngApp.directive("questionOptions", function() {
             var template = '<ul class="list list-unstyled" ng-repeat="param in parameters track by $index">';
-            template += '<b>{{param.name}}</b>: ';
+            template += '<span class="badge badge-secondary" title="{{param.description}}">?</span> <b>{{param.name}} <small>({{param.typeof}})</small></b>: ';
             template += '<span ng-switch="param.typeof">';
-            template += '<span ng-switch-when="number"><input type="number" ng-model="question.options[param.name]"/> ';
-            template += '<br/><i><small>{{param.description}}</small></i></span>';
-            template += '<span ng-switch-when="boolean"><input type="checkbox" ng-model="question.options[param.name]"/> ';
-            template += '<br/><i><small>{{param.description}}</small></i></span>';
-            template += '<span ng-switch-default><input type="text" ng-model="question.options[param.name]"/> ';
-            template += '<br/><i><small>{{param.description}}</small></i></span>';
+            template += '<span ng-switch-when="number"><input type="number" ng-model="question.options[param.name]"/></span> ';
+            template += '<span ng-switch-when="boolean"><input type="checkbox" ng-model="question.options[param.name]"/></span> ';
+            template += '<span ng-switch-default><input type="text" ng-model="question.options[param.name]"/></span> ';
             template += '</span>';
             template += '</ul>';
             return {

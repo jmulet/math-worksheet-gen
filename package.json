@@ -27,6 +27,7 @@
     "mysql": "^2.15.0",
     "nerdamer": "^0.7.16",
     "random-seed": "^0.3.0",
+    "request": "^2.86.0",
     "string-to-stream": "^1.1.0",
     "sylvester": "0.0.21",
     "temp": "^0.8.3",
@@ -43,6 +44,7 @@
     "@types/mysql": "^2.15.4",
     "@types/node": "^9.6.5",
     "@types/random-seed": "^0.3.3",
+    "@types/request": "^2.47.0",
     "@types/uniqid": "^4.1.2"
   }
 }

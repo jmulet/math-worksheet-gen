@@ -4,8 +4,9 @@ import { latexToPdf } from '../util/latexToPdf';
 import { Stream } from "stream";
 import { Response } from "express-serve-static-core";
 import { MysqlStorage } from "./MsqlStorage";
-import { Storage } from "./Storage"; 
+import { Storage } from "./Storage";
 import { Container } from "../util/WsGenerator";
+import * as httpRequest from 'request';
 
 export interface wsMathMdwOptions {
     basePrefix: string;
@@ -96,12 +97,12 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
             }
             if (req.query.fullname) {
                 doc.worksheet.fullname = req.query.fullname;
-            } 
+            }
 
             // Generate document
-            try {
+            try  {
                 generateDocument(doc, res);
-            } catch(Ex) {
+            } catch (Ex) {
                 console.log("An error occurred while generating the document");
             }
         }
@@ -110,19 +111,21 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
 
     url = (options.basePrefix || '') + '/wsmath/editor';
     router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
-
-        const textarea: string = JSON.stringify(generateSampleBody(), null, 2)
-            .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
-
-        const uri = (options.basePrefix || '') + '/wsmath';         
-        res.render("editor", {
-            textarea: textarea,
-            url: uri,
-            questionTypesList: Object.keys(Container).sort(),
-            questionTypesMeta: Container
+ 
+            const textarea: string = JSON.stringify(generateSampleBody(), null, 2)
+                .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
+ 
+            const uri = (options.basePrefix || '') + '/wsmath';
+            res.render("editor", {
+                textarea: textarea,
+                url: uri,
+                questionTypesList: Object.keys(Container).sort(),
+                questionTypesMeta: Container,
+                user: {id: 0, fullname: "Admin", username:"admin"}
+            });
         });
-    });
 
+ 
     return router;
 }
 
