@@ -157,6 +157,7 @@
                                 <button class="btn btn-info" ng-click="postWorksheet('latex')">Generate LaTeX</button>
                                 <button class="btn btn-info" ng-click="postWorksheet('html')">Generate HTML</button>
                                 <button class="btn btn-info" ng-click="postWorksheet('pdf')">Generate PDF</button>
+                                <button class="btn btn-info" ng-click="postWorksheet('moodlexml')">Generate Moodle XML</button>
                                 </p>
 
                                 <p ng-if="worksheetID">
@@ -227,15 +228,10 @@
 
             $scope.postWorksheet = function (type) { 
                 type = type || 'pdf';
-                var bodyEncoded = $scope.textarea;
-                try {
-                    bodyEncoded = JSON.parse(bodyEncoded);
-                } catch (Ex) {
-                    console.log(Ex);
-                    return;
-                } 
+                var bodyEncoded = $scope.ws;
+                
                 var url = '<%=url%>/store?seed=' + $scope.seed + (extraSeed ? ("." + extraSeed) : "") + '&type=' + type
-                    + "idUser=" + $scope.user.id + "&persist=" + ($scope.store? 1 : 0);
+                    + "&idUser=" + $scope.user.id + "&persist=" + ($scope.store? 1 : 0);
                 $http.post(url, bodyEncoded).then(function (res) {
                     var data = res.data;
                     console.log(data);

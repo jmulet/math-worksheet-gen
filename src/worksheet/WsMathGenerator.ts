@@ -4,6 +4,7 @@ import { WsSection } from './WsSection';
 import * as path from 'path';
 import { importClassesFromDirectories } from '../util/importClassesFromDirectories';
 import { Random } from '../util/Random';
+import * as xmlBuilder from 'xmlbuilder';
   
 // Load all generators
 const topics = path.resolve('src/topics/');
@@ -27,6 +28,61 @@ export enum WsExportFormats {
     LATEX = 0,
     HTML = 1,
     PDF = 2,    
+    MOODLEXML=3
+}
+ 
+/**
+ * <question type="multichoice|truefalse|shortanswer|matching|cloze|essay|numerical|description">
+ <name>
+     <text>Name of question</text>
+ </name>
+ <questiontext format="html">
+     <text>What is the answer to this question?</text>
+ </questiontext>
+ .
+ .
+ .
+</question>
+ * @param quiz 
+ * @param formulation 
+ * @param type 
+ */
+const createQuestion = function(quiz: xmlBuilder.XMLElementOrXMLNode, formulation, type, answer, distractors) {
+    const questionNode = quiz.ele("question", {type: type || "shortanswer"});
+    questionNode.ele("name").ele("text", {}, "Name of question");
+    questionNode.ele("questiontext", {format: "html"}).dat(formulation);
+    let answerNode;
+    switch(type) {
+        case("numerical"):
+            answerNode = questionNode.ele("answer", {fraction: "100", format: "moodle_auto_format"});
+            answerNode.ele("text", {}).dat(answer);
+            answerNode.ele("feedback", {format: "html"}).ele("text", {}).dat("Correcte!");
+            questionNode.ele("defaultgrade", {}, 1.0000000);
+            questionNode.ele("penalty", {}, 0.3333333);
+            questionNode.ele("hidden", {}, 0);
+            break;
+        case("shortanswer"):
+            answerNode = questionNode.ele("answer", {fraction: "100", format: "html"});
+            answerNode.ele("text", {}).dat(answer);
+            answerNode.ele("feedback", {format: "html"}).ele("text", {}).dat("Correcte!");
+            break;
+        case("multiplechoice"):
+            // Correct answer
+            answerNode = questionNode.ele("answer", {fraction: "100", format: "html"});
+            answerNode.ele("text", {}).dat(answer);
+            answerNode.ele("feedback", {format: "html"}).ele("text", {}).dat("Correcte!");
+            // Add distractors
+            distractors.forEach( (distract) => {
+                answerNode = questionNode.ele("answer", {fraction: "-33.33333", format: "html"});
+                answerNode.ele("text", {}).dat(distract);
+                answerNode.ele("feedback", {format: "html"}).ele("text", {}).dat("Incorrecte!");
+            });
+
+            questionNode.ele("shuffleanswers", {}, 1);
+            questionNode.ele("single", {}, "true");
+            questionNode.ele("answernumbering", {}, "abc");
+            break;
+    }
 }
 
 /*
@@ -66,12 +122,13 @@ export class WsMathGenerator {
             wsGenOpts.rand = this.rand;
         }
 
-        if (wsGenOpts.worksheet) {
-            this.create(wsGenOpts.worksheet);
-        }
+       // if (wsGenOpts.worksheet) {
+       //     this.create(wsGenOpts.worksheet);
+       // }
     }
 
     create(worksheet: Worksheet) {
+        console.log("Creating worksheet", worksheet);
         this.worksheet = worksheet;
         worksheet.sections.forEach( (section) => {
             const sec = this.addSection(section.name);
@@ -91,7 +148,8 @@ export class WsMathGenerator {
                 });                
             });
             this.includeKeys(worksheet.includeKeys);
-        })
+        });
+        console.log("Ended, produces sections", this.sections)
     }
     
     addSection(title: string): WsSection {
@@ -111,7 +169,9 @@ export class WsMathGenerator {
             case(WsExportFormats.LATEX):
                 return this.exportLatex();                
             case(WsExportFormats.HTML):
-                return this.exportHtml();                
+                return this.exportHtml();   
+            case(WsExportFormats.MOODLEXML):
+                return this.exportMoodleXml();                
             default:
                 console.log("Unknown exporter");
         }
@@ -268,4 +328,25 @@ export class WsMathGenerator {
 
         return code.join("\n");
     }    
+
+    exportMoodleXml(): string {
+        var quiz = xmlBuilder.create('quiz', { encoding: 'utf-8' });
+        console.log(this.sections);
+        this.sections.forEach((section) => {
+           console.log("added question category")
+           // Add a category           
+           quiz.ele("question", {type: "category"}).ele("category").ele("text", {}, "$course$/"+section.title);
+           console.log("added question category")
+           section.activities.forEach( (activity) => {
+                let formulation = activity.formulation;
+                activity.questions.forEach( (question) => {
+                    formulation += ". " + question.toHtml();
+                    const type = question.type;
+                    console.log("created question", formulation, question.answerToHtml())
+                    createQuestion(quiz, formulation, type, question.answerToHtml(), question.distractorsHtml());
+                });
+           })
+        });        
+        return quiz.end({pretty: true});
+    }
 }

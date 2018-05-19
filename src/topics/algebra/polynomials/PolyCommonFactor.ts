@@ -75,4 +75,8 @@ export class PolyCommonFactor implements QuestionGenInterface {
     getAnswer(): string {
         return "$" + this.answer + "$ ";
     }
+    
+    getDistractors(): string[] {
+        return [];
+    }
 }

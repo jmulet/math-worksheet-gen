@@ -83,4 +83,8 @@ export class RadicalsGather implements QuestionGenInterface {
     getAnswer(): string {
         return "$" + this.answer + "$";
     }
+
+    getDistractors(): string[] {
+        return [];
+    }
 }

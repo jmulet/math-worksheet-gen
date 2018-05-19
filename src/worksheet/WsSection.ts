@@ -12,7 +12,7 @@ export class WsSection {
 
     activities: WsActivity[] = [];
 
-    constructor(private title: string, private opts: SectionOptsInterface) {
+    constructor(public title: string, private opts: SectionOptsInterface) {
     }
 
     createActivity(formulation: string, scope?: any, qClass?: GenClass, qGenOpts?: any) {        

@@ -90,4 +90,8 @@ export class RadicalsRationalize implements QuestionGenInterface {
     getAnswer(): string {
         return "$" + this.answer + "$";
     }
+
+    getDistractors(): string[] {
+        return [];
+    }
 }

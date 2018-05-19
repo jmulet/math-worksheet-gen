@@ -8,6 +8,11 @@ import { Monomial } from '../math/Monomial';
 import { Literal } from '../math/Literal';
 import { Radical } from '../math/Radical';
 import { Giac } from '../math/Giac';
+import { Conics, Circumference, Elipse, Hiperbola, Parabola } from '../math/Conics';
+import { AsyncCompleter, ReadLineOptions } from 'readline';
+import { POINT_CONVERSION_COMPRESSED } from 'constants';
+import { Point } from '../math/Point';
+import { Line } from '../math/Line';
 
 /**
  *
@@ -140,26 +145,7 @@ export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
             return shuffled;
         }
     }
-
-    vector(dim=2, options?: any): Vector {        
-        // Generates a random vector
-        const opts = {symbol: 'v', domain: 'Z', range: 10, allowZero: false, ...options};
-        const symbol = opts.symbol || this.pickOne(VECTOR_NAMES);
-        let coefs;
-        if (opts.domain === 'Z') {
-           coefs = this.intList(dim, opts.range);
-        } else {
-            coefs = this.numericList(dim, opts.range, opts.domain);
-        }
-        let v = new Vector(coefs, symbol);        
-        if (!opts.allowZero) {
-            while (v.isZero()) {
-                v = this.vector(dim, options);
-            }
-        }
-        return v;
-    }
-
+ 
     monomial(options?: any): Monomial {
         const opts = { minDegree: 1, maxDegree: 5, range: 10, domain: 'Z', maxVars: 1, bar: '', ...options};
         const degree = this.intBetween(opts.minDegree, opts.maxDegree);
@@ -297,6 +283,67 @@ export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
         }
         
         return new AlgebraicFraction(numerator, denominator);
+    }
+
+    point(dim=2, options?: any): Point {
+        const opts = { range: 10, domain: 'Z', ...options};
+        const components = this.numericList(dim, opts.range, opts.domain);
+        return new Point(components);
+    }
+
+    vector(dim?: number, options?: any): Vector {        
+        dim = dim || 2;
+        console.log("calling vector", dim, options)
+        // Generates a random vector
+        const opts = {symbol: 'v', domain: 'Z', range: 10, allowZero: false, ...options};
+        const symbol = opts.symbol || this.pickOne(VECTOR_NAMES);
+        let coefs;
+        if (opts.domain === 'Z') {
+           coefs = this.intList(dim, opts.range);
+        } else {
+            coefs = this.numericList(dim, opts.range, opts.domain);
+        }
+        let v = new Vector(coefs, symbol);        
+        if (!opts.allowZero) {
+            while (v.isZero()) {
+                v = this.vector(dim, options);
+            }
+        }
+        return v;
+    }
+
+    line(dim=2, options?: any): Line {
+        options.allowZero = false;
+        return new Line(this.point(dim, options), this.vector(dim, options));
+    }
+
+    circumference(options?: any): Circumference {
+        return new Circumference(this.point(), this.intBetween(1, options.range | 10)); 
+    }
+
+    elipse(options?: any): Elipse {
+        return new Elipse(this.point(), this.intBetween(1, options.range | 10), this.intBetween(1, options.range | 10)); 
+    }
+
+    hiperbola(options?: any): Hiperbola {
+        return new Hiperbola(this.point(), this.intBetween(1, options.range | 10), this.intBetween(1, options.range | 10)); 
+    }
+
+    parabola(options?: any): Parabola {
+        return new Parabola(this.point(), this.line(2, options)); 
+    }
+
+    conic(options?: any): Conics {        
+        switch(this.intBetween(0, 3)) {
+            case 0:
+                return this.circumference(options);                
+            case 1:
+                return this.elipse(options);
+            case 2:
+                return this.hiperbola(options);
+            case 3:
+                return this.parabola(options);
+        }
     }
 
 }

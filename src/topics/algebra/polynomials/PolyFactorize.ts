@@ -72,4 +72,8 @@ export class PolyFactorize implements QuestionGenInterface {
     getAnswer(): string {
         return "$" + this.answer + "$ ";
     }
+
+    getDistractors(): string[] {
+        return [];
+    }
 }

@@ -13,18 +13,46 @@ export interface wsMathMdwOptions {
     storage: Storage;
 }
 
+function generateSampleBody() {
+    var body = {
+
+        worksheet: {
+            includeKeys: true,
+            title: "Moodle test",
+            sections: [
+                {
+                    name: "Coniques", activities: [
+                        {
+                            formulation: "Calcula l'excentricitat",
+                            questions: [
+                                { gen: "geometry/conics/excentricity", repeat: 6, options: { interval: 5 } }
+                            ]
+                        } 
+                    ]
+                }
+            ]
+        }
+    };
+    
+return body;
+}
+
 //Mysql - Cache is cleared after 5 minutes
 const deltaTime = 5 * 60 * 1000;
 
 function generateDocument(doc: any, res: Response) {
     const generator = new WsMathGenerator(doc);
-
+    generator.create(doc);
     if (doc.type === 'html') {
         const htmlPage = generator.exportAs(WsExportFormats.HTML);
         res.setHeader("Content-type", "text/html");
         res.status(200).send(htmlPage);
     } else if (doc.type === 'tex' || doc.type === 'latex') {
         const tex = generator.exportAs(WsExportFormats.LATEX);
+        res.setHeader("Content-type", "text/plain");
+        res.status(200).send(tex);
+    } else if (doc.type === 'moodlexml') {
+        const tex = generator.exportAs(WsExportFormats.MOODLEXML);
         res.setHeader("Content-type", "text/plain");
         res.status(200).send(tex);
     } else {
@@ -103,7 +131,7 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
             try  {
                 generateDocument(doc, res);
             } catch (Ex) {
-                console.log("An error occurred while generating the document");
+                console.log("An error occurred while generating the document::", Ex);
             }
         }
     });
@@ -130,7 +158,7 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
 }
 
 
-function generateSampleBody() {
+function generateSampleBody0() {
     var body = {
 
         worksheet: {
@@ -221,6 +249,4 @@ function generateSampleBody() {
         }
     };
 
-
-    return body;
 }

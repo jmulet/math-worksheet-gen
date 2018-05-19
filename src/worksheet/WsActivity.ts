@@ -5,7 +5,7 @@ import { QuestionOptsInterface } from "../interfaces/QuestionOptsInterface";
 
 export class WsActivity { 
     questions: WsQuestion[] = []
-    constructor(private formulation: string, private opts: ActivityOptsInterface, private qClass?: GenClass, private qGenOpts?: any) {
+    constructor(public formulation: string, private opts: ActivityOptsInterface, private qClass?: GenClass, private qGenOpts?: any) {
     }
 
     // if times < 0, then reuse the same question gen object for all times
