@@ -330,7 +330,7 @@ export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
     }
 
     parabola(options?: any): Parabola {
-        return new Parabola(this.point(), this.line(2, options)); 
+        return new Parabola(this.point(), this.numericBetween(1, 5), this.intBetween(0, 1)); 
     }
 
     conic(options?: any): Conics {        

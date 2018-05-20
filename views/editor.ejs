@@ -130,7 +130,9 @@
                                                     ng-change="generatorChanged(question)"></select>
 
                                                 
-                                                 Repeat: <input type="number" min="0" max="20" ng-model="question.repeat"/></p>                                                
+                                                 Repeat: <input type="number" min="0" max="20" ng-model="question.repeat"/></p>      
+                                                 
+                                                 Moodle: <select ng-model="question.type" ng-options="item for item in moodleActivityTypes"></select>
                                                 <p>
                                                     <button ng-click="question.expanded=!question.expanded;"><i class="fas" ng-class="question.expanded?'fa-minus-square':'fa-plus-square'"></i></button>
                                                     Options <span class="badge badge-secondary">{{Object.keys(question.options).length}}</span>:
@@ -188,6 +190,7 @@
         var ngApp = angular.module("wsMathEditor", []);
         
         ngApp.controller("wsMathController", function ($scope, $http) {  
+            $scope.moodleActivityTypes = ['shortanswer', 'multiplechoice', 'numerical'];
             $scope.user = <%-JSON.stringify(user)%>; 
             $scope.textarea = "<%-textarea%>";
             $scope.ws = JSON.parse($scope.textarea).worksheet;

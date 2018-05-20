@@ -48,9 +48,10 @@ export enum WsExportFormats {
  * @param type 
  */
 const createQuestion = function(quiz: xmlBuilder.XMLElementOrXMLNode, formulation, type, answer, distractors) {
-    const questionNode = quiz.ele("question", {type: type || "shortanswer"});
-    questionNode.ele("name").ele("text", {}, "Name of question");
-    questionNode.ele("questiontext", {format: "html"}).dat(formulation);
+    type = type || "shortanswer";
+    const questionNode = quiz.ele("question", {type: type});
+    questionNode.ele("name").ele("text", {}, formulation + " [" + Math.random().toString(32).substring(2) +"] " );
+    questionNode.ele("questiontext", {format: "html"}).ele("text").dat(formulation);
     let answerNode;
     switch(type) {
         case("numerical"):
@@ -60,6 +61,8 @@ const createQuestion = function(quiz: xmlBuilder.XMLElementOrXMLNode, formulatio
             questionNode.ele("defaultgrade", {}, 1.0000000);
             questionNode.ele("penalty", {}, 0.3333333);
             questionNode.ele("hidden", {}, 0);
+            questionNode.ele("tolerance", {}, 0.1);
+            questionNode.ele("tolerancetype", {}, 1);
             break;
         case("shortanswer"):
             answerNode = questionNode.ele("answer", {fraction: "100", format: "html"});
@@ -141,7 +144,7 @@ export class WsMathGenerator {
                 activity.questions.forEach( (question) => {
                         let clazz = (Container[question.gen] || {}).clazz;
                         if(clazz) {
-                            act.useRepeat(clazz, question.options || {}, question.repeat || 1, activity.scope!=null);
+                            act.useRepeat(clazz, question.options || {}, question.repeat || 1, question.type, activity.scope!=null);
                         } else {
                             console.log("Error:: generator clazz ", question, " not found");
                         }
@@ -331,18 +334,14 @@ export class WsMathGenerator {
 
     exportMoodleXml(): string {
         var quiz = xmlBuilder.create('quiz', { encoding: 'utf-8' });
-        console.log(this.sections);
         this.sections.forEach((section) => {
-           console.log("added question category")
            // Add a category           
            quiz.ele("question", {type: "category"}).ele("category").ele("text", {}, "$course$/"+section.title);
-           console.log("added question category")
-           section.activities.forEach( (activity) => {
-                let formulation = activity.formulation;
+           section.activities.forEach( (activity) => {                
                 activity.questions.forEach( (question) => {
+                    let formulation = activity.formulation;
                     formulation += ". " + question.toHtml();
                     const type = question.type;
-                    console.log("created question", formulation, question.answerToHtml())
                     createQuestion(quiz, formulation, type, question.answerToHtml(), question.distractorsHtml());
                 });
            })

@@ -9,7 +9,7 @@ export class WsActivity {
     }
 
     // if times < 0, then reuse the same question gen object for all times
-    useRepeat(qClass?: GenClass, qGenOpts?: any, times=1, reuse?: boolean): WsActivity {
+    useRepeat(qClass?: GenClass, qGenOpts?: any, times=1, type?: string, reuse?: boolean ): WsActivity {
         qClass = qClass || this.qClass;
         qGenOpts = qGenOpts || this.qGenOpts || {};        
 
@@ -17,6 +17,7 @@ export class WsActivity {
         for (var i = 0; i < times; i++ ) {
             if(!reuse || !question) {
                 question = new WsQuestion(qClass, {question: qGenOpts, ...this.opts});
+                question.type = type;
             }
             this.questions.push(question);
         }

@@ -2,10 +2,17 @@ import { HandleFunction } from "connect";
 import { Point } from "./Point";
 import { Numeric } from "./Numeric";
 import { Line } from "./Line";
+import { Vector } from "./Vector";
 
  
 
 export class Conics {
+    static CIRCUMFERENCE = 0;
+    static ELIPSE = 1;
+    static HIPERBOLA = 2;
+    static PARABOLA = 3;
+    type: number;
+
     O = new Point([0, 0]);
     a = 1;
     b = 1;
@@ -37,13 +44,12 @@ export class Conics {
         return new Hiperbola(O, a, b);
     }
 
-    static Parabola(O: Point, d: Line): Parabola {
-        return new Parabola(O, d);
+    static Parabola(O: Point, p: Numeric, position: number): Parabola {
+        return new Parabola(O, p, position);
     }
 }
 
 export class Circumference extends Conics {
-    
     R: number;
     static fromThreePoints(A: Point, B: Point, C: Point): Circumference {
         return new Circumference(new Point([0, 0]), 1);
@@ -52,6 +58,7 @@ export class Circumference extends Conics {
     constructor(O: Point, R: number) {
         super(O, R, R, 0);
         this.R = R;
+        this.type = Conics.CIRCUMFERENCE;
     }
 
     toTeX(general?: boolean): string {
@@ -112,6 +119,7 @@ export class Circumference extends Conics {
 export class Elipse extends Conics {
     constructor(O: Point, a: number, b: number) {
         super(O, a, b, Math.sqrt(Math.abs(a*a-b*b)));
+        this.type = Conics.ELIPSE;
     }
 
     toTeX(): string {
@@ -153,6 +161,7 @@ export class Elipse extends Conics {
 export class Hiperbola extends Conics {
     constructor(O: Point, a: number, b: number) {
         super(O, a, b, Math.sqrt(a*a+b*b));
+        this.type = Conics.HIPERBOLA;
     }
 
     toTeX(): string {
@@ -164,7 +173,7 @@ export class Hiperbola extends Conics {
             if (!x0.isNegative()) {
                 str += " + ";
             }                
-            str += x0.toTeX() + " \\right)^2 +" 
+            str += x0.toTeX() + " \\right)^2 " 
         } else {
             str = "x^2";
         }   
@@ -192,14 +201,84 @@ export class Hiperbola extends Conics {
 }
 
 export class Parabola extends Conics {
-    d: Line;
-    constructor(O: Point, d: Line) {
+    position: number;
+    p: Numeric;
+    F: Point;
+    static VERTICAL = 0;
+    static HORIZONTAL = 1;
+
+    constructor(O: Point, p: Numeric, position: number = 0) {
         super(O, 1, 1, 1);
-        this.d = d;
+        this.position = position;    
+        this.p = p;   
+        this.type = Conics.PARABOLA; 
+
+        // Compute focus
+        this.F = O.copy();
+        if (position === Parabola.VERTICAL) {            
+            this.F.components[1] = this.F.components[1].add(p.divide(Numeric.fromNumber(2)));
+        } else {
+            this.F.components[0] = this.F.components[0].add(p.divide(Numeric.fromNumber(2)));
+        }
+    }
+
+    focus(): Point {
+        return this.F;
+    }
+
+    directrice(): Line {
+        const P = this.O.copy();
+        let vec;
+        if (this.position === Parabola.VERTICAL) {
+            P.components[1] = P.components[1].substract(this.p.divide(Numeric.fromNumber(2)));
+            vec = new Vector([1, 0]);
+        } else {
+            P.components[0] = P.components[0].substract(this.p.divide(Numeric.fromNumber(2)));
+            vec = new Vector([0, 1]);
+        }
+        return new Line(P, vec);
+    }
+
+    excentricity(): number {
+        return 1;
     }
  
     toTeX(): string {
-        return "Not implemented";
+
+        const coef = this.p.multiply(Numeric.fromNumber(2)).inverse();
+
+        let bar1, bar2;
+        let v1:Numeric, v2: Numeric;
+        if (this.position === Parabola.VERTICAL) {
+            bar1 = "x";
+            bar2 = "y";
+            v1 = this.O.components[0];
+            v2 = this.O.components[1];
+        } else {
+            bar2 = "x";
+            bar1 = "y";
+            v1 = this.O.components[1];
+            v2 = this.O.components[0];
+        }
+
+        let str = bar2 + " = ";
+        if (!v2.isZero()) {
+            str += v2.toTeX();
+        }
+        if (!coef.isNegative()) {
+            str += " + ";
+        }
+        str += coef.toTeX();
+        if(!v1.isZero()) {
+            str += "\\left( x ";
+            if (!v1.isNegative()) {
+                str += " + ";
+            }
+            str += v1.toTeX()  + "\\right)^2"
+        } else {
+            str += bar1 + "^2";
+        }
+        return str;
     }
 }
  
