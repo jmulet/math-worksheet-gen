@@ -244,7 +244,11 @@ export class Polynomial extends Expression {
                 if (coef.isOne() && i !== degree) {
                     num = "";                    
                 }
-                if (!coef.isNegative() && i > 0) {
+                const negative = coef.isNegative();
+                if (num === "-1" && i < degree) {
+                    num = "-";
+                }
+                if (!negative && i > 0) {
                     num = "+ " + num;
                 }
                 let literal =  (expd ? (bar + (expd === 1 ? "" : "^{" + expd + "}")) : "");

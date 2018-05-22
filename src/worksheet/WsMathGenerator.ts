@@ -131,7 +131,6 @@ export class WsMathGenerator {
     }
 
     create(worksheet: Worksheet) {
-        console.log("Creating worksheet", worksheet);
         this.worksheet = worksheet;
         worksheet.sections.forEach( (section) => {
             const sec = this.addSection(section.name);
@@ -152,7 +151,7 @@ export class WsMathGenerator {
             });
             this.includeKeys(worksheet.includeKeys);
         });
-        console.log("Ended, produces sections", this.sections)
+        
     }
     
     addSection(title: string): WsSection {

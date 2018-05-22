@@ -3,6 +3,7 @@ import * as uniqid from 'uniqid';
 import { Storage } from './Storage';
 
 export class MysqlStorage implements Storage {
+
     pool: mysql.Pool;
     constructor()  {
         const config = {
@@ -90,17 +91,24 @@ export class MysqlStorage implements Storage {
         }
     }
 
-    async load(uid: string) {
+    async load(uid: string): Promise<any> {
         let connection;
         try {
             connection = await this.getConnection();
             const [err, results, fields] = await this.queryAsync(connection, "SELECT * FROM wsmath WHERE uid=? LIMIT 1", [uid]);
+            
             if (err) {
                 console.log(err);
                 return;
             }
             if (results.length) {
-                return JSON.parse(results[0].json || {});
+                try{
+                    const obj = JSON.parse(results[0].json);
+                    return obj;
+                } catch(Ex2) {
+                    console.log(Ex2);
+                    return null;
+                }
             } else {
                 return null;
             }
@@ -138,5 +146,45 @@ export class MysqlStorage implements Storage {
         } finally {
             connection && connection.release();
         }
+    }
+
+    async userByUsername(username: string): Promise<any> {
+        let connection;
+        try {
+            connection = await this.getConnection();
+            const [err, results, fields] = await this.queryAsync(connection, "SELECT * FROM users WHERE username='"+username.trim()+"'");
+            if (err) {
+                console.log(err);
+                return;
+            }
+            if (results.length) {
+                return results[0];
+            }
+        } catch (Ex) {
+            console.log(Ex);
+        } finally {
+            connection && connection.release();
+        }
+        return {};
+    }
+
+    async userByIdUser(idUser: string): Promise<any> {
+        let connection;
+        try {
+            connection = await this.getConnection();
+            const [err, results, fields] = await this.queryAsync(connection, "SELECT * FROM users WHERE id='"+idUser+"'");
+            if (err) {
+                console.log(err);
+                return;
+            }
+            if (results.length) {
+                return results[0];
+            }
+        } catch (Ex) {
+            console.log(Ex);
+        } finally {
+            connection && connection.release();
+        }
+        return {};
     }
 }

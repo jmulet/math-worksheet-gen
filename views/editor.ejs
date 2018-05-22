@@ -193,7 +193,13 @@
             $scope.moodleActivityTypes = ['shortanswer', 'multiplechoice', 'numerical'];
             $scope.user = <%-JSON.stringify(user)%>; 
             $scope.textarea = "<%-textarea%>";
-            $scope.ws = JSON.parse($scope.textarea).worksheet;
+            try {
+                $scope.ws = JSON.parse($scope.textarea).worksheet;
+            } catch(Ex) {
+                console.log(Ex);
+                console.log($scope.textarea);
+                return;
+            }
             $scope.questionTypesList = questionTypesList;
             $scope.generatorChanged = function(question, extend) {
                 var gen = questionTypesMeta[question.gen];
