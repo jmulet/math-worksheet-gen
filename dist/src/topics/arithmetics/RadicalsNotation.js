@@ -24,10 +24,10 @@ let RadicalsNotation = class RadicalsNotation {
         }
         if (rnd.intBetween(0, 1) === 0) {
             this.question = radical.toTeX() + "={}";
-            this.answer = radical.toPowerTeX() + "={}";
+            this.answer = radical.toPowerTeX();
         }
         else {
-            this.answer = radical.toTeX() + "={}";
+            this.answer = radical.toTeX();
             this.question = radical.toPowerTeX() + "={}";
         }
     }
@@ -36,6 +36,9 @@ let RadicalsNotation = class RadicalsNotation {
     }
     getAnswer() {
         return "$" + this.answer + "$";
+    }
+    getDistractors() {
+        return [];
     }
 };
 RadicalsNotation = __decorate([

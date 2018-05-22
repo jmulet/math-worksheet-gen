@@ -22,6 +22,9 @@ class FractionOpGen {
     getAnswer() {
         return "$" + this.answer.toTeX() + "$";
     }
+    getDistractors() {
+        return [];
+    }
 }
 exports.FractionOpGen = FractionOpGen;
 //# sourceMappingURL=FractionOpGen.js.map

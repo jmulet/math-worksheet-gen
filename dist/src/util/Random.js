@@ -9,6 +9,9 @@ const AlgebraicFraction_1 = require("../math/AlgebraicFraction");
 const Monomial_1 = require("../math/Monomial");
 const Literal_1 = require("../math/Literal");
 const Radical_1 = require("../math/Radical");
+const Conics_1 = require("../math/Conics");
+const Point_1 = require("../math/Point");
+const Line_1 = require("../math/Line");
 /**
  *
  *  Wrapper around RadomSeed
@@ -126,25 +129,6 @@ class Random {
         else {
             return shuffled;
         }
-    }
-    vector(dim = 2, options) {
-        // Generates a random vector
-        const opts = Object.assign({ symbol: 'v', domain: 'Z', range: 10, allowZero: false }, options);
-        const symbol = opts.symbol || this.pickOne(exports.VECTOR_NAMES);
-        let coefs;
-        if (opts.domain === 'Z') {
-            coefs = this.intList(dim, opts.range);
-        }
-        else {
-            coefs = this.numericList(dim, opts.range, opts.domain);
-        }
-        let v = new Vector_1.Vector(coefs, symbol);
-        if (!opts.allowZero) {
-            while (v.isZero()) {
-                v = this.vector(dim, options);
-            }
-        }
-        return v;
     }
     monomial(options) {
         const opts = Object.assign({ minDegree: 1, maxDegree: 5, range: 10, domain: 'Z', maxVars: 1, bar: '' }, options);
@@ -275,6 +259,60 @@ class Random {
             denominator = this.polynomial(opts);
         }
         return new AlgebraicFraction_1.AlgebraicFraction(numerator, denominator);
+    }
+    point(dim = 2, options) {
+        const opts = Object.assign({ range: 10, domain: 'Z' }, options);
+        const components = this.numericList(dim, opts.range, opts.domain);
+        return new Point_1.Point(components);
+    }
+    vector(dim, options) {
+        dim = dim || 2;
+        console.log("calling vector", dim, options);
+        // Generates a random vector
+        const opts = Object.assign({ symbol: 'v', domain: 'Z', range: 10, allowZero: false }, options);
+        const symbol = opts.symbol || this.pickOne(exports.VECTOR_NAMES);
+        let coefs;
+        if (opts.domain === 'Z') {
+            coefs = this.intList(dim, opts.range);
+        }
+        else {
+            coefs = this.numericList(dim, opts.range, opts.domain);
+        }
+        let v = new Vector_1.Vector(coefs, symbol);
+        if (!opts.allowZero) {
+            while (v.isZero()) {
+                v = this.vector(dim, options);
+            }
+        }
+        return v;
+    }
+    line(dim = 2, options) {
+        options.allowZero = false;
+        return new Line_1.Line(this.point(dim, options), this.vector(dim, options));
+    }
+    circumference(options) {
+        return new Conics_1.Circumference(this.point(), this.intBetween(1, options.range | 10));
+    }
+    elipse(options) {
+        return new Conics_1.Elipse(this.point(), this.intBetween(1, options.range | 10), this.intBetween(1, options.range | 10));
+    }
+    hiperbola(options) {
+        return new Conics_1.Hiperbola(this.point(), this.intBetween(1, options.range | 10), this.intBetween(1, options.range | 10));
+    }
+    parabola(options) {
+        return new Conics_1.Parabola(this.point(), this.numericBetween(1, 5), this.intBetween(0, 1));
+    }
+    conic(options) {
+        switch (this.intBetween(0, 3)) {
+            case 0:
+                return this.circumference(options);
+            case 1:
+                return this.elipse(options);
+            case 2:
+                return this.hiperbola(options);
+            case 3:
+                return this.parabola(options);
+        }
     }
 }
 exports.Random = Random;

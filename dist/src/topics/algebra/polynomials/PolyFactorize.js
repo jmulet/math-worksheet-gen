@@ -40,6 +40,9 @@ let PolyFactorize = class PolyFactorize {
     getAnswer() {
         return "$" + this.answer + "$ ";
     }
+    getDistractors() {
+        return [];
+    }
 };
 PolyFactorize = __decorate([
     WsGenerator_1.WsGenerator({

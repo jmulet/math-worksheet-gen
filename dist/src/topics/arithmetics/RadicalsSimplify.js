@@ -28,6 +28,9 @@ let RadicalsSimplify = class RadicalsSimplify {
     getAnswer() {
         return "$" + this.answer + "$";
     }
+    getDistractors() {
+        return [];
+    }
 };
 RadicalsSimplify = __decorate([
     WsGenerator_1.WsGenerator({

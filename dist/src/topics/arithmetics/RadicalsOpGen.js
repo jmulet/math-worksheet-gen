@@ -61,6 +61,9 @@ let RadicalsOpGen = class RadicalsOpGen {
     getAnswer() {
         return "$" + this.answer.simplify().toTeX() + "$";
     }
+    getDistractors() {
+        return [];
+    }
 };
 RadicalsOpGen = __decorate([
     WsGenerator_1.WsGenerator({

@@ -40,7 +40,7 @@ let RadicalsRationalize = class RadicalsRationalize {
             numerator.radicals.forEach((r) => {
                 r.coefficient.coef = r.coefficient.coef.divide(denom);
             });
-            this.question = "\\frac{" + radical3.toTeX() + "}{" + polyRad.toTeX() + "}";
+            this.question = "\\dfrac{" + radical3.toTeX() + "}{" + polyRad.toTeX() + "}";
             this.answer = numerator.simplify().toTeX();
         }
         else {
@@ -49,7 +49,7 @@ let RadicalsRationalize = class RadicalsRationalize {
                 radical = rnd.radical({ domain: 'Z', range: r, maxIndex: maxIndex, useCoeff: false });
             }
             const topCoeff = rnd.intBetween(1, r);
-            this.question = "\\frac{" + topCoeff + "}{" + radical.toTeX() + "}";
+            this.question = "\\dfrac{" + topCoeff + "}{" + radical.toTeX() + "}";
             let radical2 = radical.power(radical.index - 1);
             radical2.coefficient = radical2.coefficient.multiply(Monomial_1.Monomial.fromNumber(topCoeff)).divide(radical.radicand);
             this.answer = radical2.simplify().toTeX();
@@ -60,6 +60,9 @@ let RadicalsRationalize = class RadicalsRationalize {
     }
     getAnswer() {
         return "$" + this.answer + "$";
+    }
+    getDistractors() {
+        return [];
     }
 };
 RadicalsRationalize = __decorate([

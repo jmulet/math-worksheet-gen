@@ -1,211 +1,41 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const WsMathGenerator_1 = require("../worksheet/WsMathGenerator");
 const latexToPdf_1 = require("../util/latexToPdf");
-const DOCUMENT_CACHE = {};
-const deltaTime = 5 * 60 * 1000;
-//Cache is cleared after 5 minutes
-setInterval(function () {
-    const now = new Date().getTime();
-    for (let key in DOCUMENT_CACHE) {
-        const doc = DOCUMENT_CACHE[key];
-        if (now - doc.generated >= deltaTime) {
-            delete DOCUMENT_CACHE[key];
-        }
-    }
-}, deltaTime);
-function wsMathMiddleware(options) {
-    options = options || { basePrefix: '' };
-    const router = express.Router();
-    const base = (options.basePrefix || '') + '/wsmath';
-    let url = base + '/gen';
-    router.post(url, function (req, res, next) {
-        const seed = req.query.seed;
-        const type = req.query.type || 'html';
-        let body = req.body;
-        if (!body) {
-            body = generateSampleBody();
-        }
-        if (typeof (body) === 'string') {
-            body = JSON.parse(body);
-        }
-        body.seed = (seed == 0 ? '' : seed);
-        const generator = new WsMathGenerator_1.WsMathGenerator(body);
-        const id = Math.random().toString(32).substring(2);
-        res.setHeader("Content-Type", "application/json");
-        if (type === 'html') {
-            const html = generator.exportAs(WsMathGenerator_1.WsExportFormats.HTML);
-            /*
-            DOCUMENT_CACHE[id] = {
-                generated: new Date().getTime(),
-                type: 'html',
-                data: html
-            };
-            */
-            res.status(200).send({ link: base + '/get?id=' + id, data: html });
-        }
-        else if (type === 'tex' || type === 'latex' || type === 'pdf') {
-            const tex = generator.exportAs(WsMathGenerator_1.WsExportFormats.LATEX);
-            if (type === 'tex' || type === 'latex') {
-                /* DOCUMENT_CACHE[id] = {
-                    generated: new Date().getTime(),
-                    type: 'tex',
-                    data: tex
-                };
-                */
-                res.status(200).send({ link: base + '/get?id=' + id, data: tex });
-            }
-            else {
-                const outputStream = latexToPdf_1.latexToPdf(tex);
-                DOCUMENT_CACHE[id] = {
-                    generated: new Date().getTime(),
-                    type: 'pdf',
-                    data: outputStream
-                };
-                res.status(200).send({ link: base + '/get?id=' + id });
-            }
-        }
-    });
-    url = base + '/get';
-    router.get(url, function (req, res, next) {
-        const id = req.query.id;
-        let doc = DOCUMENT_CACHE[id];
-        if (!doc) {
-            const html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-            <title>Math worksheet generator</title>
-            <meta charset="utf-8">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <style>
-            </style>
-            </head>
-            <body>
-            <h1>Link not found or expired</h1>
-            </body>
-            </html>
-            `;
-            res.setHeader("Content-type", "text/html");
-            res.status(200).send(html);
-        }
-        else {
-            switch (doc.type) {
-                case 'html':
-                    res.setHeader("Content-type", "text/html");
-                    res.status(200).send(doc.data);
-                    break;
-                case 'tex':
-                    res.setHeader("Content-type", "text/plain");
-                    res.status(200).send(doc.data);
-                    break;
-                case 'pdf':
-                    res.setHeader("Content-type", "application/pdf");
-                    const outputStream = doc.data;
-                    outputStream.pipe(res);
-                    break;
-            }
-        }
-    });
-    url = (options.basePrefix || '') + '/wsmath';
-    router.get(url, function (req, res, next) {
-        const textarea = JSON.stringify(generateSampleBody(), null, 2)
-            .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
-        const uri = (options.basePrefix || '') + '/wsmath/gen';
-        const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <title>Math worksheet generator</title>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" crossorigin="anonymous">
-        <style>
-        </style>
-        </head>
-        <body>
-        <h2><b>Generate Maths Worksheets</b></h2>
-        <h4>Define the worksheet here</h4>
-        <textarea style="width:99%;" rows="35">
-        </textarea>
-        <br/>
-        Seed <input id="seed" type="number" min="0"/>
-        <br/>
-        <button class="btn" data-type="latex">Generate LaTeX</button>
-        <button class="btn" data-type="html">Generate HTML</button>
-        <button class="btn" data-type="pdf">Generate PDF</button>
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-        <script>
-            $(function(){
-                $("textarea").val("${textarea}");
-
-                var extraSeed = 0;
-
-                var doAJAX = function(evt){
-
-                    var target = evt.currentTarget;
-                    var type = $(target).data("type") || 'pdf';
-                    var bodyEncoded = $("textarea").val();
-                    try {
-                        bodyEncoded = JSON.parse(bodyEncoded);
-                    } catch(Ex) {
-                        console.log(Ex);
-                        return;
-                    }
-                    var seed = $("#seed").val() || 0;
-                    var contentType = "text/html";
-                    var fileName = "";
-                    if (type === 'text' || type === 'latex') {
-                        contentType = "text/plain;charset=UTF-8";
-                        fileName = "mathgen.tex";
-                    } else if (type === 'pdf') {
-                        contentType = "application/pdf";
-                        fileName = "mathgen.pdf";
-                    }        
-
-                    $.ajax({
-                        method: 'POST',
-                        data: bodyEncoded,
-                        responseType: 'aplication/json',
-                        url: '${url}/gen?seed=' + seed + (extraSeed? ("." + extraSeed): "") + '&type='+type 
-                    }).then(function(res){           
-                        if(type==='pdf') {
-                            window.open( res.link, '_blank' )                        
-                        } else {
-                            var appType = "text/plain";
-                            if (type==='html') {
-                                appType = "text/html";
-                            }
-                            // show data in a new page
-                            var file = new Blob([res.data], {type: appType});
-                            var fileURL = URL.createObjectURL(file);
-                            window.open(fileURL);
-                        }
-                    }, function(err){
-                        extraSeed += 1;
-                        doAJAX(evt);
-                    });
-                };
-                
-
-                $(".btn").on("click", function(evt) {                                
-                    doAJAX(evt);
-                });
-            });
-        </script>
-        </body>
-        </html>
-        `;
-        res.set("Content-type", "text/html");
-        res.send(html);
-    });
-    return router;
-}
-exports.wsMathMiddleware = wsMathMiddleware;
+const MsqlStorage_1 = require("./MsqlStorage");
+const WsGenerator_1 = require("../util/WsGenerator");
 function generateSampleBody() {
+    var body = {
+        worksheet: {
+            includeKeys: true,
+            title: "Moodle test",
+            sections: [
+                {
+                    name: "Coniques", activities: [
+                        {
+                            formulation: "Calcula l'excentricitat",
+                            questions: [
+                                { gen: "geometry/conics/excentricity", repeat: 6, options: { interval: 5 } }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    };
+    return body;
+}
+;
+function generateSampleBody0() {
     var body = {
         worksheet: {
             includeKeys: true,
@@ -290,10 +120,160 @@ function generateSampleBody() {
                             ]
                         }
                     ]
+                },
+                {
+                    name: "Equacions", activities: []
+                },
+                {
+                    name: "Logaritmes", activities: [
+                        {
+                            formulation: "Utilitza la definició de logaritme  per calcular el valor de de $x$ en les equacions següents", questions: [
+                                { gen: "arithmetics/logarithm/definition", repeat: 6, options: { interval: 10 } }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "Funcions", activities: []
                 }
             ]
         }
     };
     return body;
 }
+//Mysql - Cache is cleared after 5 minutes
+const deltaTime = 5 * 60 * 1000;
+function generateDocument(doc, res) {
+    const generator = new WsMathGenerator_1.WsMathGenerator(doc);
+    generator.create(doc);
+    if (doc.type === 'html') {
+        const htmlPage = generator.exportAs(WsMathGenerator_1.WsExportFormats.HTML);
+        res.setHeader("Content-type", "text/html");
+        res.status(200).send(htmlPage);
+    }
+    else if (doc.type === 'tex' || doc.type === 'latex') {
+        const tex = generator.exportAs(WsMathGenerator_1.WsExportFormats.LATEX);
+        res.setHeader("Content-type", "text/plain");
+        res.status(200).send(tex);
+    }
+    else if (doc.type === 'moodlexml') {
+        const tex = generator.exportAs(WsMathGenerator_1.WsExportFormats.MOODLEXML);
+        res.setHeader("Content-type", "text/plain");
+        res.status(200).send(tex);
+    }
+    else {
+        const tex = generator.exportAs(WsMathGenerator_1.WsExportFormats.LATEX);
+        const outputStream = latexToPdf_1.latexToPdf(tex);
+        outputStream.on("error", function (err) {
+            res.status(400).send("Error producing pdf:: " + err);
+            return;
+        });
+        res.setHeader("Content-type", "application/pdf");
+        outputStream.pipe(res);
+    }
+}
+function wsMathMiddleware(options) {
+    options = Object.assign({ basePrefix: '' }, options);
+    if (!options.storage) {
+        options.storage = new MsqlStorage_1.MysqlStorage();
+    }
+    setInterval(function () {
+        options.storage.clear();
+    }, deltaTime);
+    const router = express.Router();
+    /**
+     * Posts the document structure in json format and returns the stored document id
+     */
+    const base = (options.basePrefix || '') + '/wsmath';
+    let url = base + '/store';
+    router.post(url, function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const seed = req.query.seed;
+            let body = req.body;
+            if (!body) {
+                body = {};
+            }
+            if (typeof (body) === 'string') {
+                body = JSON.parse(body);
+            }
+            body.type = req.query.type || 'html';
+            body.seed = (seed == 0 ? '' : seed);
+            body.baseURL = base;
+            const uid = yield options.storage.save(body, req.query.idUser, req.query.persist);
+            res.send({ id: uid });
+        });
+    });
+    /***
+     * Gets a document by its id
+     * optional query params type, seed
+     */
+    url = base + '/';
+    router.get(url, function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const id = req.query.id;
+            let doc = yield options.storage.load(id);
+            if (!doc) {
+                res.render('notfound', {
+                    id: id
+                });
+            }
+            else {
+                // Pass extra information from query params
+                if (req.query.seed) {
+                    doc.seed = req.query.seed;
+                }
+                if (req.query.type) {
+                    doc.type = req.query.type;
+                }
+                if (req.query.fullname) {
+                    doc.fullname = req.query.fullname;
+                }
+                if (req.query.username) {
+                    // get fullname of this username
+                    doc.seed = req.query.username;
+                    const user = yield options.storage.userByUsername(req.query.username);
+                    if (user) {
+                        doc.fullname = user["fullname"];
+                        if (user["idRole"] < 200) {
+                            doc.includeKeys = true;
+                        }
+                    }
+                }
+                if (req.query.idUser) {
+                    // get fullname of this idUser
+                    doc.seed = req.query.idUser;
+                    const user = yield options.storage.userByIdUser(req.query.idUser);
+                    if (user) {
+                        doc.fullname = user["fullname"];
+                        if (user["idRole"] < 200) {
+                            doc.includeKeys = true;
+                        }
+                    }
+                }
+                // Generate document
+                try {
+                    generateDocument(doc, res);
+                }
+                catch (Ex) {
+                    console.log("An error occurred while generating the document::", Ex);
+                }
+            }
+        });
+    });
+    url = (options.basePrefix || '') + '/wsmath/editor';
+    router.get(url, function (req, res, next) {
+        const textarea = JSON.stringify(generateSampleBody0(), null, 2)
+            .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
+        const uri = (options.basePrefix || '') + '/wsmath';
+        res.render("editor", {
+            textarea: textarea,
+            url: uri,
+            questionTypesList: Object.keys(WsGenerator_1.Container).sort(),
+            questionTypesMeta: WsGenerator_1.Container,
+            user: { id: 0, fullname: "Admin", username: "admin" }
+        });
+    });
+    return router;
+}
+exports.wsMathMiddleware = wsMathMiddleware;
 //# sourceMappingURL=wsMathMiddleware.js.map

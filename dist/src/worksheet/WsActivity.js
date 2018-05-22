@@ -10,13 +10,14 @@ class WsActivity {
         this.questions = [];
     }
     // if times < 0, then reuse the same question gen object for all times
-    useRepeat(qClass, qGenOpts, times = 1, reuse) {
+    useRepeat(qClass, qGenOpts, times = 1, type, reuse) {
         qClass = qClass || this.qClass;
         qGenOpts = qGenOpts || this.qGenOpts || {};
         let question;
         for (var i = 0; i < times; i++) {
             if (!reuse || !question) {
                 question = new WsQuestion_1.WsQuestion(qClass, Object.assign({ question: qGenOpts }, this.opts));
+                question.type = type;
             }
             this.questions.push(question);
         }

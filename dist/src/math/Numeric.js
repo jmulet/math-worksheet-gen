@@ -212,6 +212,9 @@ class Numeric {
         const mod2 = this.modulus2();
         return Math.sqrt(mod2["n"] / mod2["d"]);
     }
+    toNumber() {
+        return this.Re["s"] * this.Re["n"] / this.Re["d"];
+    }
     toTeX(opts) {
         let tex = "";
         if (this.Re["s"] < 0) {

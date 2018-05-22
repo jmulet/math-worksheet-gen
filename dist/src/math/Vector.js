@@ -1,7 +1,33 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Numeric_1 = require("./Numeric");
+const mathjs = require("mathjs");
 class Vector {
+    static fromPoints(A, B) {
+        if (!A || !B) {
+            return null;
+        }
+        if (A.dimension() !== B.dimension()) {
+            throw new Error("invalid point dimensions in fixed AB vector");
+        }
+        const components = [];
+        A.components.forEach((c, i) => components.push(B.components[i].substract(c)));
+        return new Vector(components);
+    }
+    static determinant(...vectors) {
+        const dims = vectors.map(v => v.dimension());
+        if (Math.min(...dims) !== Math.max(...dims)) {
+            throw new Error("invalid dimensions in determinant");
+        }
+        const dim = Math.min(...dims);
+        if (vectors.length !== dim) {
+            throw new Error("invalid dimensions in determinant");
+        }
+        const matrix = vectors.map(v => {
+            return v.components.map(c => c.toNumber());
+        });
+        return mathjs.det(matrix);
+    }
     constructor(components, symbol) {
         this.components = components.map((e) => {
             if (typeof (e) === 'number') {
@@ -18,7 +44,14 @@ class Vector {
         return this.components.length;
     }
     times(n) {
-        const components2 = this.components.map((c) => c.multiply(n));
+        let nn;
+        if (typeof (n) === "number") {
+            nn = Numeric_1.Numeric.fromNumber(n);
+        }
+        else {
+            nn = n;
+        }
+        const components2 = this.components.map((c) => c.multiply(nn));
         return new Vector(components2);
     }
     dotProduct(v) {
@@ -37,6 +70,13 @@ class Vector {
     }
     norm2() {
         return this.dotProduct(this);
+    }
+    norm() {
+        return Math.sqrt(this.dotProduct(this).toNumber());
+    }
+    angle(v) {
+        const op = this.dotProduct(v).toNumber() / (this.norm() * v.norm());
+        return 180 * Math.acos(op) / Math.PI;
     }
     oposite() {
         const components2 = this.components.map(e => e.oposite());

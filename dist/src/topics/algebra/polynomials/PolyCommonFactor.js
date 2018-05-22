@@ -51,6 +51,9 @@ let PolyCommonFactor = PolyCommonFactor_1 = class PolyCommonFactor {
     getAnswer() {
         return "$" + this.answer + "$ ";
     }
+    getDistractors() {
+        return [];
+    }
 };
 PolyCommonFactor.Symbols = ["x", "y", "z", "t", "a", "b", "c", "m", "n"];
 PolyCommonFactor = PolyCommonFactor_1 = __decorate([

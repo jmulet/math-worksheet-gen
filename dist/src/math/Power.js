@@ -58,6 +58,9 @@ class Power {
     }
     */
     toString() {
+        return this.toTeX();
+    }
+    toTeX() {
         if (this.exponent.isOne()) {
             return "" + this.base.toString();
         }

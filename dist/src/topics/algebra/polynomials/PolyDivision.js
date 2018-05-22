@@ -58,6 +58,9 @@ let PolyDivision = class PolyDivision {
         const bar = this.qGenOpts.question.bar || "x";
         return "$Q(x)=" + this.answers.quotient.toTeX(bar) + "$; $R=" + this.answers.remainder.toTeX(bar) + "$ ";
     }
+    getDistractors() {
+        return [];
+    }
 };
 PolyDivision = __decorate([
     WsGenerator_1.WsGenerator({

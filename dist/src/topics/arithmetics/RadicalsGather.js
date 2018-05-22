@@ -43,6 +43,9 @@ let RadicalsGather = class RadicalsGather {
     getAnswer() {
         return "$" + this.answer + "$";
     }
+    getDistractors() {
+        return [];
+    }
 };
 RadicalsGather = __decorate([
     WsGenerator_1.WsGenerator({

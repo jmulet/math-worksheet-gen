@@ -5,12 +5,12 @@ exports.Container = {};
  * Decorator, dynamically generates the types of generator
  */
 function WsGenerator(meta) {
+    meta.parameters.forEach((p) => p.typeof = typeof (p.defaults));
     return function (target) {
         exports.Container[meta.category] = {
             meta: meta,
             clazz: target
         };
-        console.log(exports.Container);
     };
 }
 exports.WsGenerator = WsGenerator;

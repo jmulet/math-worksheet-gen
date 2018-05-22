@@ -52,6 +52,9 @@ let FractionsOperations = class FractionsOperations {
     getAnswer() {
         return "$" + this.answer + "$ ";
     }
+    getDistractors() {
+        return [];
+    }
 };
 FractionsOperations.Symbols = ["x", "y", "z", "t", "a", "b", "c", "m", "n"];
 FractionsOperations = __decorate([

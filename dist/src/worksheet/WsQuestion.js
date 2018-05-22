@@ -5,6 +5,7 @@ class WsQuestion {
         this.qsClass = qsClass;
         this.qsGenOpts = qsGenOpts;
         this.qsGen = new qsClass(qsGenOpts);
+        this.type = this.qsGenOpts.question.type;
     }
     toLaTeX() {
         return this.qsGen.getFormulation("latex");
@@ -17,6 +18,9 @@ class WsQuestion {
     }
     answerToHtml() {
         return this.qsGen.getAnswer("html");
+    }
+    distractorsHtml() {
+        return this.qsGen.getDistractors("html");
     }
 }
 exports.WsQuestion = WsQuestion;

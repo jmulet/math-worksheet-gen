@@ -82,6 +82,9 @@ let PolyIdentities = PolyIdentities_1 = class PolyIdentities {
     getAnswer() {
         return "$" + this.answer + "$ ";
     }
+    getDistractors() {
+        return [];
+    }
 };
 PolyIdentities.Symbols = ["x", "y", "z", "t", "a", "b", "c", "m", "n"];
 PolyIdentities = PolyIdentities_1 = __decorate([

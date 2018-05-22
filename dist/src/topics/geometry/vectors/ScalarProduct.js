@@ -77,6 +77,9 @@ let ScalarProduct = class ScalarProduct {
     getAnswer() {
         return '';
     }
+    getDistractors() {
+        return [];
+    }
 };
 ScalarProduct = __decorate([
     WsGenerator_1.WsGenerator({
