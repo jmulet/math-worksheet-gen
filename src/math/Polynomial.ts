@@ -30,7 +30,12 @@ export class Polynomial extends Expression {
 
     // Constructs the polynomial given all complex roots
     static fromRoots(roots: Numeric[]): Polynomial {
+        
         const binomials = roots.map( (e) => {
+            if (typeof(e)==="number") {
+                e = Numeric.fromNumber(e);
+            }
+            console.log(e);
             let coef1 = 1;
             let coef2 = e.oposite();
             if(coef2.Re["d"] > 1) {

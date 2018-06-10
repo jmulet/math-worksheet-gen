@@ -95,4 +95,24 @@ export class Formatter {
         }
         return str.join('');
     }
+
+    static append(a: number | Numeric) {
+        if (a instanceof Numeric) {
+            if (a.isZero()) {
+                return "";
+            }
+            if (!a.isNegative()) {
+                return "+" + a.toTeX()
+            }
+            return a.toTeX();
+        } else {
+            if (a===0) {
+                return "";
+            }
+            if (a > 0) {
+                return "+" + a
+            }
+            return a + "";
+        }
+    }
 }

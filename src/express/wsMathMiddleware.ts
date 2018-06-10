@@ -130,9 +130,39 @@ function generateSampleBody0() {
                 {
                     name: "Equacions", activities: [
                         {
+                            formulation: "Resol aquestes equacions de segon grau", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 1, maxDegree:2, minDegree: 2 } },
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 2, maxDegree:2, minDegree: 2 } }
+                            ]
+                        },
+                        {
                             formulation: "Resol aquestes equacions biquadrades", questions: [
                                 { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 1, specialType: 'biquadratic' } },
                                 { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 2, specialType: 'biquadratic' } }
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions factoritzades", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 4, options: { interval: 5, complexity: 0, specialType: 'factorizable', minDegree: 2, maxDegree: 5 } } 
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions polinòmiques", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 1, minDegree: 3, maxDegree: 4} },
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 2, minDegree: 3, maxDegree: 5} } 
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions irracionals", questions: [
+                                { gen: "algebra/equations/irrational", repeat: 2, options: { interval: 10, complexity: 1} },
+                                { gen: "algebra/equations/irrational", repeat: 4, options: { interval: 10, complexity: 2} } 
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes sistemes d'equacions", questions: [
+                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 2, nequacions: 2} },
+                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 3, nequacions: 3} },
+                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 3, nequacions: 2} }  
                             ]
                         },
                         {
