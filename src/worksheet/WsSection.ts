@@ -6,7 +6,7 @@ import { Polynomial } from "../math/Polynomial";
 import { PolyMonomial } from "../math/PolyMonomial";
 import { AlgebraicFraction } from "../math/AlgebraicFraction";
 import { Numeric } from "../math/Numeric";
-const vm = require('vm');
+import * as vm from 'vm';
 
 export class WsSection {
 
@@ -15,11 +15,12 @@ export class WsSection {
     constructor(public title: string, private opts: SectionOptsInterface) {
     }
 
-    createActivity(formulation: string, scope?: any, qClass?: GenClass, qGenOpts?: any) {        
+    createActivity(formulation: string, scope?: any, qClass?: GenClass, qGenOpts?: any) {   
+        // Eval scope in a context     
         if (scope && Object.keys(scope).length) {            
             try {
                 const context: any = {rnd: this.opts.rand, Vector: Vector, Polynomial: Polynomial,
-                    PolyMonomial: PolyMonomial, Numeric: Numeric, AlgebraicFraction: AlgebraicFraction};
+                    PolyMonomial: PolyMonomial, Numeric: Numeric, AlgebraicFraction: AlgebraicFraction, Math: Math};
                 vm.createContext(context);
 
                 // Must evaluate this scope into objects

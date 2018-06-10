@@ -39,8 +39,10 @@ export class RadicalsSimplify implements QuestionGenInterface {
         const maxIndex = qGenOpts.question.maxIndex || 5;               
         const domain = qGenOpts.question.domain || 'Z';
          
-        const radical = rnd.radical({domain: 'Z', range: r, maxIndex: maxIndex, simplificable: true});
-        
+        let radical = rnd.radical({domain: 'Z', range: r, maxIndex: maxIndex, simplificable: true});
+        while(radical.radicand.isOne()) {
+            radical = rnd.radical({domain: 'Z', range: r, maxIndex: maxIndex, simplificable: true});
+        }
         this.question = radical.toTeX();  
         this.answer =  radical.simplify().toTeX();                
     }

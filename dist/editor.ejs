@@ -80,10 +80,10 @@
                     <div role="tabpanel" class="tab-pane active" id="currentPreferences">
                         <ul>
                                 <br/>
-                                <p><span style="width: 200px; display: inline-block;"><b>Title</b></span> <input style="width:80%" type="text" ng-model="ws.title"/></p>
-                                <p><span style="width: 200px; display: inline-block;"><b>Instructions</b></span> <textarea type="text" ng-model="ws.instructions" rows="5" style="width:80%"></textarea></p>
-                                <p><span style="width: 200px; display: inline-block;"><b>Include keys</b></span> <input type="checkbox" ng-model="ws.includeKeys"/></p>
-                                <p><span style="width: 200px; display: inline-block;"><b>Show first question answer</b></span> <input type="checkbox" ng-model="ws.showFirstQuestionAnswer"/></p>
+                                <p><span style="width: 100px; display: inline-block;"><b>Title</b></span> <input style="width:80%" type="text" ng-model="ws.title"/></p>
+                                <p><span style="width: 100px; display: inline-block;"><b>Instructions</b></span> <textarea type="text" ng-model="ws.instructions" rows="5" style="width:80%"></textarea></p>
+                                <p><span style="width: 100px; display: inline-block;"><b>Include keys</b></span> <input type="checkbox" ng-model="ws.includeKeys"/></p>
+                                
                                 <br/>
                         
                                 <button class="btn btn-md btn-success" ng-click="addSection()"> <i class="fas fa-plus"></i> Add section</button>
@@ -115,9 +115,7 @@
                                             <button class="btn btn-sm btn-secondary" ng-click="moveupActivity(act, $index)"><i class="fas fa-arrow-up"></i></button>
                                             <button class="btn btn-sm btn-secondary" ng-click="movedownActivity(act, $index)"><i class="fas fa-arrow-down"></i></button>
                                             <button class="btn btn-sm btn-danger" ng-click="removeActivity(act, $index)"><i class="fas fa-trash-alt"></i></button>
-                                            <p><b>Formulation: </b><textarea style="width:70%" type="text" ng-model="act.formulation" rows="2"></textarea> <span class="badge badge-primary">{{sec.activities.length}}</span></p>                                   
-                                            <p><b>Scope</b>  <button ng-click="act.expanded=!act.expanded;"><i class="fas" ng-class="act.expanded?'fa-minus-square':'fa-plus-square'"></i></button>:
-                                                <scope-editor ng-if="act.expanded" style="width:80%" ng-model="act.scope"></scope-editor>   </p>                                
+                                            <p><b>Formulation: </b><textarea style="width:70%" type="text" ng-model="act.formulation" rows="2"></textarea> <span class="badge badge-primary">{{sec.activities.length}}</span></b></p>                                   
                                             <b>Questions:</b>
                                             <button class="btn btn-md btn-success" ng-click="addQuestion(act)"> <i class="fas fa-plus"></i> Add question</button>
                                              
@@ -131,10 +129,9 @@
                                                     ng-options="item for item in questionTypesList"
                                                     ng-change="generatorChanged(question)"></select>
 
-                                                <span ng-if="question.gen.indexOf('special/') < 0">
+                                                
                                                  Repeat: <input type="number" min="0" max="20" ng-model="question.repeat"/></p>      
-                                                </span>
-
+                                                 
                                                  Moodle: <select ng-model="question.type" ng-options="item for item in moodleActivityTypes"></select>
                                                 <p>
                                                     <button ng-click="question.expanded=!question.expanded;"><i class="fas" ng-class="question.expanded?'fa-minus-square':'fa-plus-square'"></i></button>
@@ -152,10 +149,10 @@
                         <ul>
                                 <br/> 
                                 <p>
-                                    <span style="width: 150px; display: inline-block;"><b>Seed:</b></span> <input ng-model="seed" type="number" min="0" />
+                                    <span style="width: 150px; display: inline-block;"><b>Seed: </b></span> <input ng-model="seed" type="number" min="0" />
                                 </p>
                                 <p>
-                                    <span style="width: 150px; display: inline-block;"><b>Store:</b></span> <input ng-model="store" type="checkbox"/>
+                                    <span style="width: 150px; display: inline-block;"><b>Store: </b></span> <input ng-model="store" type="checkbox"/>
                                 </p>
                                 <br/>
                                 <p>
@@ -203,9 +200,6 @@
                 console.log($scope.textarea);
                 return;
             }
-           
-            
-            //
             $scope.questionTypesList = questionTypesList;
             $scope.generatorChanged = function(question, extend) {
                 var gen = questionTypesMeta[question.gen];
@@ -230,8 +224,6 @@
                 var sec = $scope.ws.sections[i];
                 for(var j=0; j<sec.activities.length; j++) {
                     var act = sec.activities[j];
-                    act.scope = act.scope || {};
-
                     for (var k=0; k<act.questions.length; k++) {
                         var question = act.questions[k];                        
                         $scope.generatorChanged(question, true);                      
@@ -246,7 +238,7 @@
             $scope.postWorksheet = function (type) { 
                 type = type || 'pdf';
                 var bodyEncoded = $scope.ws;
-                 
+                
                 var url = '<%=url%>/store?seed=' + $scope.seed + (extraSeed ? ("." + extraSeed) : "") + '&type=' + type
                     + "&idUser=" + $scope.user.id + "&persist=" + ($scope.store? 1 : 0);
                 $http.post(url, bodyEncoded).then(function (res) {
@@ -351,9 +343,9 @@
             var template = '<ul class="list list-unstyled" ng-repeat="param in parameters track by $index">';
             template += '<span class="badge badge-secondary" title="{{param.description}}">?</span> <b>{{param.name}} <small>({{param.typeof}})</small></b>: ';
             template += '<span ng-switch="param.typeof">';
-            template += '<span ng-switch-when="number"><input class="form-control-static" style="width:95%" type="number" ng-model="question.options[param.name]"/></span> ';
-            template += '<span ng-switch-when="boolean"><input class="form-control-static"  style="width:95%" type="checkbox" ng-model="question.options[param.name]"/></span> ';
-            template += '<span ng-switch-default><input class="form-control-static" style="width:95%" type="text" ng-model="question.options[param.name]"/></span> ';
+            template += '<span ng-switch-when="number"><input type="number" ng-model="question.options[param.name]"/></span> ';
+            template += '<span ng-switch-when="boolean"><input type="checkbox" ng-model="question.options[param.name]"/></span> ';
+            template += '<span ng-switch-default><input type="text" ng-model="question.options[param.name]"/></span> ';
             template += '</span>';
             template += '</ul>';
             return {
@@ -372,42 +364,7 @@
                     };
                     scope.$watch("question", function(){
                         initDirective();
-                    }, true);
-                }]
-            }
-        });
-
-
-         ngApp.directive("scopeEditor", function() {
-            var id = 1;
-            var template = '<button ng-click="addProp()" title="add property">(+)</button><br/><ul class="list list-unstyled" ng-repeat="(key, val) in context track by $index">';
-            template += '<button ng-click="removeProp(key)" title="delete property">(x)</button><b>{{key}}</b>: ';
-            template += '<span ng-switch="param.typeof">';
-            template += '<span ng-switch-when="number"><input class="form-control-static" style="width:85%" type="number" ng-model="context[key]"/></span> ';
-            template += '<span ng-switch-when="boolean"><input class="form-control-static"  style="width:85%" type="checkbox" ng-model="context[key]"/></span> ';
-            template += '<span ng-switch-default><input class="form-control-static" style="width:85%" type="text" ng-model="context[key]"/></span> ';
-            template += '</span>';
-            template += '</ul>';
-            return {
-                restrict: 'E',
-                template: template,
-                scope: {
-                    context: '=ngModel'
-                },
-                controller: ['$scope', function(scope) {                    
-                    var initDirective = function() {                                             
-                        
-                    };
-                    scope.addProp = function() {
-                        scope.context["prop_" + id] = ""; 
-                        id++;
-                    };
-                    scope.removeProp = function(key) {
-                        delete scope.context[key];
-                    };
-                    scope.$watch("ngModel", function(){
-                        initDirective();
-                    }, true);
+                    });
                 }]
             }
         });

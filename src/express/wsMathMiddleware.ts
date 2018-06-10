@@ -129,21 +129,52 @@ function generateSampleBody0() {
                 },
                 {
                     name: "Equacions", activities: [
-
+                        {
+                            formulation: "Resol aquestes equacions biquadrades", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 1, specialType: 'biquadratic' } },
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 2, specialType: 'biquadratic' } }
+                            ]
+                        },
+                        {
+                            formulation: "En Miquel té ${a} euros i na Maria ${b} euros.", scope: {a: "rnd.decimal(10,40,2)", b: "rnd.decimal(10,40,2)"}, questions: [
+                                { gen: "special/computed", repeat: 1, options: { 
+                                    qFormulation: "Quants d'euros tenen en total?",
+                                    qAnswer: "${(a+b).toFixed(2)} euros"
+                                 } },
+                                 { gen: "special/computed", repeat: 1, options: { 
+                                    qFormulation: "Quants d'euros de diferència?",
+                                    qAnswer: "${Math.abs(a-b).toFixed(2)} euros"
+                                 } }  
+                            ]
+                        }
                     ]
                 },
                 {
                     name: "Logaritmes", activities: [
                         {
                             formulation: "Utilitza la definició de logaritme  per calcular el valor de de $x$ en les equacions següents", questions: [
-                                { gen: "arithmetics/logarithm/definition", repeat: 6, options: { interval: 10 } }
+                                { gen: "arithmetics/logarithm/definition", repeat: 6, options: { interval: 5 } }
                             ]
                         }
                     ]
                 },
                 {
                     name: "Funcions", activities: [
-                        
+                        {
+                            formulation: "Representa aquestes funcions lineals", questions: [
+                                { gen: "calculus/elemental/graph", repeat: 4, options: { interval: 10, domain: 'Q', types: [0] } }
+                            ]
+                        },
+                        {
+                            formulation: "Calcula el vèrtex i representa aquestes paràboles", questions: [
+                                { gen: "calculus/elemental/graph", repeat: 4, options: { interval: 10, types: [1] } }
+                            ]
+                        },
+                        {
+                            formulation: "Representa aquestes funcions elementals i calcula el seu domini", questions: [
+                                { gen: "calculus/elemental/graph", repeat: 6, options: { interval: 10, types: [0, 1, 2, 3, 4, 5] } }
+                            ]
+                        }
                     ]
                 }
             ]
@@ -246,6 +277,9 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
             }
             if (req.query.fullname) {
                 doc.fullname = req.query.fullname;
+            }
+            if (req.query.seed && !req.query.username && !req.query.idUser) {
+                req.query.username = req.query.seed + "b";
             }
             if (req.query.username) {
                 // get fullname of this username

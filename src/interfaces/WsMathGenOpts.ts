@@ -6,7 +6,8 @@ export interface Worksheet {
     includeKeys: boolean;
     title?: string,
     instructions?: string,
-    fullname?: string
+    fullname?: string,
+    showFirstQuestionAnswer: boolean
 }
 
 export interface WsMathGenOpts {
