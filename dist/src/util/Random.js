@@ -1,17 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Ran = require("random-seed");
-const Numeric_1 = require("../math/Numeric");
-const Vector_1 = require("../math/Vector");
-const Polynomial_1 = require("../math/Polynomial");
-const PolyMonomial_1 = require("../math/PolyMonomial");
 const AlgebraicFraction_1 = require("../math/AlgebraicFraction");
-const Monomial_1 = require("../math/Monomial");
-const Literal_1 = require("../math/Literal");
-const Radical_1 = require("../math/Radical");
 const Conics_1 = require("../math/Conics");
-const Point_1 = require("../math/Point");
+const ElementalFunction_1 = require("../math/ElementalFunction");
 const Line_1 = require("../math/Line");
+const Literal_1 = require("../math/Literal");
+const Monomial_1 = require("../math/Monomial");
+const Numeric_1 = require("../math/Numeric");
+const Point_1 = require("../math/Point");
+const PolyMonomial_1 = require("../math/PolyMonomial");
+const Polynomial_1 = require("../math/Polynomial");
+const Radical_1 = require("../math/Radical");
+const Vector_1 = require("../math/Vector");
 /**
  *
  *  Wrapper around RadomSeed
@@ -27,6 +28,13 @@ class Random {
         }
         this.seed = this.seed.toLowerCase();
         this.rnd = Ran.create(this.seed);
+    }
+    decimal(a, b, decimals = 2) {
+        if (decimals < 0) {
+            decimals = 2;
+        }
+        const pow = Math.pow(10, decimals);
+        return Math.round(this.rnd.floatBetween(a, b) * pow) / pow;
     }
     intList(length, range, rangeMax) {
         const array = [];
@@ -62,8 +70,14 @@ class Random {
         }
         return array;
     }
-    intBetween(min, max) {
-        return this.rnd.intBetween(min, max);
+    intBetween(min, max, condition) {
+        let val = this.rnd.intBetween(min, max);
+        if (condition) {
+            while (!condition(val)) {
+                val = this.rnd.intBetween(min, max);
+            }
+        }
+        return val;
     }
     numericBetween(min, max, domain = 'Z') {
         let random = this.rnd.intBetween(min, max);
@@ -148,10 +162,10 @@ class Random {
         return new Monomial_1.Monomial(this.numericBetweenNotZero(-opts.range, opts.range, opts.domain), literals);
     }
     radical(options) {
-        const opts = Object.assign({ minIndex: 2, maxIndex: 10, minDegree: 1, maxDegree: 5, range: 10, domain: 'Z', maxVars: 1, bar: '', algebraic: false, simplificable: false, useCoeff: true }, options);
+        const opts = Object.assign({ minIndex: 2, maxIndex: 10, minDegree: 1, maxDegree: 5, range: 10, domain: 'Z', maxVars: 1, bar: '', algebraic: false, useCoeff: true }, options);
         const index = this.intBetween(opts.minIndex, opts.maxIndex);
         let divisorsOfIndex = Numeric_1.Numeric.listDivisors(index);
-        divisorsOfIndex.splice(divisorsOfIndex.length - 1, 1);
+        divisorsOfIndex.splice(0, 1);
         let mono1, mono2;
         if (opts.algebraic) {
             mono1 = this.monomial(opts);
@@ -166,7 +180,7 @@ class Random {
                 const oneDivisor = this.pickOne(divisorsOfIndex);
                 mono1.coef.power(oneDivisor);
                 mono1.literals.forEach((literal) => {
-                    const times = this.intBetween(0, 3);
+                    const times = this.intBetween(1, 3);
                     literal.exponent *= oneDivisor;
                     literal.exponent += times * index;
                 });
@@ -180,11 +194,17 @@ class Random {
                 mono2 = Numeric_1.Numeric.fromNumber(1);
             }
             if (opts.simplificable) {
-                const oneDivisor = this.pickOne(divisorsOfIndex);
+                let oneDivisor = this.pickOne(divisorsOfIndex);
+                if (oneDivisor === 1) {
+                    oneDivisor = index;
+                }
                 const e1 = this.intBetween(0, 3);
                 const e2 = this.intBetween(0, 2);
                 const e3 = this.intBetween(0, 1);
-                const number = Math.pow(2, e1 * oneDivisor) * Math.pow(3, e2 * oneDivisor) * Math.pow(5, e3 * oneDivisor);
+                const r1 = this.intBetween(0, 2);
+                const r2 = this.intBetween(0, 2);
+                const r3 = this.intBetween(0, 2);
+                const number = Math.pow(2, e1 * oneDivisor + r1) * Math.pow(3, e2 * oneDivisor + r2) * Math.pow(5, e3 * oneDivisor + r3);
                 mono1 = Numeric_1.Numeric.fromNumber(number);
             }
             else {
@@ -267,7 +287,6 @@ class Random {
     }
     vector(dim, options) {
         dim = dim || 2;
-        console.log("calling vector", dim, options);
         // Generates a random vector
         const opts = Object.assign({ symbol: 'v', domain: 'Z', range: 10, allowZero: false }, options);
         const symbol = opts.symbol || this.pickOne(exports.VECTOR_NAMES);
@@ -313,6 +332,76 @@ class Random {
             case 3:
                 return this.parabola(options);
         }
+    }
+    elementalFunction(mylist, options) {
+        const opts = Object.assign({ range: 10, domain: 'Z' }, options);
+        let list;
+        if (Array.isArray(mylist)) {
+            list = [...mylist];
+        }
+        else if (typeof (mylist) === "number") {
+            list = [mylist];
+        }
+        else {
+            list = Object.keys(ElementalFunction_1.ElementalFunction.types).map((key) => ElementalFunction_1.ElementalFunction.types[key]);
+        }
+        ;
+        var type = this.pickOne(list);
+        switch (type) {
+            case ElementalFunction_1.ElementalFunction.types.Lineal:
+                const m = this.numericBetween(-opts.range, opts.range, opts.domain);
+                const n = this.numericBetween(-opts.range, opts.range, opts.domain);
+                return new ElementalFunction_1.LinealFunction(m, n);
+            case ElementalFunction_1.ElementalFunction.types.Quadratic:
+                const a = this.numericBetweenNotZero(-2, 2);
+                const b = this.numericBetween(-opts.range, opts.range, opts.domain);
+                const c = this.numericBetween(-opts.range, opts.range, opts.domain);
+                return new ElementalFunction_1.QuadraticFunction(a, b, c);
+            case ElementalFunction_1.ElementalFunction.types.Radical:
+                const a2 = this.numericBetween(-opts.range, opts.range, opts.domain);
+                const b2 = this.numericBetween(-opts.range, opts.range, opts.domain);
+                return new ElementalFunction_1.RadicalFunction(a2, b2);
+            case ElementalFunction_1.ElementalFunction.types.Hyperbole:
+                const m2 = this.numericBetween(-opts.range, opts.range, opts.domain);
+                const n2 = this.numericBetween(-opts.range, opts.range, opts.domain);
+                const p = this.numericBetween(-opts.range, opts.range, opts.domain);
+                return new ElementalFunction_1.HyperboleFuntion(m2, n2, p);
+            case ElementalFunction_1.ElementalFunction.types.Exponential:
+                const base = this.numericBetween(2, opts.range);
+                return new ElementalFunction_1.ExponentialFunction(base);
+            case ElementalFunction_1.ElementalFunction.types.Logarithm:
+                const base2 = this.numericBetween(2, opts.range);
+                return new ElementalFunction_1.LogarithmFunction(base2);
+            default:
+                const type = this.pickOne(['sin', 'cos', 'tan']);
+                const amp = this.numericBetweenNotZero(-opts.range, opts.range, opts.domain);
+                const w = this.numericBetween(1, 4);
+                return new ElementalFunction_1.TrigonometricFunction(type, amp, w);
+        }
+    }
+    /**
+     * Generates a random funcion with complexity n
+     * from bloc funtions in funcs list and operations in ops
+     * which can be + - * / and comp
+     */
+    rfunction(n, ops, funcs) {
+        var op = this.pickOne(ops);
+        var f1 = funcs.random();
+        var f2 = funcs.random();
+        var str = "";
+        if (op === '+') {
+            str = f1.toString('x') + " " + op + " " + f2.toString('x');
+        }
+        else if (op === '-') {
+            str = f1.toString('x') + " " + op + " (" + f2.toString('x') + ")";
+        }
+        else if (op === '*' || op === '/') {
+            str = "(" + f1.toString('x') + ") " + op + " (" + f2.toString('x') + ")";
+        }
+        else if (op === 'comp') {
+            str = f1.toString(f2.toString('x'));
+        }
+        return str;
     }
 }
 exports.Random = Random;

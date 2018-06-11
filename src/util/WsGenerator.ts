@@ -1,5 +1,6 @@
 export interface WsGeneratorInterface {
     category: string,
+    description?: string,
     parameters: {
         name: string,
         defaults: any,

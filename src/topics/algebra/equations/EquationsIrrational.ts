@@ -19,7 +19,7 @@ import { WsGenerator } from '../../../util/WsGenerator';
         }       
     ]
 })
-export class EquationsPolynomial implements QuestionGenInterface {
+export class EquationsIrrational implements QuestionGenInterface {
 
    
     answer: string;

@@ -6,7 +6,7 @@ const Polynomial_1 = require("../math/Polynomial");
 const PolyMonomial_1 = require("../math/PolyMonomial");
 const AlgebraicFraction_1 = require("../math/AlgebraicFraction");
 const Numeric_1 = require("../math/Numeric");
-const vm = require('vm');
+const vm = require("vm");
 class WsSection {
     constructor(title, opts) {
         this.title = title;
@@ -14,10 +14,11 @@ class WsSection {
         this.activities = [];
     }
     createActivity(formulation, scope, qClass, qGenOpts) {
+        // Eval scope in a context     
         if (scope && Object.keys(scope).length) {
             try {
                 const context = { rnd: this.opts.rand, Vector: Vector_1.Vector, Polynomial: Polynomial_1.Polynomial,
-                    PolyMonomial: PolyMonomial_1.PolyMonomial, Numeric: Numeric_1.Numeric, AlgebraicFraction: AlgebraicFraction_1.AlgebraicFraction };
+                    PolyMonomial: PolyMonomial_1.PolyMonomial, Numeric: Numeric_1.Numeric, AlgebraicFraction: AlgebraicFraction_1.AlgebraicFraction, Math: Math };
                 vm.createContext(context);
                 // Must evaluate this scope into objects
                 for (let key in scope) {

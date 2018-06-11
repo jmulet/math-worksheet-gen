@@ -28,7 +28,15 @@ class Polynomial extends Expression_1.Expression {
     }
     // Constructs the polynomial given all complex roots
     static fromRoots(roots) {
+        if (roots.length === 0) {
+            console.log("! Polynomial.fromRoots(roots): roots is an empty array. Is this an error?");
+            return new Polynomial([1]);
+        }
         const binomials = roots.map((e) => {
+            if (typeof (e) === "number") {
+                e = Numeric_1.Numeric.fromNumber(e);
+            }
+            console.log(e);
             let coef1 = 1;
             let coef2 = e.oposite();
             if (coef2.Re["d"] > 1) {

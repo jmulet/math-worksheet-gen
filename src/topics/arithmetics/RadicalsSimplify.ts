@@ -1,11 +1,7 @@
-import { QuestionGenInterface } from "../../interfaces/QuestionGenInterface";
-import { Polynomial } from "../../math/Polynomial";
-import { QuestionOptsInterface } from "../../interfaces/QuestionOptsInterface";
-import { Random, BAR_NAMES } from "../../util/Random";
-import { Radical } from "../../math/Radical";
-import { Power } from "../../math/Power";
-import { WsGenerator } from "../../util/WsGenerator";
-import { PolyRadical } from "../../math/PolyRadical";
+import { QuestionGenInterface } from '../../interfaces/QuestionGenInterface';
+import { QuestionOptsInterface } from '../../interfaces/QuestionOptsInterface';
+import { Random } from '../../util/Random';
+import { WsGenerator } from '../../util/WsGenerator';
 
 @WsGenerator({
     category: "arithmetics/radicals/simplify",

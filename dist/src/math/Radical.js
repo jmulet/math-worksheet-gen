@@ -277,6 +277,10 @@ class Radical {
         str = Formatter_1.Formatter.numericXstringTeX(true, this.coefficient, str);
         return str;
     }
+    toDecimal() {
+        const str = "root(" + this.index + ", " + this.radicand.toString().trim() + "*1.0)";
+        return Giac_1.Giac.evaluate(str);
+    }
 }
 exports.Radical = Radical;
 //# sourceMappingURL=Radical.js.map

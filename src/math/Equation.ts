@@ -121,7 +121,46 @@ export class Equation {
 
     // Rational equations =====================
     rational(r = 10, complexity = 1) {
+        if (complexity < 1) {
+            complexity = 1;
+        }
+        // Generate roots
+        const numRoots = this.rnd.numericList(complexity + 1, r); 
+        let denExpr;
+        let denRoots: Numeric[];
+        const coin = this.rnd.intBetween(0, 2);
+        if (coin === 0) {
+            denRoots = this.rnd.numericList(2, 4); 
+            denExpr = Polynomial.fromRoots(denRoots).toString();
+        } else if (coin === 1) {
+            denRoots = this.rnd.numericList(complexity, 4); 
+            denExpr = Polynomial.fromRoots(denRoots).toString();
+        } else {
+            denRoots = [this.rnd.numericBetween(-2 , 2)]; 
+            const n = this.rnd.numericBetween(1, 4);
+            denExpr = Polynomial.fromRoots(denRoots).toString()+"*(x**2 + " + n + ")";
+        }     
 
+        // Remove numRoots that are in denRoots (since zeroes the denominator)
+        denRoots.forEach( (e) => {
+            const found = numRoots.filter((n)=> {
+                return n.isEqual(e);
+            });
+            found.forEach( (f) => {
+                numRoots.splice(numRoots.indexOf(f), 1);
+            });
+        });  
+
+        if (numRoots.length === 0) {
+            return this.rational(r, complexity);
+        }
+       
+        // Generate polynomials
+        const numPoly = Polynomial.fromRoots(numRoots);
+        // Convert rational fraction to partial fractions expression:
+        this.lhs = Giac.evaluate("latex(partfrac(("+ numPoly.toString()+")/(" + denExpr + ")))").replace(/"/g,"").replace(/\\frac/g, '\\dfrac');
+        this.rhs = "0";
+        this.answers = numRoots;
     }
 
     // irrational equations ======================
@@ -130,8 +169,9 @@ export class Equation {
             const cas = this.rnd.intBetween(0, 1);
             const a = this.rnd.intBetweenNotZero(-r, r);
             const b = this.rnd.intBetweenNotZero(-r, r);
-            const c = this.rnd.intBetweenNotZero(-r, r);
+            let c = this.rnd.intBetweenNotZero(-r, r);
             if (cas === 0) {
+                c = Math.abs(c);
                 this.lhs = "\\sqrt{" + Formatter.numericXstringTeX(false, Numeric.fromNumber(a), this.bar) + Formatter.append(b) + "} ";
                 this.rhs = c + "";
                 const num = c * c - b;

@@ -1,19 +1,26 @@
-import { ElementalFunction, LinealFunction, QuadraticFunction, RadicalFunction, HyperboleFuntion, ExponentialFunction, LogarithmFunction, TrigonometricFunction } from '../math/ElementalFunction';
 import * as Ran from 'random-seed';
-import { Numeric } from '../math/Numeric';
-import { Vector } from '../math/Vector';
-import { Polynomial } from '../math/Polynomial';
-import { PolyMonomial } from '../math/PolyMonomial';
+
 import { AlgebraicFraction } from '../math/AlgebraicFraction';
-import { Monomial } from '../math/Monomial';
-import { Literal } from '../math/Literal';
-import { Radical } from '../math/Radical';
-import { Giac } from '../math/Giac';
-import { Conics, Circumference, Elipse, Hiperbola, Parabola } from '../math/Conics';
-import { AsyncCompleter, ReadLineOptions } from 'readline';
-import { POINT_CONVERSION_COMPRESSED } from 'constants';
-import { Point } from '../math/Point';
+import { Circumference, Conics, Elipse, Hiperbola, Parabola } from '../math/Conics';
+import {
+    ElementalFunction,
+    ExponentialFunction,
+    HyperboleFuntion,
+    LinealFunction,
+    LogarithmFunction,
+    QuadraticFunction,
+    RadicalFunction,
+    TrigonometricFunction,
+} from '../math/ElementalFunction';
 import { Line } from '../math/Line';
+import { Literal } from '../math/Literal';
+import { Monomial } from '../math/Monomial';
+import { Numeric } from '../math/Numeric';
+import { Point } from '../math/Point';
+import { PolyMonomial } from '../math/PolyMonomial';
+import { Polynomial } from '../math/Polynomial';
+import { Radical } from '../math/Radical';
+import { Vector } from '../math/Vector';
 
 /**
  *
@@ -78,8 +85,15 @@ export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
         return array;
     }
 
-    intBetween(min: number, max: number): number {
-        return this.rnd.intBetween(min, max);        
+    intBetween(min: number, max: number, condition?: Function): number {
+        let val = this.rnd.intBetween(min, max);        
+        if (condition) {
+            while (!condition(val)) {
+                val = this.rnd.intBetween(min, max);        
+            }
+
+        } 
+        return val;        
     }
 
     numericBetween(min: number, max: number, domain='Z'): Numeric {

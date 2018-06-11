@@ -1,52 +1,50 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class Interval {
-    // null depicts infinity
+const Interval_1 = require("./Interval");
+/**
+ * Allow the union of several interval
+ */
+class Intervals {
     constructor(a, b, aIncluded, bIncluded) {
-        this.a = a;
-        this.b = b;
-        this.aIncluded = aIncluded;
-        this.bIncluded = bIncluded;
-        if (a === Number.NEGATIVE_INFINITY) {
-            aIncluded = false;
+        this.listOfIntervals = [];
+        if (a && a instanceof Interval_1.Interval) {
+            this.listOfIntervals.push(a);
         }
-        if (b === Number.POSITIVE_INFINITY) {
-            bIncluded = false;
+        else if (a && b) {
+            this.listOfIntervals.push(new Interval_1.Interval(a, b, aIncluded, bIncluded));
         }
     }
     static isolatePoint(p) {
-        return new Interval(p, p, true, true);
+        return new Intervals(p, p, true, true);
     }
     static emptySet() {
-        return new Interval(null, null, false, false);
+        return new Intervals(null, null, false, false);
     }
     static realLine() {
-        return new Interval(Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, false, false);
+        return new Intervals(Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, false, false);
+    }
+    union(interval) {
+        this.listOfIntervals.push(interval);
+        return this;
     }
     toString() {
-        return this.toTeX();
-    }
-    toTeX() {
-        if (this.a == null && this.b === null) {
-            return "\\O";
-        }
-        if (this.a === Number.NEGATIVE_INFINITY) {
-            if (this.b === Number.POSITIVE_INFINITY) {
-                return "\\left( -\\infty, +\\infty \\right)";
-            }
-            else {
-                return "( -\\infty, " + this.b.toString + (this.bIncluded ? "]" : ")");
-            }
+        const n = this.listOfIntervals.length;
+        if (n === 0) {
+            return "O";
         }
         else {
-            if (this.b === Number.POSITIVE_INFINITY) {
-                return (this.aIncluded ? "[" : "(") + this.a.toString + ", +\\infty)";
-            }
-            else {
-                return (this.aIncluded ? "[" : "(") + this.a.toString + ", " + this.b.toString() + (this.bIncluded ? "]" : ")");
-            }
+            return this.listOfIntervals.map(e => e.toString()).join(" U ");
+        }
+    }
+    toTeX() {
+        const n = this.listOfIntervals.length;
+        if (n === 0) {
+            return "\\emptyset";
+        }
+        else {
+            return this.listOfIntervals.map(e => e.toTeX()).join(" \\cup ");
         }
     }
 }
-exports.Interval = Interval;
+exports.Intervals = Intervals;
 //# sourceMappingURL=Intervals.js.map

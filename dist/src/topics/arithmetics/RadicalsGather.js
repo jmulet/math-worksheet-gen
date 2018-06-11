@@ -9,10 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Random_1 = require("../../util/Random");
-const Radical_1 = require("../../math/Radical");
-const WsGenerator_1 = require("../../util/WsGenerator");
 const PolyRadical_1 = require("../../math/PolyRadical");
+const Radical_1 = require("../../math/Radical");
+const Random_1 = require("../../util/Random");
+const WsGenerator_1 = require("../../util/WsGenerator");
 let RadicalsGather = class RadicalsGather {
     constructor(qGenOpts) {
         this.qGenOpts = qGenOpts;

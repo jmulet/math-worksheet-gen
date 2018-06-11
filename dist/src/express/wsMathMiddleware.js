@@ -39,8 +39,8 @@ function generateSampleBody0() {
     var body = {
         worksheet: {
             includeKeys: true,
-            title: "Feina d'estiu alumnes que han de cursar MAT-I a 1r de Batxillerat",
-            instructions: "Realitzeu aquesta tasca en el quadern de l'assignatura del proper curs i entregeu-lo al professor del proper any. Aquesta feina serà comptava com a nota de la 1a avaluació.",
+            title: "Feina recomanada pels alumnes que han de cursar MAT-I a 1r de Batxillerat",
+            instructions: "Realitzeu aquesta tasca en el quadern de l'assignatura del proper curs i entregeu-lo al professor del proper any. Aquesta feina serà comptada com a nota de la 1a avaluació.",
             sections: [
                 {
                     name: "Radicals", activities: [
@@ -48,6 +48,19 @@ function generateSampleBody0() {
                             formulation: "Escriu les potències en forma d'arrel i viceversa",
                             questions: [
                                 { gen: "arithmetics/radicals/notation", repeat: 6, options: { maxIndex: 5 } }
+                            ]
+                        },
+                        {
+                            formulation: "Calcula el valor numèric de les potències",
+                            questions: [
+                                { gen: "arithmetics/power/value", repeat: 8, options: {} }
+                            ]
+                        },
+                        {
+                            formulation: "Redueix a una única potència",
+                            questions: [
+                                { gen: "arithmetics/power/operations", repeat: 4, options: { complexity: 1 } },
+                                { gen: "arithmetics/power/operations", repeat: 4, options: { complexity: 2 } }
                             ]
                         },
                         {
@@ -111,7 +124,8 @@ function generateSampleBody0() {
                         },
                         {
                             formulation: "Factoritza els polinomis", questions: [
-                                { gen: "algebra/polynomial/factorize", repeat: 4, options: { interval: 5, complexity: 1, maxDegree: 4, allowFractions: true } }
+                                { gen: "algebra/polynomial/factorize", repeat: 4, options: { interval: 5, complexity: 0, maxDegree: 3, allowFractions: false } },
+                                { gen: "algebra/polynomial/factorize", repeat: 4, options: { interval: 5, complexity: 1, maxDegree: 3, allowFractions: true } }
                             ]
                         },
                         {
@@ -122,19 +136,92 @@ function generateSampleBody0() {
                     ]
                 },
                 {
-                    name: "Equacions", activities: []
-                },
-                {
-                    name: "Logaritmes", activities: [
+                    name: "Equacions", activities: [
                         {
-                            formulation: "Utilitza la definició de logaritme  per calcular el valor de de $x$ en les equacions següents", questions: [
-                                { gen: "arithmetics/logarithm/definition", repeat: 6, options: { interval: 10 } }
+                            formulation: "Resol aquestes equacions de segon grau", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 1, maxDegree: 2, minDegree: 2 } },
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 2, maxDegree: 2, minDegree: 2 } }
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions biquadrades", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 1, specialType: 'biquadratic' } },
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 2, specialType: 'biquadratic' } }
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions factoritzades", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 4, options: { interval: 5, complexity: 0, specialType: 'factorizable', minDegree: 2, maxDegree: 5 } }
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions polinòmiques", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 1, minDegree: 3, maxDegree: 4 } },
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 2, minDegree: 3, maxDegree: 5 } }
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions racionals", questions: [
+                                { gen: "algebra/equations/rational", repeat: 2, options: { interval: 5, complexity: 1 } },
+                                { gen: "algebra/equations/rational", repeat: 2, options: { interval: 5, complexity: 2 } }
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions irracionals", questions: [
+                                { gen: "algebra/equations/irrational", repeat: 2, options: { interval: 10, complexity: 1 } },
+                                { gen: "algebra/equations/irrational", repeat: 4, options: { interval: 10, complexity: 2 } }
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes sistemes d'equacions", questions: [
+                                { gen: "algebra/system/lineal", repeat: 2, options: { interval: 10, dimension: 2, nequations: 2 } },
+                                { gen: "algebra/system/lineal", repeat: 2, options: { interval: 5, dimension: 3, nequations: 3, allowIncompatible: true, allowIndeterminate: true } },
+                                { gen: "algebra/system/lineal", repeat: 2, options: { interval: 5, dimension: 3, nequations: 2 } },
+                                { gen: "algebra/system/nonlinear", repeat: 2, options: { interval: 10, complexity: 1 } },
+                                { gen: "algebra/system/nonlinear", repeat: 2, options: { interval: 10, complexity: 2 } }
+                            ]
+                        },
+                        {
+                            formulation: "En Miquel té ${a} euros i na Maria ${b} euros.", scope: { a: "rnd.decimal(10,40,2)", b: "rnd.decimal(10,40,2)" }, questions: [
+                                { gen: "special/computed", repeat: 1, options: {
+                                        qFormulation: "Quants d'euros tenen en total?",
+                                        qAnswer: "${(a+b).toFixed(2)} euros"
+                                    } },
+                                { gen: "special/computed", repeat: 1, options: {
+                                        qFormulation: "Quants d'euros de diferència?",
+                                        qAnswer: "${Math.abs(a-b).toFixed(2)} euros"
+                                    } }
                             ]
                         }
                     ]
                 },
                 {
-                    name: "Funcions", activities: []
+                    name: "Logaritmes", activities: [
+                        {
+                            formulation: "Utilitza la definició de logaritme  per calcular el valor de de $x$ en les equacions següents", questions: [
+                                { gen: "arithmetics/logarithm/definition", repeat: 6, options: { interval: 5 } }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "Funcions", activities: [
+                        {
+                            formulation: "Representa aquestes funcions lineals", questions: [
+                                { gen: "calculus/elemental/graph", repeat: 4, options: { interval: 10, domain: 'Q', types: [0] } }
+                            ]
+                        },
+                        {
+                            formulation: "Calcula el vèrtex i representa aquestes paràboles", questions: [
+                                { gen: "calculus/elemental/graph", repeat: 4, options: { interval: 10, types: [1] } }
+                            ]
+                        },
+                        {
+                            formulation: "Representa aquestes funcions elementals i calcula el seu domini", questions: [
+                                { gen: "calculus/elemental/graph", repeat: 6, options: { interval: 10, types: [0, 1, 2, 3, 4, 5] } }
+                            ]
+                        }
+                    ]
                 }
             ]
         }
@@ -227,6 +314,9 @@ function wsMathMiddleware(options) {
                 }
                 if (req.query.fullname) {
                     doc.fullname = req.query.fullname;
+                }
+                if (req.query.seed && !req.query.username && !req.query.idUser) {
+                    req.query.username = req.query.seed + "b";
                 }
                 if (req.query.username) {
                     // get fullname of this username

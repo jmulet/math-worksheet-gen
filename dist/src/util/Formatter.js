@@ -98,6 +98,26 @@ class Formatter {
         }
         return str.join('');
     }
+    static append(a) {
+        if (a instanceof Numeric_1.Numeric) {
+            if (a.isZero()) {
+                return "";
+            }
+            if (!a.isNegative()) {
+                return "+" + a.toTeX();
+            }
+            return a.toTeX();
+        }
+        else {
+            if (a === 0) {
+                return "";
+            }
+            if (a > 0) {
+                return "+" + a;
+            }
+            return a + "";
+        }
+    }
 }
 exports.Formatter = Formatter;
 //# sourceMappingURL=Formatter.js.map

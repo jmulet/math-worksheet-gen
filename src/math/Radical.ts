@@ -304,4 +304,9 @@ export class Radical {
 
         return str;
     }
+
+    toDecimal(): string {
+        const str = "root(" + this.index + ", " + this.radicand.toString().trim() + "*1.0)";
+        return Giac.evaluate(str);
+    }
 }

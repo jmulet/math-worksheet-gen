@@ -30,7 +30,11 @@ export class Polynomial extends Expression {
 
     // Constructs the polynomial given all complex roots
     static fromRoots(roots: Numeric[]): Polynomial {
-        
+        if (roots.length === 0) {
+            console.log("! Polynomial.fromRoots(roots): roots is an empty array. Is this an error?");
+            return new Polynomial([1]);
+        }
+
         const binomials = roots.map( (e) => {
             if (typeof(e)==="number") {
                 e = Numeric.fromNumber(e);

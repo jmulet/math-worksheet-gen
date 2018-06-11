@@ -9,7 +9,7 @@ import { Numeric } from '../../../math/Numeric';
 const VARNAMES = ["x", "y", "z", "t", "w"];
 
 @WsGenerator({
-    category: "algebra/equations/linealsystem",
+    category: "algebra/system/lineal",
     parameters: [
         {
             name: "interval",
@@ -52,10 +52,14 @@ export class EquationsLinealSystem implements QuestionGenInterface {
         const rnd: Random = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
         let complexity = qGenOpts.question.complexity || 1;
-        const dimension = qGenOpts.question.dimension || 2; 
-        const nequations = qGenOpts.question.nequations || dimension; 
+        let dimension = qGenOpts.question.dimension || 2; 
+        let nequations = qGenOpts.question.nequations || dimension; 
         const allowIncompatible = qGenOpts.question.allowIncompatible || false;
         const allowIndeterminate = qGenOpts.question.allowIndeterminate || false; 
+
+        if (dimension >5) {
+            dimension = 5;
+        }
 
         const matrix = [];
         const rightVector = [];
@@ -68,8 +72,7 @@ export class EquationsLinealSystem implements QuestionGenInterface {
         for (var i=0; i < dimension; i++) {
             const root = rnd.intBetween(-r, r);
             roots.push(root);
-        }
-        console.log(roots);
+        } 
 
         for (var i=0; i < nequations; i++) { 
             const coefs = rnd.intList(dimension, -r, r);
@@ -135,7 +138,7 @@ export class EquationsLinealSystem implements QuestionGenInterface {
             eqns.push(lhs.join("") + "=" + rightVector[i]);
             eqnsTeX.push(lhsTeX.join("") + "&=" + rightVector[i]);
         }
-        this.answer =  Giac.evaluate("latex(linsolve(["+ eqns.join(",") +"], [" + bars + "]))").replace(/"/g, "");
+        this.answer =  Giac.evaluate("latex(linsolve(["+ eqns.join(",") +"], [" + bars + "]))").replace(/"/g, "").replace(/,/g, ", \\quad ").replace(/\[/,'').replace(/\]/,'');
             
 
         this.question = "\\left\\{ \\begin{array}{ll}  ";
@@ -148,7 +151,7 @@ export class EquationsLinealSystem implements QuestionGenInterface {
     }
 
     getAnswer(): string {
-        return this.answer;
+        return "$ \\left(" + this.answer + " \\right)$" ;
     }
 
     getDistractors(): string[] {

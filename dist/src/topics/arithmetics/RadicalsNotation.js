@@ -18,17 +18,24 @@ let RadicalsNotation = class RadicalsNotation {
         const r = qGenOpts.question.interval || 10;
         const maxIndex = qGenOpts.question.maxIndex || 5;
         const domain = qGenOpts.question.domain || 'Z';
+        const representation = qGenOpts.question.representation || 'root';
         let radical = rnd.radical({ domain: 'Z', range: r, maxIndex: maxIndex, useCoeff: false });
         while (!radical.isRadical()) {
             radical = rnd.radical({ domain: 'Z', range: r, maxIndex: maxIndex, useCoeff: false });
         }
-        if (rnd.intBetween(0, 1) === 0) {
-            this.question = radical.toTeX() + "={}";
-            this.answer = radical.toPowerTeX();
+        if (representation === "root") {
+            if (rnd.intBetween(0, 1) === 0) {
+                this.question = radical.toTeX() + "={}";
+                this.answer = radical.toPowerTeX();
+            }
+            else {
+                this.answer = radical.toTeX();
+                this.question = radical.toPowerTeX() + "={}";
+            }
         }
         else {
-            this.answer = radical.toTeX();
-            this.question = radical.toPowerTeX() + "={}";
+            this.question = radical.toTeX() + "={}";
+            this.answer = radical.toDecimal();
         }
     }
     getFormulation() {
@@ -59,7 +66,12 @@ RadicalsNotation = __decorate([
                 name: "maxIndex",
                 defaults: 5,
                 description: "Max radical index"
-            }
+            },
+            {
+                name: "representation",
+                defaults: "root",
+                description: "root or decimal: root activities transforming from root to power; decimal: activities determining decimal value of a root"
+            },
         ]
     }),
     __metadata("design:paramtypes", [Object])

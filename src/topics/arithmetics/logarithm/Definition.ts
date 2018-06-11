@@ -71,27 +71,34 @@ export class RadicalsGather implements QuestionGenInterface {
                 break;
         }
          
+      
+
         let result = rnd.intBetween(-r, r);
         let a;
         if (typeof(base) === 'string') {
             a = base + "^{" + result + "}";  
         } else {
-            a = base.power(result);  
+            a = base.power(result);             
         }
         
-        const type = rnd.intBetween(0, 2);
-
+        let type = rnd.intBetween(0, 2);
+        if (type===2 && result === 0) {
+            type = 0;
+        }
         switch(type) {
             case 0:
+                // La incògnita és el resultat del logaritme
                 this.question = displayLog(base) + displayStrOrNumeric(a) + " = x ";  
                 this.answer =  "x=" + result ;             
                 break;
             case 1:
+                // La incògnita és l'argument del logaritme
                 this.question = displayLog(base) + " x = " + result;  
                 this.answer =  "x=" + displayStrOrNumeric(a) ;     
                 break;
             case 2:
-                this.question = "\\log_{x} " +displayStrOrNumeric(a) + " = " + result;  
+                // La incògnita és la base del logaritme.
+                this.question = "\\log_{x} " + displayStrOrNumeric(a) + " = " + result;  
               
                 this.answer =  "x=" + displayStrOrNumeric(base) ;     
                 break;

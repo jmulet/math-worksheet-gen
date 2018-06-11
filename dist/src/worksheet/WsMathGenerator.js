@@ -19,7 +19,9 @@ const genClasses = importClassesFromDirectories_1.importClassesFromDirectories([
     path.join(topics, '/probability/**/*.ts'),
     path.join(topics, '/probability/**/*.js'),
     path.join(topics, '/statistics/**/*.ts'),
-    path.join(topics, '/statistics/**/*.js')
+    path.join(topics, '/statistics/**/*.js'),
+    path.join(topics, '/special/**/*.ts'),
+    path.join(topics, '/special/**/*.js')
 ]);
 console.log("WsMathGenerator:: Loaded generator classes ...");
 console.log(genClasses.map((clazz) => clazz.name).join(", "));
@@ -128,11 +130,17 @@ class WsMathGenerator {
                 if (activity.gen) {
                     clazz = (WsGenerator_1.Container[activity.gen] || {}).clazz;
                 }
+                activity.options = activity.options || {};
+                activity.options.showFirstQuestionAnswer = worksheet.showFirstQuestionAnswer;
                 const act = sec.createActivity(activity.formulation, activity.scope, clazz, activity.options);
                 activity.questions.forEach((question) => {
                     let clazz = (WsGenerator_1.Container[question.gen] || {}).clazz;
+                    // Special generators only allow for one repetition
+                    if (question.gen.indexOf("special/") === 0) {
+                        question.repeat = 1;
+                    }
                     if (clazz) {
-                        act.useRepeat(clazz, question.options || {}, question.repeat || 1, question.type, activity.scope != null);
+                        act.useRepeat(clazz, question.options || {}, question.repeat || 1, question.type, activity.scope && Object.keys(activity.scope).length > 0);
                     }
                     else {
                         console.log("Error:: generator clazz ", question, " not found");
@@ -223,13 +231,13 @@ class WsMathGenerator {
             }
 
            .olactivity:first-of-type { counter-reset: activitycounter }           
-           .olactivity > li { counter-increment: activitycounter; list-style-type: none; }       
+           .olactivity > li { counter-increment: activitycounter; list-style-type: none; font-weight: 'bold' }       
            .olactivity > li:before { content: counter(activitycounter) ". "; }
 
             .olalpha {
                 counter-reset: alphacounter;
                 margin: 10px; 
-                font-size: 120%;
+                font-size: 110%;
             }
             
             .olalpha > li {
@@ -248,7 +256,9 @@ class WsMathGenerator {
             .arial {
                 font-family: Arial, Helvetica, sans-serif;
             }
-
+            .activity-formulation {
+                font-size: 120%;
+            }
             .instructions {                
                 border: 2px solid blue;
                 border-radius: 5px;
@@ -257,6 +267,36 @@ class WsMathGenerator {
                 padding: 10px;
                 font-size: 110%;
             }
+            @media print {               
+                .instructions {
+                    font-size: 12px;
+                }
+                p {
+                    font-size: 100%;
+                }
+                h2 {
+                    font-size: 100%;
+                } 
+                h3 {
+                    font-size: 100%;
+                }  
+                h4 {
+                    font-size: 100%;
+                } 
+                @page {
+                    margin: 1.5cm 1.5cm;
+                }
+                .activity-formulation {
+                    font-size: 13px;
+                }
+                .arial-large {
+                    font-size: 18px;
+                }
+                .question-formulation {
+                    font-size: 12px;
+                }
+             }
+             
            `,
             '</style>',
             "</head>",
@@ -264,10 +304,10 @@ class WsMathGenerator {
         ];
         if (this.worksheet) {
             if (this.worksheet.title) {
-                code.push("<h2 class=\"arial\" style=\"color:blue;text-align:center;\"><b>" + this.worksheet.title + "</b></h2>");
+                code.push("<h2 class=\"arial arial-large\" style=\"color:blue;text-align:center;\"><b>" + this.worksheet.title + "</b></h2>");
             }
             if (this.worksheet.instructions) {
-                code.push("<center><div class=\"arial instructions\">" + this.worksheet.instructions + "</div></center>");
+                code.push('<center><div class=\"instructions\"><p>' + this.worksheet.instructions + "</p></div></center>");
             }
             code.push("<p class=\"arial\"><b>Referència:</b> " + this.rand.seed + ". <b>Nom i llinatges:</b> " +
                 (this.worksheet.fullname ? this.worksheet.fullname : "..........................................................</p>"));

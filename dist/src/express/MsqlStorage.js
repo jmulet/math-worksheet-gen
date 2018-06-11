@@ -16,7 +16,7 @@ class MysqlStorage {
             connectionLimit: 10,
             host: 'localhost',
             user: 'root',
-            password: 'Admin765431091',
+            password: 'root',
             database: 'piworld'
         };
         this.pool = mysql.createPool(config);

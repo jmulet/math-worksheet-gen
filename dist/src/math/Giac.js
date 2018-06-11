@@ -12,10 +12,10 @@ class Giac {
         return giac.evaluate(str);
     }
     static coeffs(polynomial, bar = 'x') {
-        console.log("Trying to parse polynomial", polynomial, bar);
+        //console.log("Trying to parse polynomial", polynomial, bar);
         const str = Giac.evaluate('coeffs(' + polynomial + ', ' + bar + ')');
         const list = str.slice(str.indexOf('[') + 1, str.length - 1).split(",");
-        console.log("Trying to numeric parse ", list);
+        //console.log("Trying to numeric parse ", list);
         return list.filter((e) => e !== 'undef').map((e) => Numeric_1.Numeric.parse(e));
     }
     static parsePolynomial(str, bar = 'x') {
@@ -44,6 +44,7 @@ class Giac {
         }
     }
     static factor(expr, latex) {
+        console.log("factor called", expr, latex);
         let str = 'factor(' + expr.toString() + ')';
         if (latex) {
             str = 'latex(' + str + ')';

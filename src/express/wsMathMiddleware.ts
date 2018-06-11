@@ -57,6 +57,19 @@ function generateSampleBody0() {
                             ]
                         },
                         {
+                            formulation: "Calcula el valor numèric de les potències",
+                            questions: [
+                                { gen: "arithmetics/power/value", repeat: 8, options: {} }
+                            ]
+                        },
+                        {
+                            formulation: "Redueix a una única potència",
+                            questions: [
+                                { gen: "arithmetics/power/operations", repeat: 4, options: {complexity: 1} },
+                                { gen: "arithmetics/power/operations", repeat: 4, options: {complexity: 2} }
+                            ]
+                        },
+                        {
                             formulation: "Treu factors i simplifica els radicals si és possible",
                             questions: [
                                 { gen: "arithmetics/radicals/simplify", repeat: 4, options: { maxIndex: 5 } }
@@ -117,7 +130,8 @@ function generateSampleBody0() {
                         },
                         {
                             formulation: "Factoritza els polinomis", questions: [
-                                { gen: "algebra/polynomial/factorize", repeat: 4, options: { interval: 5, complexity: 1, maxDegree: 4, allowFractions: true } }
+                                { gen: "algebra/polynomial/factorize", repeat: 4, options: { interval: 5, complexity: 0, maxDegree: 3, allowFractions: false } },
+                                { gen: "algebra/polynomial/factorize", repeat: 4, options: { interval: 5, complexity: 1, maxDegree: 3, allowFractions: true } }
                             ]
                         },
                         {
@@ -128,7 +142,7 @@ function generateSampleBody0() {
                     ]
                 },
                 {
-                    name: "Equacions", activities: [
+                    name: "Equacions", activities: [                        
                         {
                             formulation: "Resol aquestes equacions de segon grau", questions: [
                                 { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 1, maxDegree:2, minDegree: 2 } },
@@ -153,6 +167,12 @@ function generateSampleBody0() {
                             ]
                         },
                         {
+                            formulation: "Resol aquestes equacions racionals", questions: [
+                                { gen: "algebra/equations/rational", repeat: 2, options: { interval: 5, complexity: 1 } },
+                                { gen: "algebra/equations/rational", repeat: 2, options: { interval: 5, complexity: 2 } }
+                            ]
+                        },
+                        {
                             formulation: "Resol aquestes equacions irracionals", questions: [
                                 { gen: "algebra/equations/irrational", repeat: 2, options: { interval: 10, complexity: 1} },
                                 { gen: "algebra/equations/irrational", repeat: 4, options: { interval: 10, complexity: 2} } 
@@ -160,9 +180,11 @@ function generateSampleBody0() {
                         },
                         {
                             formulation: "Resol aquestes sistemes d'equacions", questions: [
-                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 2, nequations: 2} },
-                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 3, nequations: 3} },
-                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 3, nequations: 2} }  
+                                { gen: "algebra/system/lineal", repeat: 2, options: { interval: 10, dimension: 2, nequations: 2} },
+                                { gen: "algebra/system/lineal", repeat: 2, options: { interval: 5, dimension: 3, nequations: 3, allowIncompatible: true, allowIndeterminate: true} },
+                                { gen: "algebra/system/lineal", repeat: 2, options: { interval: 5, dimension: 3, nequations: 2} },
+                                { gen: "algebra/system/nonlinear", repeat: 2, options: { interval: 10, complexity: 1} },
+                                { gen: "algebra/system/nonlinear", repeat: 2, options: { interval: 10, complexity: 2} }    
                             ]
                         },
                         {

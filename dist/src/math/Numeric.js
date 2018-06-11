@@ -166,6 +166,13 @@ class Numeric {
     isNegative() {
         return this.Re["s"] < 0;
     }
+    isEqual(n) {
+        const thisRE = this.Re["s"] * this.Re["n"] / this.Re["d"];
+        const nRE = n.Re["s"] * n.Re["n"] / n.Re["d"];
+        const thisIM = this.Im["s"] * this.Im["n"] / this.Im["d"];
+        const nIM = n.Im["s"] * n.Im["n"] / n.Im["d"];
+        return thisRE === nRE && thisIM === nIM;
+    }
     oposite() {
         return new Numeric(-this.Re["n"] * this.Re["s"], this.Re["d"], -this.Im["n"] * this.Im["s"], this.Im["d"]);
     }
@@ -189,9 +196,11 @@ class Numeric {
         if (!this.isReal()) {
             throw "power of complex not implemented yet";
         }
-        let base = this;
+        let base = this.copy();
         if (n.isNegative()) {
             base = base.inverse();
+            // Make n positive
+            n = n.oposite();
         }
         if (n.isZero()) {
             return Numeric.fromNumber(1);
