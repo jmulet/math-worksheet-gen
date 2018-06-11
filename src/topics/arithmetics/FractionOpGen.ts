@@ -36,4 +36,8 @@ export class FractionOpGen implements QuestionGenInterface {
     getAnswer(): string {
         return "$" + this.answer.toTeX() + "$";
     }
+
+    getDistractors(): string[] {
+        return [];
+    }
 }

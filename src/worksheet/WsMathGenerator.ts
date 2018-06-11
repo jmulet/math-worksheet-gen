@@ -4,10 +4,10 @@ import { WsSection } from './WsSection';
 import * as path from 'path';
 import { importClassesFromDirectories } from '../util/importClassesFromDirectories';
 import { Random } from '../util/Random';
- 
- 
- // Load all generators
-const topics = path.resolve('src//topics/');
+import * as xmlBuilder from 'xmlbuilder';
+  
+// Load all generators
+const topics = path.resolve('src/topics/');
 const genClasses = importClassesFromDirectories([path.join(topics,'/algebra/**/*.ts'), 
                                                  path.join(topics, '/algebra/**/*.js'),
                                                  path.join(topics, '/arithmetics/**/*.ts'),
@@ -19,7 +19,9 @@ const genClasses = importClassesFromDirectories([path.join(topics,'/algebra/**/*
                                                  path.join(topics, '/probability/**/*.ts'),
                                                  path.join(topics, '/probability/**/*.js'),
                                                  path.join(topics, '/statistics/**/*.ts'),
-                                                 path.join(topics, '/statistics/**/*.js')
+                                                 path.join(topics, '/statistics/**/*.js'),
+                                                 path.join(topics, '/special/**/*.ts'),
+                                                 path.join(topics, '/special/**/*.js')
                                                 ]);
 console.log("WsMathGenerator:: Loaded generator classes ...");
 console.log(genClasses.map( (clazz) => clazz.name ).join(", "));
@@ -28,6 +30,64 @@ export enum WsExportFormats {
     LATEX = 0,
     HTML = 1,
     PDF = 2,    
+    MOODLEXML=3
+}
+ 
+/**
+ * <question type="multichoice|truefalse|shortanswer|matching|cloze|essay|numerical|description">
+ <name>
+     <text>Name of question</text>
+ </name>
+ <questiontext format="html">
+     <text>What is the answer to this question?</text>
+ </questiontext>
+ .
+ .
+ .
+</question>
+ * @param quiz 
+ * @param formulation 
+ * @param type 
+ */
+const createQuestion = function(quiz: xmlBuilder.XMLElementOrXMLNode, formulation, type, answer, distractors) {
+    type = type || "shortanswer";
+    const questionNode = quiz.ele("question", {type: type});
+    questionNode.ele("name").ele("text", {}, formulation + " [" + Math.random().toString(32).substring(2) +"] " );
+    questionNode.ele("questiontext", {format: "html"}).ele("text").dat(formulation);
+    let answerNode;
+    switch(type) {
+        case("numerical"):
+            answerNode = questionNode.ele("answer", {fraction: "100", format: "moodle_auto_format"});
+            answerNode.ele("text", {}).dat(answer);
+            answerNode.ele("feedback", {format: "html"}).ele("text", {}).dat("Correcte!");
+            questionNode.ele("defaultgrade", {}, 1.0000000);
+            questionNode.ele("penalty", {}, 0.3333333);
+            questionNode.ele("hidden", {}, 0);
+            questionNode.ele("tolerance", {}, 0.1);
+            questionNode.ele("tolerancetype", {}, 1);
+            break;
+        case("shortanswer"):
+            answerNode = questionNode.ele("answer", {fraction: "100", format: "html"});
+            answerNode.ele("text", {}).dat(answer);
+            answerNode.ele("feedback", {format: "html"}).ele("text", {}).dat("Correcte!");
+            break;
+        case("multiplechoice"):
+            // Correct answer
+            answerNode = questionNode.ele("answer", {fraction: "100", format: "html"});
+            answerNode.ele("text", {}).dat(answer);
+            answerNode.ele("feedback", {format: "html"}).ele("text", {}).dat("Correcte!");
+            // Add distractors
+            distractors.forEach( (distract) => {
+                answerNode = questionNode.ele("answer", {fraction: "-33.33333", format: "html"});
+                answerNode.ele("text", {}).dat(distract);
+                answerNode.ele("feedback", {format: "html"}).ele("text", {}).dat("Incorrecte!");
+            });
+
+            questionNode.ele("shuffleanswers", {}, 1);
+            questionNode.ele("single", {}, "true");
+            questionNode.ele("answernumbering", {}, "abc");
+            break;
+    }
 }
 
 /*
@@ -67,9 +127,9 @@ export class WsMathGenerator {
             wsGenOpts.rand = this.rand;
         }
 
-        if (wsGenOpts.worksheet) {
-            this.create(wsGenOpts.worksheet);
-        }
+       // if (wsGenOpts.worksheet) {
+       //     this.create(wsGenOpts.worksheet);
+       // }
     }
 
     create(worksheet: Worksheet) {
@@ -81,18 +141,26 @@ export class WsMathGenerator {
                 if (activity.gen) {
                     clazz = (Container[activity.gen] || {}).clazz;
                 } 
+                activity.options = activity.options || {};
+                activity.options.showFirstQuestionAnswer = worksheet.showFirstQuestionAnswer;
+               
                 const act = sec.createActivity(activity.formulation, activity.scope, clazz, activity.options);
                 activity.questions.forEach( (question) => {
                         let clazz = (Container[question.gen] || {}).clazz;
+                        // Special generators only allow for one repetition
+                        if (question.gen.indexOf("special/") === 0) {
+                            question.repeat = 1;
+                        }
                         if(clazz) {
-                            act.useRepeat(clazz, question.options || {}, question.repeat || 1, activity.scope!=null);
+                            act.useRepeat(clazz, question.options || {}, question.repeat || 1, question.type, activity.scope && Object.keys(activity.scope).length>0);
                         } else {
                             console.log("Error:: generator clazz ", question, " not found");
                         }
                 });                
             });
             this.includeKeys(worksheet.includeKeys);
-        })
+        });
+        
     }
     
     addSection(title: string): WsSection {
@@ -112,7 +180,9 @@ export class WsMathGenerator {
             case(WsExportFormats.LATEX):
                 return this.exportLatex();                
             case(WsExportFormats.HTML):
-                return this.exportHtml();                
+                return this.exportHtml();   
+            case(WsExportFormats.MOODLEXML):
+                return this.exportMoodleXml();                
             default:
                 console.log("Unknown exporter");
         }
@@ -125,6 +195,8 @@ export class WsMathGenerator {
             "\\usepackage{geometry}",
             "\\geometry{a4paper, total={170mm,257mm}, left=20mm, top=20mm}",
             "\\usepackage{tasks}",
+            "\\usepackage[utf8]{inputenc}",
+            "\\usepackage[T1]{fontenc}",
             "\\usepackage{enumitem}",
             "\\usepackage{amsmath}",
             "\\begin{document}",           
@@ -138,7 +210,9 @@ export class WsMathGenerator {
                 latex.push("" + this.worksheet.instructions + "");
             }
 
-            latex.push("\n \\textbf{Referència:} " + this.rand.seed + ". \\textbf{Nom i llinatges:} ........................................................ \n");
+            latex.push("\n \\textbf{Referència:} " + this.rand.seed + ". \\textbf{Nom i llinatges:} " +
+            (this.worksheet.fullname? this.worksheet.fullname :
+            "........................................................... \n"));
         }
 
 
@@ -181,7 +255,7 @@ export class WsMathGenerator {
             }
 
            .olactivity:first-of-type { counter-reset: activitycounter }           
-           .olactivity > li { counter-increment: activitycounter; list-style-type: none; }       
+           .olactivity > li { counter-increment: activitycounter; list-style-type: none; font-weight: 'bold' }       
            .olactivity > li:before { content: counter(activitycounter) ". "; }
 
             .olalpha {
@@ -206,7 +280,9 @@ export class WsMathGenerator {
             .arial {
                 font-family: Arial, Helvetica, sans-serif;
             }
-
+            .activity-formulation {
+                font-size: 120%;
+            }
             .instructions {                
                 border: 2px solid blue;
                 border-radius: 5px;
@@ -215,6 +291,33 @@ export class WsMathGenerator {
                 padding: 10px;
                 font-size: 110%;
             }
+            @media print {               
+                .instructions {
+                    font-size: 20px;
+                }
+                p {
+                    font-size: 120%;
+                }
+                h2 {
+                    font-size: 120%;
+                } 
+                h3 {
+                    font-size: 120%;
+                }  
+                h4 {
+                    font-size: 120%;
+                } 
+                @page {
+                    margin: 1.5cm 1.5cm;
+                }
+                .activity-formulation {
+                    font-size: 20px;
+                }
+                .arial-large {
+                    font-size: 34px;
+                }
+             }
+             
            `,
             '</style>',
             "</head>",
@@ -223,13 +326,14 @@ export class WsMathGenerator {
 
         if (this.worksheet) {
             if (this.worksheet.title) {
-                code.push("<h2 class=\"arial\" style=\"color:blue;text-align:center;\"><b>" + this.worksheet.title + "</b></h2>")
+                code.push("<h2 class=\"arial arial-large\" style=\"color:blue;text-align:center;\"><b>" + this.worksheet.title + "</b></h2>")
             }
             if (this.worksheet.instructions) {
-                code.push("<center><div class=\"arial instructions\">" + this.worksheet.instructions + "</div></center>")
+                code.push('<center><div class=\"instructions\"><p>' + this.worksheet.instructions + "</p></div></center>")
             }
 
-            code.push("<p class=\"arial\"><b>Referència:</b> " + this.rand.seed + ". <b>Nom i llinatges:</b> ........................................................</p>")
+            code.push("<p class=\"arial\"><b>Referència:</b> " + this.rand.seed + ". <b>Nom i llinatges:</b> " +
+            (this.worksheet.fullname? this.worksheet.fullname : "..........................................................</p>"))
         }
 
         let activityCounter = 1;
@@ -264,4 +368,21 @@ export class WsMathGenerator {
 
         return code.join("\n");
     }    
+
+    exportMoodleXml(): string {
+        var quiz = xmlBuilder.create('quiz', { encoding: 'utf-8' });
+        this.sections.forEach((section) => {
+           // Add a category           
+           quiz.ele("question", {type: "category"}).ele("category").ele("text", {}, "$course$/"+section.title);
+           section.activities.forEach( (activity) => {                
+                activity.questions.forEach( (question) => {
+                    let formulation = activity.formulation;
+                    formulation += ". " + question.toHtml();
+                    const type = question.type;
+                    createQuestion(quiz, formulation, type, question.answerToHtml(), question.distractorsHtml());
+                });
+           })
+        });        
+        return quiz.end({pretty: true});
+    }
 }

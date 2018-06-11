@@ -88,4 +88,8 @@ export class RadicalsOpGen implements QuestionGenInterface {
     getAnswer(): string {
         return "$" + this.answer.simplify().toTeX() + "$";
     }
+
+    getDistractors(): string[] {
+        return [];
+    }
 }

@@ -85,4 +85,8 @@ export class PolyDivision implements QuestionGenInterface {
         const bar = this.qGenOpts.question.bar || "x";
         return "$Q(x)=" + this.answers.quotient.toTeX(bar)  + "$; $R=" + this.answers.remainder.toTeX(bar) + "$ ";
     }
+
+    getDistractors(): string[] {
+        return [];
+    }
 }

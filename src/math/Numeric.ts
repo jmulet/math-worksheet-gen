@@ -237,6 +237,10 @@ export class Numeric {
         return Math.sqrt(mod2["n"]/mod2["d"]);
     }
 
+    toNumber(): number {
+        return this.Re["s"]*this.Re["n"] / this.Re["d"];
+    }
+
     toTeX(opts?: any): string {
         let tex = "";
         if (this.Re["s"] < 0) {

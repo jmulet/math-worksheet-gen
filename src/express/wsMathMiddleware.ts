@@ -2,233 +2,45 @@ import * as express from "express";
 import { WsMathGenerator, WsExportFormats } from "../worksheet/WsMathGenerator";
 import { latexToPdf } from '../util/latexToPdf';
 import { Stream } from "stream";
+import { Response } from "express-serve-static-core";
+import { MysqlStorage } from "./MsqlStorage";
+import { Storage } from "./Storage";
+import { Container } from "../util/WsGenerator";
+import * as httpRequest from 'request';
 
 export interface wsMathMdwOptions {
     basePrefix: string;
+    storage: Storage;
 }
-
-const DOCUMENT_CACHE: any = {};
-const deltaTime = 5*60*1000;
-//Cache is cleared after 5 minutes
-setInterval(function() {
-    const now = new Date().getTime();
-    for (let key in DOCUMENT_CACHE) {
-        const doc = DOCUMENT_CACHE[key];
-        if (now - doc.generated >= deltaTime) {
-            delete DOCUMENT_CACHE[key];
-        }
-    }   
-}, deltaTime);
-
-export function wsMathMiddleware(options?: wsMathMdwOptions) {
-    options = options || { basePrefix: '' };
-
-    const router = express.Router();
-
-    const base = (options.basePrefix || '') + '/wsmath';
-    let url = base + '/gen';
-
-    router.post(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
-        const seed = req.query.seed;
-        const type = req.query.type || 'html';
-        let body = req.body; 
-
-        if (!body) {
-            body = generateSampleBody();
-        }
-        if (typeof (body) === 'string') {
-            body = JSON.parse(body);
-        }
-        body.seed = (seed == 0? '': seed);
-        const generator = new WsMathGenerator(body);
-        const id = Math.random().toString(32).substring(2);
-        res.setHeader("Content-Type", "application/json");
-
-        if (type === 'html') {
-            const html = generator.exportAs(WsExportFormats.HTML);
-            /*
-            DOCUMENT_CACHE[id] = {
-                generated: new Date().getTime(),
-                type: 'html',
-                data: html
-            };
-            */
-            res.status(200).send({ link: base + '/get?id=' + id, data: html });
-
-        } else if (type === 'tex' || type === 'latex' || type === 'pdf') {
-            const tex = generator.exportAs(WsExportFormats.LATEX);
-            if (type === 'tex' || type === 'latex') {
-                /* DOCUMENT_CACHE[id] = {
-                    generated: new Date().getTime(),
-                    type: 'tex',
-                    data: tex
-                };
-                */
-                res.status(200).send({ link: base + '/get?id=' + id, data: tex });
-            } else {
-                const outputStream = latexToPdf(tex);
-                
-                DOCUMENT_CACHE[id] = {
-                    generated: new Date().getTime(),
-                    type: 'pdf',
-                    data: outputStream
-                };
-                
-                res.status(200).send({ link: base + '/get?id=' + id });
-            }
-        }
-    });
-
-    url = base + '/get';
-
-    router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
-        const id = req.query.id; 
-        let doc = DOCUMENT_CACHE[id];
-        if (!doc) {
-            const html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-            <title>Math worksheet generator</title>
-            <meta charset="utf-8">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <style>
-            </style>
-            </head>
-            <body>
-            <h1>Link not found or expired</h1>
-            </body>
-            </html>
-            `;
-            res.setHeader("Content-type", "text/html");
-            res.status(200).send(html);
-        } else {
-            switch(doc.type) {
-                case 'html': 
-                    res.setHeader("Content-type", "text/html");
-                    res.status(200).send(doc.data);
-                    break;
-                case 'tex': 
-                    res.setHeader("Content-type", "text/plain");
-                    res.status(200).send(doc.data);
-                    break;
-                case 'pdf': 
-                    res.setHeader("Content-type", "application/pdf");
-                    const outputStream = <Stream> doc.data;
-                    outputStream.pipe(res);
-                    break;
-            }
-        }
-    });
-
-
-
-
-
-
-    url = (options.basePrefix || '') + '/wsmath';
-    router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
-
-        const textarea: string = JSON.stringify(generateSampleBody(), null, 2)
-            .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
-
-        const uri = (options.basePrefix || '') + '/wsmath/gen';
-
-        const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <title>Math worksheet generator</title>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" crossorigin="anonymous">
-        <style>
-        </style>
-        </head>
-        <body>
-        <h2><b>Generate Maths Worksheets</b></h2>
-        <h4>Define the worksheet here</h4>
-        <textarea style="width:99%;" rows="35">
-        </textarea>
-        <br/>
-        Seed <input id="seed" type="number" min="0"/>
-        <br/>
-        <button class="btn" data-type="latex">Generate LaTeX</button>
-        <button class="btn" data-type="html">Generate HTML</button>
-        <button class="btn" data-type="pdf">Generate PDF</button>
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-        <script>
-            $(function(){
-                $("textarea").val("${textarea}");
-
-                var extraSeed = 0;
-
-                var doAJAX = function(evt){
-
-                    var target = evt.currentTarget;
-                    var type = $(target).data("type") || 'pdf';
-                    var bodyEncoded = $("textarea").val();
-                    try {
-                        bodyEncoded = JSON.parse(bodyEncoded);
-                    } catch(Ex) {
-                        console.log(Ex);
-                        return;
-                    }
-                    var seed = $("#seed").val() || 0;
-                    var contentType = "text/html";
-                    var fileName = "";
-                    if (type === 'text' || type === 'latex') {
-                        contentType = "text/plain;charset=UTF-8";
-                        fileName = "mathgen.tex";
-                    } else if (type === 'pdf') {
-                        contentType = "application/pdf";
-                        fileName = "mathgen.pdf";
-                    }        
-
-                    $.ajax({
-                        method: 'POST',
-                        data: bodyEncoded,
-                        responseType: 'aplication/json',
-                        url: '${url}/gen?seed=' + seed + (extraSeed? ("." + extraSeed): "") + '&type='+type 
-                    }).then(function(res){           
-                        if(type==='pdf') {
-                            window.open( res.link, '_blank' )                        
-                        } else {
-                            var appType = "text/plain";
-                            if (type==='html') {
-                                appType = "text/html";
-                            }
-                            // show data in a new page
-                            var file = new Blob([res.data], {type: appType});
-                            var fileURL = URL.createObjectURL(file);
-                            window.open(fileURL);
-                        }
-                    }, function(err){
-                        extraSeed += 1;
-                        doAJAX(evt);
-                    });
-                };
-                
-
-                $(".btn").on("click", function(evt) {                                
-                    doAJAX(evt);
-                });
-            });
-        </script>
-        </body>
-        </html>
-        `;
-        res.set("Content-type", "text/html");
-        res.send(html);
-    });
-
-    return router;
-}
-
 
 function generateSampleBody() {
+    var body = {
+
+        worksheet: {
+            includeKeys: true,
+            title: "Moodle test",
+            sections: [
+                {
+                    name: "Coniques", activities: [
+                        {
+                            formulation: "Calcula l'excentricitat",
+                            questions: [
+                                { gen: "geometry/conics/excentricity", repeat: 6, options: { interval: 5 } }
+                            ]
+                        } 
+                    ]
+                }
+            ]
+        }
+    };
+    
+    return body;
+};
+
+
+
+
+function generateSampleBody0() {
     var body = {
 
         worksheet: {
@@ -239,40 +51,40 @@ function generateSampleBody() {
                 {
                     name: "Radicals", activities: [
                         {
-                            formulation: "Escriu les potències en forma d'arrel i viceversa",                           
+                            formulation: "Escriu les potències en forma d'arrel i viceversa",
                             questions: [
-                                { gen: "arithmetics/radicals/notation", repeat: 6, options: {maxIndex: 5} }                                
+                                { gen: "arithmetics/radicals/notation", repeat: 6, options: { maxIndex: 5 } }
                             ]
                         },
                         {
-                            formulation: "Treu factors i simplifica els radicals si és possible",                           
+                            formulation: "Treu factors i simplifica els radicals si és possible",
                             questions: [
-                                { gen: "arithmetics/radicals/simplify", repeat: 4, options: {maxIndex: 5} }                                
+                                { gen: "arithmetics/radicals/simplify", repeat: 4, options: { maxIndex: 5 } }
                             ]
                         },
                         {
-                            formulation: "Opera els radicals",                           
+                            formulation: "Opera els radicals",
                             questions: [
                                 { gen: "arithmetics/radicals/operations", repeat: 4, options: {} },
-                                { gen: "arithmetics/radicals/operations", repeat: 2, options: {algebraic: true} }
-                            ]
-                        },                        
-                        {
-                            formulation: "Simplifica els radicals",                           
-                            questions: [
-                                { gen: "arithmetics/radicals/gather", repeat: 2, options: {maxIndex: 2} },
-                                { gen: "arithmetics/radicals/gather", repeat: 2, options: {domain: 'Q'} }
+                                { gen: "arithmetics/radicals/operations", repeat: 2, options: { algebraic: true } }
                             ]
                         },
                         {
-                            formulation: "Racionalitza els radicals",                           
+                            formulation: "Simplifica els radicals",
+                            questions: [
+                                { gen: "arithmetics/radicals/gather", repeat: 2, options: { maxIndex: 2 } },
+                                { gen: "arithmetics/radicals/gather", repeat: 2, options: { domain: 'Q' } }
+                            ]
+                        },
+                        {
+                            formulation: "Racionalitza els radicals",
                             questions: [
                                 { gen: "arithmetics/radicals/rationalize", repeat: 2, options: {} },
-                                { gen: "arithmetics/radicals/rationalize", repeat: 2, options: {conjugate: true} }
+                                { gen: "arithmetics/radicals/rationalize", repeat: 2, options: { conjugate: true } }
                             ]
                         }
                     ]
-                },        
+                },
                 {
                     name: "Polinomis", activities: [
                         {
@@ -314,11 +126,243 @@ function generateSampleBody() {
                             ]
                         }
                     ]
+                },
+                {
+                    name: "Equacions", activities: [
+                        {
+                            formulation: "Resol aquestes equacions de segon grau", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 1, maxDegree:2, minDegree: 2 } },
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 2, maxDegree:2, minDegree: 2 } }
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions biquadrades", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 1, specialType: 'biquadratic' } },
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 2, specialType: 'biquadratic' } }
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions factoritzades", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 4, options: { interval: 5, complexity: 0, specialType: 'factorizable', minDegree: 2, maxDegree: 5 } } 
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions polinòmiques", questions: [
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 1, minDegree: 3, maxDegree: 4} },
+                                { gen: "algebra/equations/polynomial", repeat: 2, options: { interval: 5, complexity: 2, minDegree: 3, maxDegree: 5} } 
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes equacions irracionals", questions: [
+                                { gen: "algebra/equations/irrational", repeat: 2, options: { interval: 10, complexity: 1} },
+                                { gen: "algebra/equations/irrational", repeat: 4, options: { interval: 10, complexity: 2} } 
+                            ]
+                        },
+                        {
+                            formulation: "Resol aquestes sistemes d'equacions", questions: [
+                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 2, nequacions: 2} },
+                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 3, nequacions: 3} },
+                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 3, nequacions: 2} }  
+                            ]
+                        },
+                        {
+                            formulation: "En Miquel té ${a} euros i na Maria ${b} euros.", scope: {a: "rnd.decimal(10,40,2)", b: "rnd.decimal(10,40,2)"}, questions: [
+                                { gen: "special/computed", repeat: 1, options: { 
+                                    qFormulation: "Quants d'euros tenen en total?",
+                                    qAnswer: "${(a+b).toFixed(2)} euros"
+                                 } },
+                                 { gen: "special/computed", repeat: 1, options: { 
+                                    qFormulation: "Quants d'euros de diferència?",
+                                    qAnswer: "${Math.abs(a-b).toFixed(2)} euros"
+                                 } }  
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "Logaritmes", activities: [
+                        {
+                            formulation: "Utilitza la definició de logaritme  per calcular el valor de de $x$ en les equacions següents", questions: [
+                                { gen: "arithmetics/logarithm/definition", repeat: 6, options: { interval: 5 } }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "Funcions", activities: [
+                        {
+                            formulation: "Representa aquestes funcions lineals", questions: [
+                                { gen: "calculus/elemental/graph", repeat: 4, options: { interval: 10, domain: 'Q', types: [0] } }
+                            ]
+                        },
+                        {
+                            formulation: "Calcula el vèrtex i representa aquestes paràboles", questions: [
+                                { gen: "calculus/elemental/graph", repeat: 4, options: { interval: 10, types: [1] } }
+                            ]
+                        },
+                        {
+                            formulation: "Representa aquestes funcions elementals i calcula el seu domini", questions: [
+                                { gen: "calculus/elemental/graph", repeat: 6, options: { interval: 10, types: [0, 1, 2, 3, 4, 5] } }
+                            ]
+                        }
+                    ]
                 }
             ]
         }
     };
 
-
     return body;
 }
+
+//Mysql - Cache is cleared after 5 minutes
+const deltaTime = 5 * 60 * 1000;
+
+function generateDocument(doc: any, res: Response) {
+    const generator = new WsMathGenerator(doc);
+    generator.create(doc);
+    if (doc.type === 'html') {
+        const htmlPage = generator.exportAs(WsExportFormats.HTML);
+        res.setHeader("Content-type", "text/html");
+        res.status(200).send(htmlPage);
+    } else if (doc.type === 'tex' || doc.type === 'latex') {
+        const tex = generator.exportAs(WsExportFormats.LATEX);
+        res.setHeader("Content-type", "text/plain");
+        res.status(200).send(tex);
+    } else if (doc.type === 'moodlexml') {
+        const tex = generator.exportAs(WsExportFormats.MOODLEXML);
+        res.setHeader("Content-type", "text/plain");
+        res.status(200).send(tex);
+    } else {
+        const tex = generator.exportAs(WsExportFormats.LATEX);
+        
+            const outputStream = latexToPdf(tex);
+            outputStream.on("error", function(err){
+                res.status(400).send("Error producing pdf:: "+ err);
+                return;
+            });
+            res.setHeader("Content-type", "application/pdf");
+            outputStream.pipe(res);
+        
+    }
+}
+
+
+export function wsMathMiddleware(options?: wsMathMdwOptions) {
+    options = { basePrefix: '', ...options };
+    if (!options.storage) {
+        options.storage = new MysqlStorage();
+    }
+
+    setInterval(function () {
+        options.storage.clear();
+    }, deltaTime);
+
+    const router = express.Router();
+
+
+    /**
+     * Posts the document structure in json format and returns the stored document id
+     */
+    const base = (options.basePrefix || '') + '/wsmath';
+    let url = base + '/store';
+    router.post(url, async function (req: express.Request, res: express.Response, next: express.NextFunction) {
+        const seed = req.query.seed;
+        let body = req.body;
+        if (!body) {
+            body = {};
+        }
+        if (typeof (body) === 'string') {
+            body = JSON.parse(body);
+        }
+
+        body.type = req.query.type || 'html';
+        body.seed = (seed == 0 ? '' : seed);
+        body.baseURL = base;
+
+        const uid = await options.storage.save(body, req.query.idUser, req.query.persist);
+        res.send({ id: uid });
+    });
+
+    /***
+     * Gets a document by its id
+     * optional query params type, seed
+     */
+
+    url = base + '/';
+    router.get(url, async function (req: express.Request, res: express.Response, next: express.NextFunction) {
+        const id = req.query.id;
+        let doc = await options.storage.load(id);
+
+        if (!doc) {
+            res.render('notfound', {
+                id: id
+            });
+        } else { 
+            // Pass extra information from query params
+            if (req.query.seed) {
+                doc.seed = req.query.seed;
+            }
+            if (req.query.type) {
+                doc.type = req.query.type;
+            }
+            if (req.query.fullname) {
+                doc.fullname = req.query.fullname;
+            }
+            if (req.query.seed && !req.query.username && !req.query.idUser) {
+                req.query.username = req.query.seed + "b";
+            }
+            if (req.query.username) {
+                // get fullname of this username
+                doc.seed = req.query.username;
+                const user = await options.storage.userByUsername(req.query.username);
+                if (user) {
+                    doc.fullname = user["fullname"];
+                    if (user["idRole"] < 200) {
+                        doc.includeKeys = true;
+                    }
+                }
+            }
+            if (req.query.idUser) {
+                // get fullname of this idUser
+                doc.seed = req.query.idUser;
+                const user = await options.storage.userByIdUser(req.query.idUser);
+                if (user) {
+                    doc.fullname = user["fullname"];
+                    if (user["idRole"] < 200) {
+                        doc.includeKeys = true;
+                    }
+                }
+            }
+            // Generate document
+            try  {
+                generateDocument(doc, res);
+            } catch (Ex) {
+                console.log("An error occurred while generating the document::", Ex);
+            }
+        }
+    });
+
+
+    url = (options.basePrefix || '') + '/wsmath/editor';
+    router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
+ 
+            const textarea: string = JSON.stringify(generateSampleBody0(), null, 2)
+                .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
+ 
+            const uri = (options.basePrefix || '') + '/wsmath';
+            res.render("editor", {
+                textarea: textarea,
+                url: uri,
+                questionTypesList: Object.keys(Container).sort(),
+                questionTypesMeta: Container,
+                user: {id: 0, fullname: "Admin", username:"admin"}
+            });
+        });
+
+ 
+    return router;
+}
+
+
+
+ 

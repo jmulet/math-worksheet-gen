@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>wsMath</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+    <style>
+        /* Sticky footer styles
+-------------------------------------------------- */
+
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            margin-bottom: 60px;
+            padding-top: 20px;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            font-size: 86%;
+            background-color: #f5f5f5;
+        }
+
+        body>.container {
+            padding: 60px 15px 0;
+        }
+
+        .footer>.container {
+            padding-right: 15px;
+            padding-left: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <!-- Fixed navbar -->
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <a class="navbar-brand" href="#">wsMath</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mr-auto">
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="row alert alert-danger">
+            <% if(id) {%>
+                <h2><p>Upps!</p> 
+                    <p>Worksheet
+                    <i>
+                        <%=id%>
+                    </i> not found</h2>
+                    </p>
+                <%} else {%>
+                    <h3>
+                        <p>Invalid Url</p>
+                        <p> Parameters syntax:</p>
+                    </h3>
+                    </br>
+                    <h4> /wsmath?id=
+                        <i>worksheetID</i>&seed=
+                        <i>randomseed</i>&type=
+                        <i>latex|html|pdf</i>&fullname=
+                        <i>student's name</i>
+                    </h4>
+                    <p>Only worksheetID is required. All other parameters are optional. By default seed is random and type=pdf</p>
+                    <%} %>
+        </div>
+        <br/>
+        <% if(!id) {%>
+            <p>
+                <a href="/wsmath/editor">Looking for the worksheet editor?</a>
+            </p>
+            <%}%>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <span class="text-muted">By Josep Mulet (c) 2018.</span>
+        </div>
+    </footer>
+</body>
+
+</html>

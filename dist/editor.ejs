@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>wsMath</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <style>
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            margin-bottom: 60px;
+            padding-top: 60px;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            font-size: 86%;
+            background-color: #f5f5f5;
+        }
+
+        body>.container {
+            padding: 60px 15px 0;
+        }
+
+        .footer>.container {
+            padding-right: 15px;
+            padding-left: 15px;
+        }
+        input[type="checkbox"] {
+            width: 20px; height: 20px;
+        }
+    </style>
+</head>
+
+<body ng-app="wsMathEditor">
+
+        <header>
+                <!-- Fixed navbar -->
+                <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+                    <a class="navbar-brand" href="#">wsMath</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarCollapse">
+                        <ul class="navbar-nav mr-auto">
+                            <li><%=user.username%></li>
+                        </ul>
+                    </div>
+                </nav>
+            </header>
+
+
+    <div ng-controller="wsMathController" class="container-fluid">
+            <h5>Hi <%=user.fullname%>!</h5>
+
+            <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#currentPreferences">Worksheet</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#alternative">Activities</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#link">Generate</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="currentPreferences">
+                        <ul>
+                                <br/>
+                                <p><span style="width: 100px; display: inline-block;"><b>Title</b></span> <input style="width:80%" type="text" ng-model="ws.title"/></p>
+                                <p><span style="width: 100px; display: inline-block;"><b>Instructions</b></span> <textarea type="text" ng-model="ws.instructions" rows="5" style="width:80%"></textarea></p>
+                                <p><span style="width: 100px; display: inline-block;"><b>Include keys</b></span> <input type="checkbox" ng-model="ws.includeKeys"/></p>
+                                
+                                <br/>
+                        
+                                <button class="btn btn-md btn-success" ng-click="addSection()"> <i class="fas fa-plus"></i> Add section</button>
+                                <p><b>Sections:</b></p>
+                                <div ng-repeat="sec in ws.sections track by $index">
+                                    <button class="btn btn-sm btn-secondary" ng-click="moveupSection(sec, $index)"><i class="fas fa-arrow-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary" ng-click="movedownSection(sec, $index)"><i class="fas fa-arrow-down"></i></button>
+                                    <button class="btn btn-sm btn-danger" ng-click="removeSection(sec, $index)"><i class="fas fa-trash-alt"></i></button>
+                                    <b><input style="width:70%" type="text" ng-model="sec.name"> <span class="badge badge-primary">{{sec.activities.length}}</span></b>                                    
+                                </div>
+                        </ul>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade in" id="alternative">
+                        <ul>
+                                <b>Activities in section: </b>
+                                <div class="dropdown" style="display: inline-block;">
+                                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                          {{selectedSection? selectedSection.name : "No section"}}
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                          <a ng-repeat="sec in ws.sections track by $index" class="dropdown-item" href="#" ng-click="pickSection(sec)">{{sec.name}}</a>                                          
+                                        </div>                                      
+                                </div>
+
+                                <div ng-if="selectedSection">
+                                        <button class="btn btn-md btn-success" ng-click="addActivity()"> <i class="fas fa-plus"></i> Add activity</button>
+                                        <p><b>Activities:</b></p>
+                                        <div ng-repeat="act in selectedSection.activities track by $index" style="width:90%;border: 1px solid gray; border-bottom: 20px; border-radius:5px">
+                                            <button class="btn btn-sm btn-secondary" ng-click="moveupActivity(act, $index)"><i class="fas fa-arrow-up"></i></button>
+                                            <button class="btn btn-sm btn-secondary" ng-click="movedownActivity(act, $index)"><i class="fas fa-arrow-down"></i></button>
+                                            <button class="btn btn-sm btn-danger" ng-click="removeActivity(act, $index)"><i class="fas fa-trash-alt"></i></button>
+                                            <p><b>Formulation: </b><textarea style="width:70%" type="text" ng-model="act.formulation" rows="2"></textarea> <span class="badge badge-primary">{{sec.activities.length}}</span></b></p>                                   
+                                            <b>Questions:</b>
+                                            <button class="btn btn-md btn-success" ng-click="addQuestion(act)"> <i class="fas fa-plus"></i> Add question</button>
+                                             
+                                            <div ng-repeat="question in act.questions track by $index" style="width:80%; padding-left:120px;">
+                                                <p>
+                                                <button class="btn btn-sm btn-secondary" ng-click="moveupQuestion(act, question, $index)"><i class="fas fa-arrow-up"></i></button>
+                                                <button class="btn btn-sm btn-secondary" ng-click="movedownQuestion(act, question, $index)"><i class="fas fa-arrow-down"></i></button>
+                                                <button class="btn btn-sm btn-danger" ng-click="removeQuestion(act, $index)"><i class="fas fa-trash-alt"></i></button>
+                                                Generator: 
+                                                    <select ng-model="question.gen"
+                                                    ng-options="item for item in questionTypesList"
+                                                    ng-change="generatorChanged(question)"></select>
+
+                                                
+                                                 Repeat: <input type="number" min="0" max="20" ng-model="question.repeat"/></p>      
+                                                 
+                                                 Moodle: <select ng-model="question.type" ng-options="item for item in moodleActivityTypes"></select>
+                                                <p>
+                                                    <button ng-click="question.expanded=!question.expanded;"><i class="fas" ng-class="question.expanded?'fa-minus-square':'fa-plus-square'"></i></button>
+                                                    Options <span class="badge badge-secondary">{{Object.keys(question.options).length}}</span>:
+                                                </p>
+                                                <question-options ng-if="question.expanded" question="question"></question-options>
+                                                <hr/>
+                                            </div>
+                                            <hr/>
+                                        </div>
+                                </div>
+                        </ul>
+                    </div>
+                     <div role="tabpanel" class="tab-pane fade in" id="link">
+                        <ul>
+                                <br/> 
+                                <p>
+                                    <span style="width: 150px; display: inline-block;"><b>Seed: </b></span> <input ng-model="seed" type="number" min="0" />
+                                </p>
+                                <p>
+                                    <span style="width: 150px; display: inline-block;"><b>Store: </b></span> <input ng-model="store" type="checkbox"/>
+                                </p>
+                                <br/>
+                                <p>
+                                <button class="btn btn-info" ng-click="postWorksheet('latex')">Generate LaTeX</button>
+                                <button class="btn btn-info" ng-click="postWorksheet('html')">Generate HTML</button>
+                                <button class="btn btn-info" ng-click="postWorksheet('pdf')">Generate PDF</button>
+                                <button class="btn btn-info" ng-click="postWorksheet('moodlexml')">Generate Moodle XML</button>
+                                </p>
+
+                                <p ng-if="worksheetID">
+                                        <span style="width: 150px; display: inline-block;"><b>worksheetID: </b></span> {{worksheetID}}
+                                </p>
+                        </ul>
+                    </div>
+                </div>
+
+        
+        
+
+        
+        <!--<textarea style="width:99%;" rows="15" ng-model="textarea"></textarea>-->
+
+       
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
+
+    <script>
+        var questionTypesList = <%-JSON.stringify(questionTypesList)%>;
+        var questionTypesMeta = <%-JSON.stringify(questionTypesMeta)%>;
+
+        var ngApp = angular.module("wsMathEditor", []);
+        
+        ngApp.controller("wsMathController", function ($scope, $http) {  
+            $scope.moodleActivityTypes = ['shortanswer', 'multiplechoice', 'numerical'];
+            $scope.user = <%-JSON.stringify(user)%>; 
+            $scope.textarea = "<%-textarea%>";
+            try {
+                $scope.ws = JSON.parse($scope.textarea).worksheet;
+            } catch(Ex) {
+                console.log(Ex);
+                console.log($scope.textarea);
+                return;
+            }
+            $scope.questionTypesList = questionTypesList;
+            $scope.generatorChanged = function(question, extend) {
+                var gen = questionTypesMeta[question.gen];
+                if (!gen) {
+                    return;
+                }
+                var parameters = gen.meta.parameters;
+                var options = {};
+                for(var i = 0; i < parameters.length; i++) {
+                    var p = parameters[i];
+                    options[p.name] = p.defaults;
+                }
+                if (extend) {
+                    question.options = angular.extend(options, question.options);
+                } else {
+                    question.options = options;
+                }
+            };
+
+            // Extend questions options with defaults
+            for(var i=0; i<$scope.ws.sections.length; i++) {
+                var sec = $scope.ws.sections[i];
+                for(var j=0; j<sec.activities.length; j++) {
+                    var act = sec.activities[j];
+                    for (var k=0; k<act.questions.length; k++) {
+                        var question = act.questions[k];                        
+                        $scope.generatorChanged(question, true);                      
+                    }
+                }
+            }
+
+            $scope.seed = 0;
+            var extraSeed = 0;
+            $scope.selectedSection = $scope.ws.sections[0];
+
+            $scope.postWorksheet = function (type) { 
+                type = type || 'pdf';
+                var bodyEncoded = $scope.ws;
+                
+                var url = '<%=url%>/store?seed=' + $scope.seed + (extraSeed ? ("." + extraSeed) : "") + '&type=' + type
+                    + "&idUser=" + $scope.user.id + "&persist=" + ($scope.store? 1 : 0);
+                $http.post(url, bodyEncoded).then(function (res) {
+                    var data = res.data;
+                    console.log(data);
+                    if (data.id) {
+                        $scope.worksheetID = data.id;
+                        var link = '<%=url%>/?id=' + data.id + '&seed=' + $scope.seed + (extraSeed ? ("." + extraSeed) : "") + '&type=' + type;
+                        window.open(link, '_blank')
+                    }
+                }, function (err) {
+                    extraSeed += 1;
+                    console.log(err);
+                });
+            };
+
+            $scope.moveupSection = function(sec, indx) {
+                if (indx === 0) {
+                    return;
+                }
+                $scope.ws.sections.splice(indx, 1);
+                $scope.ws.sections.splice(indx - 1, 0, sec);
+            };
+
+            $scope.movedownSection = function(sec, indx) {
+                if(indx === $scope.ws.sections.length - 1) {
+                    return;
+                }
+                $scope.ws.sections.splice(indx, 1);
+                $scope.ws.sections.splice(indx + 1, 0, sec);
+                $scope.selectedSection = $scope.ws.sections[0];
+            };
+
+            $scope.removeSection = function(sec, indx) {
+                $scope.ws.sections.splice(indx, 1);
+                $scope.selectedSection = $scope.ws.sections[0];
+            };
+
+            $scope.addSection = function() {
+                $scope.ws.sections.push({name: "", activities: []});
+                $scope.selectedSection = $scope.ws.sections[0];
+            }
+
+            $scope.pickSection = function(sec) {                
+                $scope.selectedSection = sec;
+            }
+
+            $scope.moveupActivity = function(sec, indx) {
+                if (indx === 0) {
+                    return;
+                }
+                $scope.selectedSection.activities.splice(indx, 1); 
+            };
+
+            $scope.movedownActivity = function(act, indx) {
+                if(indx === $scope.selectedSection.activities.length - 1) {
+                    return;
+                }
+                $scope.selectedSection.activities.splice(indx, 1);
+                $scope.selectedSection.activities.splice(indx + 1, 0, act); 
+            };
+
+            $scope.removeActivity = function(act, indx) {
+                $scope.selectedSection.activities.splice(indx, 1); 
+            };
+
+            $scope.addActivity = function() {
+                $scope.selectedSection.activities.push({formulation: "", questions: []}); 
+            };
+
+
+            $scope.moveupQuestion= function(act, question, indx) {
+                if (indx === 0) {
+                    return;
+                }
+                act.questions.splice(indx, 1); 
+                act.questions.splice(indx - 1, 0, question); 
+            };
+
+            $scope.movedownQuestion = function(act, question, indx) {
+                if(indx === act.questions.length - 1) {
+                    return;
+                }
+                act.questions.splice(indx, 1);
+                act.questions.splice(indx + 1, 0, question); 
+            };
+
+            $scope.removeQuestion = function(act, indx) {
+                act.questions.splice(indx, 1); 
+            };
+
+            $scope.addQuestion = function(act, category) {
+                var question = {gen: category || questionTypesList[0] || "", repeat: 1, options: {}};
+                act.questions.push(question); 
+                $scope.generatorChanged(question);
+            };
+
+           
+        });
+
+        ngApp.directive("questionOptions", function() {
+            var template = '<ul class="list list-unstyled" ng-repeat="param in parameters track by $index">';
+            template += '<span class="badge badge-secondary" title="{{param.description}}">?</span> <b>{{param.name}} <small>({{param.typeof}})</small></b>: ';
+            template += '<span ng-switch="param.typeof">';
+            template += '<span ng-switch-when="number"><input type="number" ng-model="question.options[param.name]"/></span> ';
+            template += '<span ng-switch-when="boolean"><input type="checkbox" ng-model="question.options[param.name]"/></span> ';
+            template += '<span ng-switch-default><input type="text" ng-model="question.options[param.name]"/></span> ';
+            template += '</span>';
+            template += '</ul>';
+            return {
+                restrict: 'E',
+                template: template,
+                scope: {
+                    question: '=question'
+                },
+                controller: ['$scope', function(scope) {                    
+                    var initDirective = function() {
+                        var gen = questionTypesMeta[scope.question.gen];
+                        if(!gen) {
+                            return;
+                        }                        
+                        scope.parameters = gen.meta.parameters;
+                    };
+                    scope.$watch("question", function(){
+                        initDirective();
+                    });
+                }]
+            }
+        });
+    </script>
+</body>
+
+</html>

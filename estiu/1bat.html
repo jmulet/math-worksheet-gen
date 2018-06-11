@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Feina estiu MAT-II</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <style>
+      body {
+        padding-top: 54px;
+        background: rgb(255, 225, 225);
+      }
+      @media (min-width: 992px) {
+        body {
+          padding-top: 56px;
+        }
+      }
+    </style>
+
+  </head>
+
+  <body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="http://www.iesbinissalem.net/">
+            <img src="./iesb.png" style="width:60px"/>
+          IES Binissalem</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        
+      </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 text-center">
+          <h1 class="mt-5 alert alert-warning">
+              Feina Recomada per als alumnes de 1r BATX (Científic) que han de cursar Matemàtiques II a 2n de Batxillerat
+          </h1>
+          <img src="./estiu.png" style="width:200px" class="float-sm-left"/>
+
+          <p class="lead">Cada alumne té una feina personalitzada. Cal que introduïu el vostre <b>número d'expedient</b> que trobareu escrit en la vostra agenda (És el mateix
+          usuari que feis servir en el moodle de l'institut)</p>
+ 
+      
+          <p><b>Introduïu el vostre número d'expedient:</b></p>
+          <h4><input type="number" min="0" id="expedient" placeholder=""/><br/></h4>
+          <button id="download" class="btn btn-primary">Descarrega activitats</button>
+
+          <div class="mt-5 alert alert-default"> 
+              <img src="./clau.png" style="width:80px"/> En cas de dificultats a l'hora d'obtenir el full d'activitats contactau amb piworld.es@gmail.com
+          </div>
+          
+
+          <div id="disabled-msg" class="mt-5 alert alert-danger">
+              <img src="./clock.png" style="width:80px"/>
+             <b>ATENCIÓ:</b> Els exercicis estaran disponibles a partir de 25 de juny.
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.slim.min.js"></script>
+  <script>
+    $(function(){
+      var disabled = true;
+      $("#expedient").prop("disabled", disabled);
+      $("#download").prop("disabled", disabled);
+      $("#disabled-msg").css("display", disabled?"":"none");
+
+      $("#expedient").focus();
+      $("#download").click(function(evt){
+          evt.preventDefault();
+          var expedient = $("#expedient").val();
+          console.log(expedient);
+          if (expedient) {
+            //crea un link per clicar-lo
+            var link = $('<a>');
+            link.css({display: 'none'});
+            link.attr('href', "https://piworld.es/wsmath/?id=45lnfgojhi0atrr&type=html&username="+expedient+"b");
+            link.attr('target', "_blank");
+            $("body").append(link);
+            link[0].click();
+          } else {
+            alert("Introduïu un número d'expedient vàlid. Exemple 1753");
+          }
+      });
+      
+    }); 
+  </script>
+  </body>
+
+</html> 

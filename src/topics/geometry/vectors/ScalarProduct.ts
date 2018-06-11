@@ -104,4 +104,8 @@ export class ScalarProduct implements QuestionGenInterface {
     getAnswer(): string {        
         return '';
     }
+ 
+    getDistractors(): string[] {
+        return [];
+    }
 }

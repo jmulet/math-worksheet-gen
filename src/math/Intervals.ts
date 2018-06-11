@@ -1,50 +1,54 @@
+import { Interval } from "./Interval";
 import { Numeric } from "./Numeric";
 
-export class Interval {
+/**
+ * Allow the union of several interval
+ */
+export class Intervals {
+
+    listOfIntervals: Interval[] = [];
 
     static isolatePoint(p: Numeric) {
-        return new Interval(p, p, true, true);
+        return new Intervals(p, p, true, true);
     }
 
     static emptySet() {
-        return new Interval(null, null, false, false);
+        return new Intervals(null, null, false, false);
     }
 
     static realLine() {
-        return new Interval(Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, false, false);
+        return new Intervals(Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, false, false);
     }
 
-    // null depicts infinity
-    constructor(public a: Numeric | Number, public b: Numeric | Number, public aIncluded?: boolean, public bIncluded?: boolean) {
-        if (a === Number.NEGATIVE_INFINITY) {
-            aIncluded = false;
-        }
+    constructor(a?: any, b?: Numeric | Number, aIncluded?: boolean, bIncluded?: boolean) {
+        if (a && a instanceof Interval) {
+            this.listOfIntervals.push(a);
+        } else if(a && b) {
+            this.listOfIntervals.push(new Interval(a, b, aIncluded, bIncluded));
+        } 
+    }
 
-        if (b === Number.POSITIVE_INFINITY) {
-            bIncluded = false;
-        }
+    union(interval: Interval): Intervals {
+        this.listOfIntervals.push(interval);
+        return this;
     }
 
     toString(): string {
-        return this.toTeX();
+        const n = this.listOfIntervals.length;
+        if (n === 0) {
+            return "O";
+        } else {
+            return this.listOfIntervals.map( e => e.toString() ).join(" U ");
+        }
     }
 
     toTeX(): string {
-        if (this.a == null && this.b === null) {
-            return "\\O";
-        }
-        if (this.a === Number.NEGATIVE_INFINITY) {
-            if (this.b === Number.POSITIVE_INFINITY) {
-                return "\\left( -\\infty, +\\infty \\right)";
-            } else {
-                return "( -\\infty, " + this.b.toString + (this.bIncluded? "]":")");
-            }
+        const n = this.listOfIntervals.length;
+        if (n === 0) {
+            return "\\emptyset"
         } else {
-            if (this.b === Number.POSITIVE_INFINITY) {
-                return (this.aIncluded? "[":"(") + this.a.toString + ", +\\infty)";
-            } else {
-                return (this.aIncluded? "[":"(") + this.a.toString + ", "+ this.b.toString() + (this.bIncluded? "]":")");
-            }
+            return this.listOfIntervals.map( e => e.toTeX() ).join(" \\cup ");
         }
     }
+
 }

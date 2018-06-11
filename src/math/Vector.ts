@@ -1,6 +1,8 @@
 import { Numeric } from './Numeric';
 import { RandomSeed } from 'random-seed';
 import { Random } from '../util/Random';
+import { Point } from './Point';
+import * as mathjs from 'mathjs';
 
 export class Vector {
     
@@ -8,9 +10,36 @@ export class Vector {
     symbol: string;
     components: Numeric[];
 
+    static fromPoints(A: Point, B: Point): Vector {
+        if(!A || !B) {
+            return null;
+        }
+        if (A.dimension() !== B.dimension()) {
+            throw new Error("invalid point dimensions in fixed AB vector");
+        }
+        const components = [];
+        A.components.forEach( (c, i) => components.push(B.components[i].substract(c)));
+        return new Vector(components);
+    }
 
-    constructor(components: (number | Numeric)[], symbol?: string) {
-        
+    static determinant(...vectors: Vector[]): number {
+        const dims = vectors.map(v => v.dimension());
+        if(Math.min(...dims) !== Math.max(...dims)) {
+            throw new Error("invalid dimensions in determinant");
+        }
+        const dim = Math.min(...dims);
+        if (vectors.length !== dim) {
+            throw new Error("invalid dimensions in determinant");
+        }
+
+        const matrix = vectors.map( v => {
+            return v.components.map(c => c.toNumber());
+         } );
+
+        return mathjs.det(matrix);
+    }
+
+    constructor(components: (number | Numeric)[], symbol?: string) {        
         this.components = components.map((e)=> {
             if (typeof(e) === 'number') {
                 return Numeric.fromNumber(e);
@@ -27,8 +56,14 @@ export class Vector {
         return this.components.length;
     }
 
-    times(n: Numeric): Vector {
-        const components2 = this.components.map( (c) => c.multiply(n));
+    times(n: Numeric | number): Vector {
+        let nn: Numeric;
+        if(typeof(n) === "number") {
+            nn = Numeric.fromNumber(n);
+        } else {
+            nn = n;
+        }
+        const components2 = this.components.map( (c) => c.multiply(nn));
         return new Vector(components2);
     }
 
@@ -51,6 +86,15 @@ export class Vector {
 
     norm2(): Numeric {
         return this.dotProduct(this);
+    }
+
+    norm(): number {
+        return Math.sqrt(this.dotProduct(this).toNumber());
+    }
+
+    angle(v: Vector): number {
+        const op = this.dotProduct(v).toNumber() / (this.norm()*v.norm());
+        return 180*Math.acos(op) / Math.PI;
     }
 
     oposite(): Vector {

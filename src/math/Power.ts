@@ -60,7 +60,11 @@ export class Power {
     }
     */
 
-    toString(): string {
+    toString(): string {
+        return this.toTeX();
+    }
+
+    toTeX(): string {
         if (this.exponent.isOne()) {
             return "" + this.base.toString();
         } else if (this.exponent.isZero()) {

@@ -46,9 +46,9 @@ export class RadicalsNotation implements QuestionGenInterface {
         
         if (rnd.intBetween(0, 1) === 0) {
             this.question = radical.toTeX() + "={}";  
-            this.answer =  radical.toPowerTeX() + "={}";                
+            this.answer =  radical.toPowerTeX();                
         } else {
-            this.answer = radical.toTeX() + "={}";  
+            this.answer = radical.toTeX();  
             this.question =  radical.toPowerTeX() + "={}";                
         }
     }
@@ -59,5 +59,9 @@ export class RadicalsNotation implements QuestionGenInterface {
 
     getAnswer(): string {
         return "$" + this.answer + "$";
+    }
+
+    getDistractors(): string[] {
+        return [];
     }
 }

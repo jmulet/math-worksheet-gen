@@ -67,7 +67,7 @@ export class RadicalsRationalize implements QuestionGenInterface {
                 r.coefficient.coef = r.coefficient.coef.divide(denom);
             });
 
-            this.question = "\\frac{" + radical3.toTeX() + "}{" + polyRad.toTeX() + "}";  
+            this.question = "\\dfrac{" + radical3.toTeX() + "}{" + polyRad.toTeX() + "}";  
             this.answer =  numerator.simplify().toTeX();                
         } else {
             let radical = rnd.radical({domain: 'Z', range: r, maxIndex: maxIndex, useCoeff: false});
@@ -75,7 +75,7 @@ export class RadicalsRationalize implements QuestionGenInterface {
                 radical = rnd.radical({domain: 'Z', range: r, maxIndex: maxIndex, useCoeff: false});
             }
             const topCoeff = rnd.intBetween(1, r);
-            this.question = "\\frac{" + topCoeff + "}{" + radical.toTeX() + "}";  
+            this.question = "\\dfrac{" + topCoeff + "}{" + radical.toTeX() + "}";  
             let radical2 = radical.power(radical.index - 1);
             radical2.coefficient = radical2.coefficient.multiply(Monomial.fromNumber(topCoeff)).divide(radical.radicand);
             this.answer =  radical2.simplify().toTeX();                
@@ -89,5 +89,9 @@ export class RadicalsRationalize implements QuestionGenInterface {
 
     getAnswer(): string {
         return "$" + this.answer + "$";
+    }
+
+    getDistractors(): string[] {
+        return [];
     }
 }

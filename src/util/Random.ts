@@ -1,3 +1,4 @@
+import { ElementalFunction, LinealFunction, QuadraticFunction, RadicalFunction, HyperboleFuntion, ExponentialFunction, LogarithmFunction, TrigonometricFunction } from '../math/ElementalFunction';
 import * as Ran from 'random-seed';
 import { Numeric } from '../math/Numeric';
 import { Vector } from '../math/Vector';
@@ -8,6 +9,11 @@ import { Monomial } from '../math/Monomial';
 import { Literal } from '../math/Literal';
 import { Radical } from '../math/Radical';
 import { Giac } from '../math/Giac';
+import { Conics, Circumference, Elipse, Hiperbola, Parabola } from '../math/Conics';
+import { AsyncCompleter, ReadLineOptions } from 'readline';
+import { POINT_CONVERSION_COMPRESSED } from 'constants';
+import { Point } from '../math/Point';
+import { Line } from '../math/Line';
 
 /**
  *
@@ -28,6 +34,14 @@ export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
         }
         this.seed = this.seed.toLowerCase();
         this.rnd = Ran.create(this.seed);
+    }
+
+    decimal(a: number, b: number, decimals: number = 2) {
+        if(decimals < 0) {
+            decimals = 2;
+        }
+        const pow = Math.pow(10, decimals);
+        return Math.round(this.rnd.floatBetween(a, b)*pow)/pow;
     }
 
     intList(length: number, range: number, rangeMax?: number): number[] {
@@ -140,26 +154,7 @@ export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
             return shuffled;
         }
     }
-
-    vector(dim=2, options?: any): Vector {        
-        // Generates a random vector
-        const opts = {symbol: 'v', domain: 'Z', range: 10, allowZero: false, ...options};
-        const symbol = opts.symbol || this.pickOne(VECTOR_NAMES);
-        let coefs;
-        if (opts.domain === 'Z') {
-           coefs = this.intList(dim, opts.range);
-        } else {
-            coefs = this.numericList(dim, opts.range, opts.domain);
-        }
-        let v = new Vector(coefs, symbol);        
-        if (!opts.allowZero) {
-            while (v.isZero()) {
-                v = this.vector(dim, options);
-            }
-        }
-        return v;
-    }
-
+ 
     monomial(options?: any): Monomial {
         const opts = { minDegree: 1, maxDegree: 5, range: 10, domain: 'Z', maxVars: 1, bar: '', ...options};
         const degree = this.intBetween(opts.minDegree, opts.maxDegree);
@@ -180,14 +175,14 @@ export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
     
     radical(options?: any): Radical {
         const opts = { minIndex: 2, maxIndex: 10, minDegree: 1, maxDegree: 5, range: 10,
-                       domain: 'Z', maxVars: 1, bar: '', algebraic: false, simplificable: false, 
+                       domain: 'Z', maxVars: 1, bar: '', algebraic: false, 
                        useCoeff: true,
                        ...options};
         
         const index = this.intBetween(opts.minIndex, opts.maxIndex);
       
         let divisorsOfIndex = Numeric.listDivisors(index);
-        divisorsOfIndex.splice(divisorsOfIndex.length - 1, 1);
+        divisorsOfIndex.splice(0, 1);
         
         let mono1, mono2;
         if (opts.algebraic) {
@@ -202,7 +197,7 @@ export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
                 const oneDivisor = this.pickOne(divisorsOfIndex);
                 (<Monomial> mono1).coef.power(oneDivisor);
                 (<Monomial> mono1).literals.forEach( (literal) => {
-                    const times = this.intBetween(0, 3);                  
+                    const times = this.intBetween(1, 3);                  
                     literal.exponent *= oneDivisor;
                     literal.exponent += times*index;
                 });                
@@ -215,11 +210,17 @@ export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
             }
 
             if (opts.simplificable) {
-                const oneDivisor = this.pickOne(divisorsOfIndex);
+                let oneDivisor = this.pickOne(divisorsOfIndex);
+                if (oneDivisor === 1) {
+                    oneDivisor = index;
+                }
                 const e1 = this.intBetween(0, 3);
                 const e2 = this.intBetween(0, 2);
                 const e3 = this.intBetween(0, 1);
-                const number = Math.pow(2, e1*oneDivisor)* Math.pow(3, e2*oneDivisor)*Math.pow(5, e3*oneDivisor);                
+                const r1 = this.intBetween(0, 2);
+                const r2 = this.intBetween(0, 2);
+                const r3 = this.intBetween(0, 2);
+                const number = Math.pow(2, e1*oneDivisor+r1)* Math.pow(3, e2*oneDivisor+r2)*Math.pow(5, e3*oneDivisor+r3);                
                 mono1 = Numeric.fromNumber(number);                
             } else {
                 mono1 = this.numericBetween(2, opts.range, opts.domain);                
@@ -299,4 +300,151 @@ export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
         return new AlgebraicFraction(numerator, denominator);
     }
 
+    point(dim=2, options?: any): Point {
+        const opts = { range: 10, domain: 'Z', ...options};
+        const components = this.numericList(dim, opts.range, opts.domain);
+        return new Point(components);
+    }
+
+    vector(dim?: number, options?: any): Vector {        
+        dim = dim || 2; 
+        // Generates a random vector
+        const opts = {symbol: 'v', domain: 'Z', range: 10, allowZero: false, ...options};
+        const symbol = opts.symbol || this.pickOne(VECTOR_NAMES);
+        let coefs;
+        if (opts.domain === 'Z') {
+           coefs = this.intList(dim, opts.range);
+        } else {
+            coefs = this.numericList(dim, opts.range, opts.domain);
+        }
+        let v = new Vector(coefs, symbol);        
+        if (!opts.allowZero) {
+            while (v.isZero()) {
+                v = this.vector(dim, options);
+            }
+        }
+        return v;
+    }
+
+    line(dim=2, options?: any): Line {
+        options.allowZero = false;
+        return new Line(this.point(dim, options), this.vector(dim, options));
+    }
+
+    circumference(options?: any): Circumference {
+        return new Circumference(this.point(), this.intBetween(1, options.range | 10)); 
+    }
+
+    elipse(options?: any): Elipse {
+        return new Elipse(this.point(), this.intBetween(1, options.range | 10), this.intBetween(1, options.range | 10)); 
+    }
+
+    hiperbola(options?: any): Hiperbola {
+        return new Hiperbola(this.point(), this.intBetween(1, options.range | 10), this.intBetween(1, options.range | 10)); 
+    }
+
+    parabola(options?: any): Parabola {
+        return new Parabola(this.point(), this.numericBetween(1, 5), this.intBetween(0, 1)); 
+    }
+
+    conic(options?: any): Conics {        
+        switch(this.intBetween(0, 3)) {
+            case 0:
+                return this.circumference(options);                
+            case 1:
+                return this.elipse(options);
+            case 2:
+                return this.hiperbola(options);
+            case 3:
+                return this.parabola(options);
+        }
+    }
+
+
+    elementalFunction(mylist?: number | number[], options?: any) {
+            const opts = {range: 10, domain: 'Z', ...options};
+            let list;
+            if (Array.isArray(mylist)) {
+                list = [...mylist];
+            } else if (typeof (mylist) === "number") {
+                list = [mylist];
+            }
+            else {
+                list = Object.keys(ElementalFunction.types).map((key)=> ElementalFunction.types[key]);
+            };
+            var type = this.pickOne(list);
+
+            switch (type) {
+                case ElementalFunction.types.Lineal: 
+                    const m = this.numericBetween(-opts.range, opts.range, opts.domain);
+                    const n = this.numericBetween(-opts.range, opts.range, opts.domain);
+                    return new LinealFunction(m, n);
+                    
+                case ElementalFunction.types.Quadratic: 
+                    const a = this.numericBetweenNotZero(-2, 2);
+                    const b = this.numericBetween(-opts.range, opts.range, opts.domain);
+                    const c = this.numericBetween(-opts.range, opts.range, opts.domain);
+                    return new QuadraticFunction(a, b, c);
+
+                case ElementalFunction.types.Radical: 
+                    const a2 = this.numericBetween(-opts.range, opts.range, opts.domain);
+                    const b2 = this.numericBetween(-opts.range, opts.range, opts.domain);
+                    return new RadicalFunction(a2, b2);
+
+                case ElementalFunction.types.Hyperbole:
+                    const m2 = this.numericBetween(-opts.range, opts.range, opts.domain);
+                    const n2 = this.numericBetween(-opts.range, opts.range, opts.domain);
+                    const p = this.numericBetween(-opts.range, opts.range, opts.domain);
+                    return new HyperboleFuntion(m2, n2, p);
+
+                case ElementalFunction.types.Exponential: 
+                    const base = this.numericBetween(2, opts.range);
+                    return new ExponentialFunction(base);
+
+                case ElementalFunction.types.Logarithm: 
+                    const base2 = this.numericBetween(2, opts.range);
+                    return new LogarithmFunction(base2);
+
+                default: 
+                    const type = this.pickOne(['sin', 'cos', 'tan']);
+                    const amp = this.numericBetweenNotZero(-opts.range, opts.range, opts.domain);
+                    const w = this.numericBetween(1, 4);
+                    return new TrigonometricFunction(type, amp, w);
+            }
+    }
+
+
+ 
+
+    /**
+     * Generates a random funcion with complexity n
+     * from bloc funtions in funcs list and operations in ops
+     * which can be + - * / and comp
+     */
+    rfunction(n, ops: string[], funcs) {
+        var op = this.pickOne(ops);
+        var f1 = funcs.random();
+        var f2 = funcs.random();
+
+        var str = "";
+        if (op === '+') {
+            str = f1.toString('x') + " " + op + " " + f2.toString('x');
+        }
+        else if (op === '-') {
+            str = f1.toString('x') + " " + op + " (" + f2.toString('x') + ")";
+        }
+        else if (op === '*' || op === '/') {
+            str = "(" + f1.toString('x') + ") " + op + " (" + f2.toString('x') + ")";
+        }
+        else if (op === 'comp') {
+            str = f1.toString(f2.toString('x'));
+        }
+        return str;
+    }
+ 
+    
+ 
+ 
+ 
 }
+

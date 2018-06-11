@@ -5,18 +5,20 @@ import { QuestionOptsInterface } from "../interfaces/QuestionOptsInterface";
 
 export class WsActivity { 
     questions: WsQuestion[] = []
-    constructor(private formulation: string, private opts: ActivityOptsInterface, private qClass?: GenClass, private qGenOpts?: any) {
+    constructor(public formulation: string, private opts: ActivityOptsInterface, private qClass?: GenClass, private qGenOpts?: any) {
+        this.qGenOpts = this.qGenOpts || {};
     }
 
     // if times < 0, then reuse the same question gen object for all times
-    useRepeat(qClass?: GenClass, qGenOpts?: any, times=1, reuse?: boolean): WsActivity {
+    useRepeat(qClass?: GenClass, qGenOpts?: any, times=1, type?: string, reuse?: boolean ): WsActivity {
         qClass = qClass || this.qClass;
         qGenOpts = qGenOpts || this.qGenOpts || {};        
 
         let question;
-        for (var i = 0; i < times; i++ ) {
+        for (var i = 0; i < times; i++ ) { 
             if(!reuse || !question) {
                 question = new WsQuestion(qClass, {question: qGenOpts, ...this.opts});
+                question.type = type;
             }
             this.questions.push(question);
         }
@@ -59,19 +61,38 @@ export class WsActivity {
 
     toHtml(): string[] {
         const latex = [];
-        latex.push("    <li> " + this.formulation + "</li>");
-        latex.push('    <ol class="olalpha">'); 
-        this.questions.forEach( (question) => {
-            try {
-                latex.push("      <li> " + question.toHtml() + "</li>");
-            } catch (Ex) {
-                console.log('EXCEPTION:: Skipping question:: ', Ex);
-                const ind = this.questions.indexOf(question);
-                this.questions.splice(ind, 1);
-            }            
-        });
-        latex.push("    </ol>");
-        
+       
+        if (this.questions.length === 1) {
+            const q = this.questions[0];
+            latex.push('    <li> <p><span class="activity-formulation">' + this.formulation  + ' ' );
+            latex.push(q.toHtml());
+            latex.push('</span></p></li>');
+        } else {
+            latex.push('    <li> <p><span class="activity-formulation">' + this.formulation + "</span></p></li>");
+            latex.push('    <ol class="olalpha">'); 
+            this.questions.forEach( (question, indx) => {
+                let sampleAnswer = "";
+                const qHtml = question.toHtml();
+                const answer = question.answerToHtml();
+                const hasAnswer = answer && answer !== "Correcció manual";
+                if (this.qGenOpts.showFirstQuestionAnswer && hasAnswer && indx === 0 && (question.qsGen.name || "").indexOf("special/") < 0) {                    
+                    const trim = qHtml.replace(/\$/g, '').replace(/ /g, '');
+                    if(trim.lastIndexOf("=") !== trim.length - 1 && trim.lastIndexOf("={}") !== trim.length - 3) {
+                        sampleAnswer = "  $\\quad\\rightarrow \\quad$ ";
+                    }
+                    sampleAnswer += answer;
+                }
+                try {
+                    latex.push("      <li> <p>" + qHtml + '<span style="color:red">' + sampleAnswer + "</span></p></li>");
+                } catch (Ex) {
+                    console.log('EXCEPTION:: Skipping question:: ', Ex);
+                    const ind = this.questions.indexOf(question);
+                    this.questions.splice(ind, 1);
+                }            
+            });
+            latex.push("    </ol>");
+        }
+
         return latex;
     }
 
@@ -80,7 +101,7 @@ export class WsActivity {
         latex.push('  <li>');
         latex.push('    <ol class="olalpha">');
         this.questions.forEach( (question) => {
-            latex.push("    <li> " + question.answerToHtml() + "</li>");
+            latex.push("    <li> <p>" + question.answerToHtml() + "</p></li>");
         });
         latex.push("    </ol>");
         latex.push("  </li>");
