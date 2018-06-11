@@ -261,7 +261,7 @@ export class WsMathGenerator {
             .olalpha {
                 counter-reset: alphacounter;
                 margin: 10px; 
-                font-size: 120%;
+                font-size: 110%;
             }
             
             .olalpha > li {
@@ -293,28 +293,31 @@ export class WsMathGenerator {
             }
             @media print {               
                 .instructions {
-                    font-size: 20px;
+                    font-size: 12px;
                 }
                 p {
-                    font-size: 120%;
+                    font-size: 100%;
                 }
                 h2 {
-                    font-size: 120%;
+                    font-size: 100%;
                 } 
                 h3 {
-                    font-size: 120%;
+                    font-size: 100%;
                 }  
                 h4 {
-                    font-size: 120%;
+                    font-size: 100%;
                 } 
                 @page {
                     margin: 1.5cm 1.5cm;
                 }
                 .activity-formulation {
-                    font-size: 20px;
+                    font-size: 13px;
                 }
                 .arial-large {
-                    font-size: 34px;
+                    font-size: 18px;
+                }
+                .question-formulation {
+                    font-size: 12px;
                 }
              }
              

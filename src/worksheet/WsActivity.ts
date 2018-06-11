@@ -83,7 +83,7 @@ export class WsActivity {
                     sampleAnswer += answer;
                 }
                 try {
-                    latex.push("      <li> <p>" + qHtml + '<span style="color:red">' + sampleAnswer + "</span></p></li>");
+                    latex.push('      <li> <p class="question-formulation">' + qHtml + '<span style="color:red">' + sampleAnswer + "</span></p></li>");
                 } catch (Ex) {
                     console.log('EXCEPTION:: Skipping question:: ', Ex);
                     const ind = this.questions.indexOf(question);
@@ -101,7 +101,7 @@ export class WsActivity {
         latex.push('  <li>');
         latex.push('    <ol class="olalpha">');
         this.questions.forEach( (question) => {
-            latex.push("    <li> <p>" + question.answerToHtml() + "</p></li>");
+            latex.push('    <li> <p class="question-formulation">' + question.answerToHtml() + "</p></li>");
         });
         latex.push("    </ol>");
         latex.push("  </li>");

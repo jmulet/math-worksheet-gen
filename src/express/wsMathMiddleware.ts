@@ -45,8 +45,8 @@ function generateSampleBody0() {
 
         worksheet: {
             includeKeys: true,
-            title: "Feina d'estiu alumnes que han de cursar MAT-I a 1r de Batxillerat",
-            instructions: "Realitzeu aquesta tasca en el quadern de l'assignatura del proper curs i entregeu-lo al professor del proper any. Aquesta feina serà comptava com a nota de la 1a avaluació.",
+            title: "Feina recomanada pels alumnes que han de cursar MAT-I a 1r de Batxillerat",
+            instructions: "Realitzeu aquesta tasca en el quadern de l'assignatura del proper curs i entregeu-lo al professor del proper any. Aquesta feina serà comptada com a nota de la 1a avaluació.",
             sections: [
                 {
                     name: "Radicals", activities: [
@@ -160,9 +160,9 @@ function generateSampleBody0() {
                         },
                         {
                             formulation: "Resol aquestes sistemes d'equacions", questions: [
-                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 2, nequacions: 2} },
-                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 3, nequacions: 3} },
-                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 3, nequacions: 2} }  
+                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 2, nequations: 2} },
+                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 3, nequations: 3} },
+                                { gen: "algebra/equations/linealsystem", repeat: 2, options: { interval: 10, dimension: 3, nequations: 2} }  
                             ]
                         },
                         {
