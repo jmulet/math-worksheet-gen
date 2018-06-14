@@ -151,7 +151,7 @@ export class WsMathGenerator {
                         if (question.gen.indexOf("special/") === 0) {
                             question.repeat = 1;
                         }
-                        if(clazz) {
+                        if (clazz) {
                             act.useRepeat(clazz, question.options || {}, question.repeat || 1, question.type, activity.scope && Object.keys(activity.scope).length>0);
                         } else {
                             console.log("Error:: generator clazz ", question, " not found");
@@ -175,7 +175,6 @@ export class WsMathGenerator {
     }
 
     exportAs(format: WsExportFormats) {
-
         switch(format) {
             case(WsExportFormats.LATEX):
                 return this.exportLatex();                

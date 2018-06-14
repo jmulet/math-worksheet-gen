@@ -61,8 +61,14 @@ export class WsActivity {
 
     toHtml(): string[] {
         const latex = [];
+
+        //Check it this activity contains no questions
        
-        if (this.questions.length === 1) {
+        if (this.questions.length === 0)  { 
+           // Assume that this is not a question and it is displayed as theory block
+            latex.push('<div style="background:rgb(200,200,255); box-shadow: 5px 5px grey; webkit-box-shadow: 5px 5px grey; moz-box-shadow: 5px 5px grey; border-radius: 5px; width:95%; border:1px solid blue; padding:5px">' +
+            this.formulation + "</div>");
+        } else if (this.questions.length === 1) {
             const q = this.questions[0];
             latex.push('    <li> <p><span class="activity-formulation">' + this.formulation  + ' ' );
             latex.push(q.toHtml());
@@ -100,6 +106,8 @@ export class WsActivity {
         const latex = [];
         latex.push('  <li>');
         latex.push('    <ol class="olalpha">');
+
+        // Skip activity with no questions
         this.questions.forEach( (question) => {
             latex.push('    <li> <p class="question-formulation">' + question.answerToHtml() + "</p></li>");
         });

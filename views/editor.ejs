@@ -231,7 +231,8 @@
                 for(var j=0; j<sec.activities.length; j++) {
                     var act = sec.activities[j];
                     act.scope = act.scope || {};
-
+                    act.questions = act.questions || [];
+                    
                     for (var k=0; k<act.questions.length; k++) {
                         var question = act.questions[k];                        
                         $scope.generatorChanged(question, true);                      

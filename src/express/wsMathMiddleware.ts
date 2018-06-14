@@ -76,6 +76,10 @@ function generateSampleBody0() {
                             ]
                         },
                         {
+                            formulation: `Això és un recordatori de com s'ha de fer $\\\\sqrt{6}{x}=x^{1/6}$`,
+                            questions: []
+                        },
+                        {
                             formulation: "Opera els radicals",
                             questions: [
                                 { gen: "arithmetics/radicals/operations", repeat: 4, options: {} },
