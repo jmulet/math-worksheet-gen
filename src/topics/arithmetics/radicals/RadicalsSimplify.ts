@@ -1,7 +1,7 @@
-import { QuestionGenInterface } from '../../interfaces/QuestionGenInterface';
-import { QuestionOptsInterface } from '../../interfaces/QuestionOptsInterface';
-import { Random } from '../../util/Random';
-import { WsGenerator } from '../../util/WsGenerator';
+import { QuestionGenInterface } from '../../../interfaces/QuestionGenInterface';
+import { QuestionOptsInterface } from '../../../interfaces/QuestionOptsInterface';
+import { Random } from '../../../util/Random';
+import { WsGenerator } from '../../../util/WsGenerator';
 
 @WsGenerator({
     category: "arithmetics/radicals/simplify",

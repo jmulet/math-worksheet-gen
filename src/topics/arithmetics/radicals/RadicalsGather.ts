@@ -1,9 +1,9 @@
-import { QuestionGenInterface } from '../../interfaces/QuestionGenInterface';
-import { QuestionOptsInterface } from '../../interfaces/QuestionOptsInterface';
-import { PolyRadical } from '../../math/PolyRadical';
-import { Radical } from '../../math/Radical';
-import { Random } from '../../util/Random';
-import { WsGenerator } from '../../util/WsGenerator';
+import { QuestionGenInterface } from '../../../interfaces/QuestionGenInterface';
+import { QuestionOptsInterface } from '../../../interfaces/QuestionOptsInterface';
+import { PolyRadical } from '../../../math/PolyRadical';
+import { Radical } from '../../../math/Radical';
+import { Random } from '../../../util/Random';
+import { WsGenerator } from '../../../util/WsGenerator';
 
 @WsGenerator({
     category: "arithmetics/radicals/gather",

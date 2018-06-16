@@ -1,11 +1,10 @@
-import { Power } from "./Power"; 
-import { Arithmetics } from "./Arithmetics";
-import { Monomial } from "./Monomial";
-import { Numeric } from "./Numeric";
-import * as mathjs from "mathjs";
-import { Literal } from "./Literal";
-import { Giac } from "./Giac";
-import { Formatter } from "../util/Formatter";
+import * as mathjs from 'mathjs';
+
+import { Formatter } from '../util/Formatter';
+import { Giac } from './Giac';
+import { Literal } from './Literal';
+import { Monomial } from './Monomial';
+import { Numeric } from './Numeric';
 
 function factor2TeX(factors: any[]): string {
     let y = "";

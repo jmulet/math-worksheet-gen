@@ -42,15 +42,48 @@ export class TreeFunction {
   
     }
 
-    randomNode(opts) {
+    /**
+     * 
+     * @param depth Maxium depth of the tree
+     * @param opts can be a common object for all depths or an array to fine tune every depth
+     */
+    randomNode(depth: number, parentNode: mathjs.MathNode,  opts?: any, currentDepth?: number): mathjs.MathNode {
+        const mathjsNode = mathjs.expression["node"];     
+
+        let userOpts = opts;
+        if (opts && Array.isArray(opts)) {
+            userOpts = opts[opts.length - currentDepth || 0];
+            if (!userOpts) {
+                userOpts = opts[0];
+            }
+        }
         const options = { range: 10, 
             operationNodes:  ['+', '*', '/', '^'], 
             functionNodes: ['sqrt', 'ln', 'log10', 'cos', 'sin', 'tan'],
             constantNodes: ['pi', 'e'], 
             symbolNodes: ['x'],  
-            ...opts };  
+            ...userOpts };  
 
-        const mathjsNode = mathjs.expression["node"];        
+        parentNode = parentNode || new mathjsNode.SymbolNode(this.rnd.pickOne(options.symbolNodes));
+/*
+        const kindOfNode = this.rnd.pickOne([0, 1, 2, 3]);
+        if (kindOfNode === 0 && currentDepth < depth) {
+            // operation
+            const op = this.rnd.pickOne(options.operationNodes);
+            const opName = OP_NAMES[op];
+            const node3 = new mathjsNode.OperatorNode(op, opName, [node1, node2]);
+        } else if (kindOfNode === 1) {
+            // function
+            
+        } else if (kindOfNode === 2) {
+            // constant
+            
+        } else {
+            // symbol
+            const node2 = new mathjsNode.SymbolNode(this.rnd.pickOne(options.symbolNodes));
+        }
+*/
+           
         const node1 = new mathjsNode.ConstantNode(this.rnd.intBetweenNotZero(-options.range, options.range));
         const node2 = new mathjsNode.SymbolNode(this.rnd.pickOne(options.symbolNodes));
         const op = this.rnd.pickOne(options.operationNodes);
