@@ -333,12 +333,13 @@ function generateSample1BAT() {
                         },         
                         {
                             formulation: "Simplifica les fraccions algebraiques", questions: [
-                                { gen: "algebra/fractions/simplify", repeat: 4, options: { interval: 5, maxDegree: 3 } }
+                                { gen: "algebra/fractions/simplify", repeat: 3, options: { complexity: 1, interval: 5, maxDegree: 3 } },
+                                { gen: "algebra/fractions/simplify", repeat: 3, options: { complexity: 2, interval: 5, maxDegree: 3 } }
                             ]
                         },
                         {
                             formulation: "Opera i simplifica les fraccions algebraiques", questions: [
-                            
+                                { gen: "algebra/fractions/simplify", repeat: 6, options: { complexity: 3, interval: 5, maxDegree: 3 } }
                             ]
                         },
                         {

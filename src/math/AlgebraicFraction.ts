@@ -49,7 +49,10 @@ export class AlgebraicFraction {
     }
 
     simplified(): AlgebraicFraction {
-        return Giac.simplify(this.toString(), AlgebraicFraction);        
+        console.log("Asking giac to simplify ", this.toString());
+        const res = Giac.simplify(this.toString(), AlgebraicFraction);        
+        console.log(res.toString());
+        return res;
     }
 
     isPolynomial(): boolean {

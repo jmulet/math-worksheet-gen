@@ -33,12 +33,12 @@ export class WsActivity {
 
         if (this.questions.length === 0) {
             // Assume that this is a theory box
-            latex.push("\n\n \\makebox[\\textwidth]{" + this.formulation.replace(/\n/g, '\n\n') +"}\n\n");
+            latex.push("\n\n \\makebox[\\textwidth]{" + this.formulation.replace(/\n/g, '\n\n') + "}\n\n");
         } else if (this.questions.length === 1) {
             latex.push("    \\item ");
             latex.push("    \\begin{tasks}(2)");
-            this.questions.forEach( (question) => {
-                latex.push("    \\item " + this.formulation.replace(/\n/g, '\n\n') +  question.toLaTeX());
+            this.questions.forEach((question) => {
+                latex.push("    \\item " + this.formulation.replace(/\n/g, '\n\n') + question.toLaTeX());
             });
             latex.push("    \\end{tasks}");
         } else {
@@ -52,11 +52,11 @@ export class WsActivity {
                     const ind = this.questions.indexOf(question);
                     this.questions.splice(ind, 1);
                 }
-        })
-        latex.push("    \\end{tasks}");
+            })
+            latex.push("    \\end{tasks}");
+        }
+        return latex;
     }
-    return latex;
-}
 
     answersToLaTeX(): string[] {
         const latex = [];
@@ -93,9 +93,9 @@ export class WsActivity {
                 const qHtml = question.toHtml();
                 const answer = question.answerToHtml();
                 const hasAnswer = answer && answer !== "Correcció manual";
-                if (this.qGenOpts.showFirstQuestionAnswer && hasAnswer && indx === 0 && (question.qsGen.name ||  "").indexOf("special/") < 0) {
+                if (this.qGenOpts.showFirstQuestionAnswer && hasAnswer && indx === 0 && (question.qsGen.name || "").indexOf("special/") < 0) {
                     const trim = qHtml.replace(/\$/g, '').replace(/ /g, '');
-                    if (trim.lastIndexOf("=") !== trim.length - 1 &&  trim.lastIndexOf("={}") !== trim.length - 3) {
+                    if (trim.lastIndexOf("=") !== trim.length - 1 && trim.lastIndexOf("={}") !== trim.length - 3) {
                         sampleAnswer = "  $\\quad\\rightarrow \\quad$ ";
                     }
                     sampleAnswer += answer;
@@ -116,16 +116,17 @@ export class WsActivity {
 
     answersToHtml(): string[] {
         const latex = [];
-        latex.push('  <li>');
-        latex.push('    <ol class="olalpha">');
+        if (this.questions.length) {
+            latex.push('  <li>');
+            latex.push('    <ol class="olalpha">');
 
-        // Skip activity with no questions
-        this.questions.forEach((question) => {
-            latex.push('    <li> <p class="question-}tion">' + question.answerToHtml() + "</p></li>");
-        });
-        latex.push("    </ol>");
-        latex.push("  </li>");
-
+            // Skip activity with no questions
+            this.questions.forEach((question) => {
+                latex.push('    <li> <p class="questiontion">' + question.answerToHtml() + "</p></li>");
+            });
+            latex.push("    </ol>");
+            latex.push("  </li>");
+        }
         return latex;
     }
 }

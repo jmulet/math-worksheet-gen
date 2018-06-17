@@ -16,9 +16,11 @@ export class Giac {
     }
 
     static coeffs(polynomial: string, bar='x'): Numeric[] {
-        //console.log("Trying to parse polynomial", polynomial, bar);
+        console.log("Trying to parse polynomial", polynomial, bar);
         const str = Giac.evaluate('coeffs(' + polynomial + ', '+ bar + ')');
+        console.log("Els coefs del polynomial are ", str);
         const list = str.slice(str.indexOf('[')+1, str.length - 1).split(",");
+        console.log("List is ",  list);
         //console.log("Trying to numeric parse ", list);
         return list.filter( (e) => e!=='undef').map( (e) => Numeric.parse(e) );
     }
@@ -31,6 +33,7 @@ export class Giac {
     static parseAlgebraicFraction(str: string, bar='x'): AlgebraicFraction {
         const numer = giac.evaluate('numer(' + str + ')');
         const denom = giac.evaluate('denom(' + str + ')');
+        console.log('el numerador i denominador son ', numer, denom);
         return new AlgebraicFraction(Giac.parsePolynomial(numer), Giac.parsePolynomial(denom));
     }
 
@@ -50,8 +53,7 @@ export class Giac {
     }   
 
     static factor(expr: any, latex?: boolean): string {
-        console.log("factor called" , expr, latex)
-        let str = 'factor(' + expr.toString() + ')';
+       let str = 'factor(' + expr.toString() + ')';
         if (latex) {
             str = 'latex(' + str + ')';
         }

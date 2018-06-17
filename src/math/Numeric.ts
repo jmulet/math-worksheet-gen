@@ -85,7 +85,7 @@ export class Numeric {
             throw 'Numeric:: parse ' + str + ' with complex numbers not implemented yet';
         } else {
             const f = math.fraction(str);
-            return new Numeric(f["n"]*f["n"], f["d"]);
+            return Numeric.fromFraction(f["s"]*f["n"], f["d"]);
         }
     }
   

@@ -139,10 +139,18 @@ export class RadicalsOperations implements QuestionGenInterface {
                 this.answer = base + "^{" + result.toTeX() + "}";
             } else {
                 const base = rnd.pickOne([2, 3, 5, 7]);
-                let b = rnd.intBetween(2, 5);
                 let c = rnd.intBetween(2, 5);                
-                this.question = "$\\dfrac{1 + \\frac{1}{\\sqrt{" + base + "}}}{ " + b + " - \\frac{\\sqrt{" + base + "}{" + c + "}}$";
-                this.answer = "Manual";
+                this.question = "$\\dfrac{1 + \\frac{1}{\\sqrt{" + base + "}}}{ 1 - \\frac{\\sqrt{" + base + "}}{" + c + "}}$";
+                const den = base*base*(c*c - base);
+                const num1 = c*base*base*(1 + c);
+                const num2 = base*c*(base + c);
+                this.answer = Numeric.fromFraction(num1, den).toTeX();
+                if (num2/den > 0) {
+                    this.answer += " + ";
+                }
+                if (num2 !== 0) {
+                    this.answer += Numeric.fromFraction(num2, den).toTeX() + "\\sqrt{" + base + "}";
+                }
             }
             
         }
