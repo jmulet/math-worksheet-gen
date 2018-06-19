@@ -84,7 +84,7 @@ export class RadicalsRationalize implements QuestionGenInterface {
     }
 
     getFormulation(): string {        
-       return "$" + this.question + "$";
+       return "$" + this.question + "={}$";
     }
 
     getAnswer(): string {

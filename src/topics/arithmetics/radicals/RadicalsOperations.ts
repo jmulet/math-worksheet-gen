@@ -33,6 +33,11 @@ import { Formatter } from "../../../util/Formatter";
             description: "Which operations must include"
         },
         {
+            name: "useSingleBase",
+            defaults: false,
+            description: "Only one base appears in the operations"
+        },
+        {
             name: "miscellania",
             defaults: false,
             description: "When true; generates simple but diverse operations involving radicals, fractions, powers and algebraic identities. That's why is called miscellania"
@@ -52,6 +57,7 @@ export class RadicalsOperations implements QuestionGenInterface {
         const algebraic = qGenOpts.question.algebraic || false;
         const operators = qGenOpts.question.operators || '*/^r';
         const miscellania = qGenOpts.question.miscellania || false;
+        const useSingleBase = qGenOpts.question.useSingleBase || false;
 
 
         if (!miscellania) {
@@ -60,11 +66,15 @@ export class RadicalsOperations implements QuestionGenInterface {
 
             const bar = rnd.pickOne(BAR_NAMES);
             const options = { range: r, maxIndex: maxIndex, algebraic: algebraic, useCoeff: false, maxVars: 1, bar: bar };
-            const n = rnd.intBetween(1, 3);
+            let n = rnd.intBetween(1, 3);
+            if (useSingleBase && n < 2) {
+                n = 2;
+            }
             for (let i = 0; i < n; i++) {
                 this.radicals[i] = rnd.radical(options);
             }
 
+            // A single radical to be simplified
             if (this.radicals.length === 1) {
                 const [r1, ...r2] = this.radicals;
                 const rindex = rnd.intBetween(2, maxIndex);
@@ -76,8 +86,16 @@ export class RadicalsOperations implements QuestionGenInterface {
                     this.answer = (<Radical>r1).power(rindex).simplify().toTeX();
                 }
             }
+            // Two radicals to be divided or multiplied
             else if (this.radicals.length === 2) {
-                const [r1, r2, ...r3] = this.radicals;
+                const [r1, r2]: Radical[] = this.radicals;
+                if (useSingleBase) { 
+                    if (r1.radicand.literals.length) {
+                        r1.radicand.coef = Numeric.fromNumber(1);
+                    }
+                   
+                    r2.radicand = r1.radicand.copy();
+                }
                 if (rnd.intBetween(0, 1) === 1) {
                     this.question = "$\\dfrac{" + r1.toTeX() + " }{ " + r2.toTeX() + "}$"
                     this.answer = r1.divide(r2).simplify().toTeX();
@@ -87,7 +105,14 @@ export class RadicalsOperations implements QuestionGenInterface {
                 }
 
             } else {
-                const [r1, r2, r3, ...r4] = this.radicals;
+                const [r1, r2, r3] = this.radicals;
+                if (useSingleBase) { 
+                    if (r1.radicand.literals.length) {
+                        r1.radicand.coef = Numeric.fromNumber(1);
+                    }
+                    r2.radicand = r1.radicand.copy();
+                    r3.radicand = r1.radicand.copy();
+                }
                 this.answer = r1.multiply(r2).divide(r3).simplify().toTeX();
                 this.question = "$\\dfrac{" + this.radicals[0].toTeX() + " \\cdot " + this.radicals[1].toTeX() + "}{" + this.radicals[2].toTeX() + "}$";
             }

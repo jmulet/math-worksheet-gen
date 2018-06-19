@@ -5,6 +5,7 @@ import { WsGenerator } from '../../../util/WsGenerator';
 import { Giac } from '../../../math/Giac';
 import { Formatter } from '../../../util/Formatter';
 import { Numeric } from '../../../math/Numeric';
+import { Polynomial } from '../../../math/Polynomial';
 
 const VARNAMES = ["x", "y", "z", "t", "w"];
 
@@ -30,6 +31,11 @@ const VARNAMES = ["x", "y", "z", "t", "w"];
             name: "operations",
             defaults: "*,^,sqrt",
             description: "which operations can lead to non-linearity"
+        },
+        {
+            name: "graphical",
+            defaults: false,
+            description: "When true, the activity is prepared to be done graphically"
         }       
     ]
 })
@@ -41,7 +47,8 @@ export class EquationsNonlinearSystem implements QuestionGenInterface {
     constructor(private qGenOpts: QuestionOptsInterface) {
         const rnd: Random = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
-        const complexity = qGenOpts.question.complexity || 1;
+        let complexity = qGenOpts.question.complexity || 1;
+        const graphical = qGenOpts.question.graphical || false;
         const dimension = 2; 
         let operations =  (qGenOpts.question.operations || "*,^").split(",").map(e => e.trim());
         if (operations.length === 0) {
@@ -60,6 +67,10 @@ export class EquationsNonlinearSystem implements QuestionGenInterface {
         
         const eqns = [];
         const eqnsTeX = [];
+
+        if (graphical) {
+            complexity = 1;
+        }
         
         if (complexity === 1) {
             // In complexity 1: Create a linear equation with at least one coef being +- 1
@@ -76,7 +87,7 @@ export class EquationsNonlinearSystem implements QuestionGenInterface {
             });
             const lhs = linCoefs.map( (e, k) => {
                 let str = Formatter.numericXstring(Numeric.fromNumber(e), BAR_NAMES[k]);
-                if (k>0 && e>0) {
+                if (k > 0 && e > 0) {
                     str = " + " + str;
                 } 
                 return str;
@@ -84,28 +95,46 @@ export class EquationsNonlinearSystem implements QuestionGenInterface {
             eqns.push(lhs.join("") + "=" + rightScalar);
             eqnsTeX.push(lhsTeX.join("") + "&=" + rightScalar);          
          
-            // The second equation is non-linear and picked from the allowed operations
-            if (op === "^") {
-                const op2 = rnd.pickOne(["+", "-"]);
-                const lhs = "x**2 " + op2 + "y**2";
-                const lhsTeX = "x^2 " + op2 + "y^2";
-                let rhs = rootX*rootX;
-                if (op2 === "+") {
-                    rhs += rootY*rootY;
-                } else {
-                    rhs -= rootY*rootY;
-                }
-                eqns.push(lhs + "=" + rhs);
-                eqnsTeX.push(lhsTeX + "&=" + rhs);
-            } else if (op === "*") {
-                const rhs = rootX*rootY;
-                eqns.push("x*y=" + rhs);
-                eqnsTeX.push("x \\cdot y" + "&=" + rhs);
-            }  else {
-                const beta = rnd.intBetween(2, 5);
-                const rhs = beta*rootX + Math.sqrt(rootX + rootY);
-                eqns.push(beta + "*x + sqrt(x + y) =" + rhs);
-                eqnsTeX.push(beta + " x + \\sqrt{x + y} &=" + rhs);
+            if (graphical) {
+                    // Make the second equation non-linear but easy to draw
+                    const coin = rnd.intBetween(0, 1);
+                    if (coin === 0) {
+                        // The second eq. is a parabola
+                        const alpha = rnd.intBetween(-r, r);
+                        const beta = rootY + rootX*(2*alpha - rootX);
+                        const coefs = [1, -2*alpha, beta];
+                        eqns.push("y=" + new Polynomial(coefs).toString() );
+                        eqnsTeX.push("y&=" + new Polynomial(coefs).toTeX() + "" );
+                    } else {
+                        // The second eq. is inverse proportional
+                        const rhs = rootX*rootY;
+                        eqns.push("x*y=" + rhs);
+                        eqnsTeX.push("x \\cdot y" + "&=" + rhs + "");
+                    }
+            } else {
+                    // The second equation is non-linear and picked from the allowed operations
+                    if (op === "^") {
+                        const op2 = rnd.pickOne(["+", "-"]);
+                        const lhs = "x**2 " + op2 + "y**2";
+                        const lhsTeX = "x^2 " + op2 + "y^2";
+                        let rhs = rootX*rootX;
+                        if (op2 === "+") {
+                            rhs += rootY*rootY;
+                        } else {
+                            rhs -= rootY*rootY;
+                        }
+                        eqns.push(lhs + "=" + rhs);
+                        eqnsTeX.push(lhsTeX + "&=" + rhs);
+                    } else if (op === "*") {
+                        const rhs = rootX*rootY;
+                        eqns.push("x*y=" + rhs);
+                        eqnsTeX.push("x \\cdot y" + "&=" + rhs);
+                    }  else {
+                        const beta = rnd.intBetween(2, 5);
+                        const rhs = beta*rootX + Math.sqrt(rootX + rootY);
+                        eqns.push(beta + "*x + sqrt(x + y) =" + rhs);
+                        eqnsTeX.push(beta + " x + \\sqrt{x + y} &=" + rhs);
+                    }
             }
 
         } else {

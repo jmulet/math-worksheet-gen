@@ -16,7 +16,12 @@ function displayPower(base: string, n: number): string {
             base = base.replace("-","");
         }
         if (n < 0) {
-            return base + "^{" + n + "} = \\dfrac{1}{" + base + "^{" + Math.abs(n) + "}}";
+            // Check if the base is already a fraction
+            if (base.indexOf("frac{") >= 0) {
+                base + "^{" + n + "}";
+            } else {
+                return base + "^{" + n + "} = \\dfrac{1}{" + base + "^{" + Math.abs(n) + "}}";
+            }
         } else {
             return base + "^{" + n + "}";
         }
@@ -150,6 +155,7 @@ export class PowerOperations implements QuestionGenInterface {
                 this.question =   "\\dfrac{ \\left(" + base2 + "^{" + e1 + "}\\right)^{" + e2 + "} \\cdot "+ base3 + "^{" + e3 + "} : "+ base + "^{" + e4+ " }}{"+ base + "^{" + e5 + "}}";  
                 this.answer =  displayPower( base, f2*e1*e2 + f3*e3 - e4 - e5 );
             } else if (coin === 4) {
+                e3 = rnd.intBetween(2, maxExp);
                 this.question =   "\\left[ \\dfrac{" + base  + "^{" + e1 +"}\\cdot " + base2 +"^{" + e1 + "}}{" + base3 + "^{" + e2 + "}} \\right]^{" + e3 + "}";  
                 this.answer =  displayPower( base, e3*(e1 + f2*e1 - f3*e2) );
             }
@@ -159,7 +165,7 @@ export class PowerOperations implements QuestionGenInterface {
     }
 
     getFormulation(): string {        
-       return "$" + this.question + "$";
+       return "$" + this.question + "={}$";
     }
 
     getAnswer(): string {
