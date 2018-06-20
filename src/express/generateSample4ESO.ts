@@ -112,15 +112,13 @@ export function generateSample4ESO() {
                             ]
                         },
                         {
-                            formulation: "En Miquel té ${a} euros i na Maria ${b} euros.", scope: {a: "rnd.decimal(10,40,2)", b: "rnd.decimal(10,40,2)"}, questions: [
-                                { gen: "special/computed", repeat: 1, options: { 
-                                    qFormulation: "Quants d'euros tenen en total?",
-                                    qAnswer: "${(a+b).toFixed(2)} euros"
-                                 } },
-                                 { gen: "special/computed", repeat: 1, options: { 
-                                    qFormulation: "Quants d'euros de diferència?",
-                                    qAnswer: "${Math.abs(a-b).toFixed(2)} euros"
-                                 } }  
+                            formulation: "", questions: [
+                                { gen: "algebra/equations/quadraticproblems", repeat: 1}  
+                            ]
+                        },
+                        {
+                            formulation: "", questions: [
+                                { gen: "algebra/system/linealproblems", repeat: 1}  
                             ]
                         }
                     ]
