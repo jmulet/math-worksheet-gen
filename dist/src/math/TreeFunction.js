@@ -112,7 +112,6 @@ class TreeFunction {
         const coefs = this.rnd.intList(degree + 1, 0, range);
         coefs[0] = this.rnd.intBetweenNotZero(1, range);
         const monomials = coefs.map((coef, i) => this.monomialNode(degree - i, Math.abs(coef), xnode));
-        console.log(monomials);
         let poly = monomials[0];
         monomials.forEach((m, i) => {
             if (i > 0 && coefs[i] !== 0) {

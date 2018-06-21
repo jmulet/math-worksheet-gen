@@ -38,7 +38,12 @@ let QuadraticProblems = class QuadraticProblems {
         const rnd = qGenOpts.rand || new Random_1.Random();
         const r = qGenOpts.question.interval || 10;
         let dimension = qGenOpts.question.dimension || 2;
-        const forbiddenIdentifiers = qGenOpts.question.forbiddenIdentifiers || [];
+        const uniqueQuestionsMap = qGenOpts.question.uniqueQuestionsMap || {};
+        let forbiddenIdentifiers = uniqueQuestionsMap["algebra/equations/quadraticproblems"];
+        if (!forbiddenIdentifiers) {
+            forbiddenIdentifiers = [];
+            uniqueQuestionsMap["algebra/equations/quadraticproblems"] = forbiddenIdentifiers;
+        }
         let problem;
         //Nomes cridar una vegada aquesta funció, d'aquesta forma multiples cridadades resultara en duplicitat de problemes.
         const maxLen = 5;
@@ -48,7 +53,7 @@ let QuadraticProblems = class QuadraticProblems {
                 coin = rnd.intBetween(0, maxLen);
             }
         }
-        this.identifier = coin;
+        forbiddenIdentifiers.push(coin);
         if (coin === 0) {
             const mult = rnd.intBetween(1, r);
             const x = rnd.intBetween(10, 50);
@@ -105,7 +110,7 @@ let QuadraticProblems = class QuadraticProblems {
             const sumen = x * x + (x + 1) * (x + 1) + (x + 2) * (x + 2);
             problem = {
                 tags: "quadratic",
-                formulation: `Troba tres números consecutius tals que la suma dels seus quadrats sigui ${sumen}.`,
+                formulation: `Troba tres nombres consecutius tals que la suma dels seus quadrats sigui ${sumen}.`,
                 answer: `Els nombres són ${x}, ${x + 1}, ${x + 2}`
             };
         }

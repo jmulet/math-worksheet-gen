@@ -10,16 +10,11 @@ class WsActivity {
         this.questions = [];
         this.qGenOpts = this.qGenOpts || {};
     }
-    // if times < 0, then reuse the same question gen object for all times
     useRepeat(qClass, qGenOpts, times = 1, type, reuse) {
         qClass = qClass || this.qClass;
         qGenOpts = qGenOpts || this.qGenOpts || {};
-        let question;
-        for (var i = 0; i < times; i++) {
-            if (!reuse || !question) {
-                question = new WsQuestion_1.WsQuestion(qClass, Object.assign({ question: qGenOpts }, this.opts));
-                question.type = type;
-            }
+        for (let i = 0; i < times; i++) {
+            const question = new WsQuestion_1.WsQuestion(qClass, Object.assign({ question: qGenOpts }, this.opts));
             this.questions.push(question);
         }
         return this;
@@ -113,14 +108,20 @@ class WsActivity {
     }
     answersToHtml() {
         const latex = [];
-        if (this.questions.length) {
+        const n = this.questions.length;
+        if (n) {
             latex.push('  <li>');
-            latex.push('    <ol class="olalpha">');
-            // Skip activity with no questions
-            this.questions.forEach((question) => {
-                latex.push('    <li> <p class="questiontion">' + question.answerToHtml() + "</p></li>");
-            });
-            latex.push("    </ol>");
+            if (n > 1) {
+                latex.push('    <ol class="olalpha">');
+                // Skip activity with no questions
+                this.questions.forEach((question) => {
+                    latex.push('    <li> <p class="questiontion">' + question.answerToHtml() + "</p></li>");
+                });
+                latex.push("    </ol>");
+            }
+            else {
+                latex.push(' <p class="questiontion">' + this.questions[0].answerToHtml() + "</p>");
+            }
             latex.push("  </li>");
         }
         return latex;

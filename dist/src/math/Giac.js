@@ -12,12 +12,8 @@ class Giac {
         return giac.evaluate(str);
     }
     static coeffs(polynomial, bar = 'x') {
-        console.log("Trying to parse polynomial", polynomial, bar);
         const str = Giac.evaluate('coeffs(' + polynomial + ', ' + bar + ')');
-        console.log("Els coefs del polynomial are ", str);
         const list = str.slice(str.indexOf('[') + 1, str.length - 1).split(",");
-        console.log("List is ", list);
-        //console.log("Trying to numeric parse ", list);
         return list.filter((e) => e !== 'undef').map((e) => Numeric_1.Numeric.parse(e));
     }
     static parsePolynomial(str, bar = 'x') {
@@ -27,7 +23,6 @@ class Giac {
     static parseAlgebraicFraction(str, bar = 'x') {
         const numer = giac.evaluate('numer(' + str + ')');
         const denom = giac.evaluate('denom(' + str + ')');
-        console.log('el numerador i denominador son ', numer, denom);
         return new AlgebraicFraction_1.AlgebraicFraction(Giac.parsePolynomial(numer), Giac.parsePolynomial(denom));
     }
     /**

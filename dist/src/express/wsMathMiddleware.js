@@ -114,6 +114,9 @@ function wsMathMiddleware(options) {
             }
             else {
                 // Pass extra information from query params
+                if (req.query.includeKeys === "true") {
+                    doc.includeKeys = true;
+                }
                 if (req.query.seed) {
                     doc.seed = req.query.seed;
                 }

@@ -124,6 +124,16 @@ function generateSample4ESO() {
                         },
                         {
                             formulation: "", questions: [
+                                { gen: "algebra/equations/quadraticproblems", repeat: 1, options: {} }
+                            ]
+                        },
+                        {
+                            formulation: "", questions: [
+                                { gen: "algebra/system/linealproblems", repeat: 1, options: { dimension: 2 } }
+                            ]
+                        },
+                        {
+                            formulation: "", questions: [
                                 { gen: "algebra/system/linealproblems", repeat: 1, options: { dimension: 2 } }
                             ]
                         },
@@ -143,7 +153,7 @@ function generateSample4ESO() {
                         },
                         {
                             formulation: "Calcula el vèrtex i representa aquestes paràboles", questions: [
-                                { gen: "calculus/elemental/graph", repeat: 4, options: { interval: 10, types: [1] } }
+                                { gen: "calculus/elemental/graph", repeat: 4, options: { interval: 10, types: [1], complexity: 0 } }
                             ]
                         }
                     ]

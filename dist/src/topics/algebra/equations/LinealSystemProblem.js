@@ -37,9 +37,15 @@ let EquationsLinealSystem = class EquationsLinealSystem {
         const rnd = qGenOpts.rand || new Random_1.Random();
         const r = qGenOpts.question.interval || 10;
         const dimension = qGenOpts.question.dimension || 2;
-        const forbiddenIdentifiers = qGenOpts.question.forbiddenIdentifiers || [];
+        const uniqueQuestionsMap = qGenOpts.question.uniqueQuestionsMap || {};
+        let forbiddenIdentifiers = uniqueQuestionsMap["algebra/system/linealproblems"];
+        if (!forbiddenIdentifiers) {
+            forbiddenIdentifiers = [];
+            uniqueQuestionsMap["algebra/system/linealproblems"] = forbiddenIdentifiers;
+        }
         let problem;
         //Nomes cridar una vegada aquesta funció, d'aquesta forma multiples cridadades resultara en duplicitat de problemes.
+        //S'ha arreglat mitjnaçant el mapa uniqueQuestionsMap["algebra/system/linealproblems"]
         if (dimension > 2) {
             // Problemes 3x3
             const maxLen = 5;
@@ -49,7 +55,7 @@ let EquationsLinealSystem = class EquationsLinealSystem {
                     coin = rnd.intBetween(0, maxLen);
                 }
             }
-            this.identifier = coin;
+            forbiddenIdentifiers.push(coin);
             throw new Error("Problems 3x3 not implemented yet");
         }
         else {
@@ -61,7 +67,7 @@ let EquationsLinealSystem = class EquationsLinealSystem {
                     coin = rnd.intBetween(0, maxLen);
                 }
             }
-            this.identifier = coin;
+            forbiddenIdentifiers.push(coin);
             if (coin === 0) {
                 problem = {
                     tags: "system",
@@ -121,13 +127,13 @@ let EquationsLinealSystem = class EquationsLinealSystem {
             else if (coin === 4) {
                 const x = rnd.intBetween(20, 100);
                 const y = rnd.intBetween(2, 19);
-                const result = x / 1.0 * y;
+                const result = x / (1.0 * y);
                 const quotient = Math.floor(result);
                 const remainder = x - quotient * y;
                 problem = {
                     tags: "system",
                     formulation: `En dividir un nombre entre un altre el quocient és ${quotient} i el residu és ${remainder}. 
-                    Si la diferència entre el dividend i el dividend és ${x - y}, quins són aquests nombres? (Recorda: $D = d\\cdot q + R$)`,
+                    Si la diferència entre el dividend i el divisor és ${x - y}, quins són aquests nombres? (Recorda: $D = d\\cdot q + R$)`,
                     answer: `Els nombres són ${x} i ${y}`
                 };
             }

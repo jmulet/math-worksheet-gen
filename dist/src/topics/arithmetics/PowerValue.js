@@ -20,10 +20,10 @@ let PowerValue = class PowerValue {
         const maxExp = qGenOpts.question.maxExp || 4;
         const domain = qGenOpts.question.domain || 'Z';
         let base = rnd.numericBetweenNotZero(-r, r, domain);
-        while (base.isOne) {
+        while (base.isOne()) {
             base = rnd.numericBetweenNotZero(-r, r, domain);
         }
-        const exp = rnd.intBetween(minExp, maxExp);
+        const exp = rnd.intBetweenNotZero(minExp, maxExp);
         const decimal = Math.pow(base.toNumber(), exp);
         if (base.isNegative() || !base.isInt()) {
             this.question = "\\left( " + base.toTeX() + "\\right)^{" + exp + "}";

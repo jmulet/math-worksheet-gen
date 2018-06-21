@@ -36,7 +36,6 @@ class Polynomial extends Expression_1.Expression {
             if (typeof (e) === "number") {
                 e = Numeric_1.Numeric.fromNumber(e);
             }
-            console.log(e);
             let coef1 = 1;
             let coef2 = e.oposite();
             if (coef2.Re["d"] > 1) {

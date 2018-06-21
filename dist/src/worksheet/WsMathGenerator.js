@@ -117,6 +117,7 @@ class WsMathGenerator {
             this.rand = new Random_1.Random(seed);
             wsGenOpts.rand = this.rand;
         }
+        wsGenOpts.uniqueQuestionsMap = {};
         // if (wsGenOpts.worksheet) {
         //     this.create(wsGenOpts.worksheet);
         // }
@@ -140,6 +141,7 @@ class WsMathGenerator {
                         question.repeat = 1;
                     }
                     if (clazz) {
+                        question.options.uniqueQuestionsMap = this.wsGenOpts.uniqueQuestionsMap;
                         act.useRepeat(clazz, question.options || {}, question.repeat || 1, question.type, activity.scope && Object.keys(activity.scope).length > 0);
                     }
                     else {
@@ -220,6 +222,10 @@ class WsMathGenerator {
             '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" crossorigin="anonymous">',
             '<script src="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.js" crossorigin="anonymous"></script>',
             '<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/contrib/auto-render.min.js" integrity="sha384-IiI65aU9ZYub2MY9zhtKd1H2ps7xxf+eb2YFG9lX6uRqpXCvBTOidPRCXCrQ++Uc" crossorigin="anonymous"></script>',
+            '<script type="text/javascript" charset="UTF-8" src="//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.3/jsxgraphcore.js"></script>',
+            `
+            
+            `,
             '<style>',
             `
            .olsection:first-of-type { counter-reset: sectioncounter }           

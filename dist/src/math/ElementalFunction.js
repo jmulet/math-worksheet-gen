@@ -188,7 +188,7 @@ class QuadraticFunction extends ElementalFunction {
         if (x.length > 1) {
             x = "(" + x + ")";
         }
-        var str = "" + applyProduct(this.a, "*", x + "**2");
+        var str = "" + applyProduct(this.a, "*", x + "^2");
         str = apply(str, this.b, "*" + x);
         str = apply(str, this.c);
         return str;

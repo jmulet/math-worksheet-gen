@@ -353,8 +353,17 @@ class Random {
                 const n = this.numericBetween(-opts.range, opts.range, opts.domain);
                 return new ElementalFunction_1.LinealFunction(m, n);
             case ElementalFunction_1.ElementalFunction.types.Quadratic:
-                const a = this.numericBetweenNotZero(-2, 2);
-                const b = this.numericBetween(-opts.range, opts.range, opts.domain);
+                let a = this.numericBetweenNotZero(-1, 1);
+                if (opts.complexity > 0) {
+                    a = this.numericBetweenNotZero(-2, 2);
+                }
+                let b;
+                if (opts.complexity === 0) {
+                    b = this.numericBetween(-5, 5, 'Z').multiply(Numeric_1.Numeric.fromNumber(2));
+                }
+                else {
+                    b = this.numericBetween(-opts.range, opts.range, opts.domain);
+                }
                 const c = this.numericBetween(-opts.range, opts.range, opts.domain);
                 return new ElementalFunction_1.QuadraticFunction(a, b, c);
             case ElementalFunction_1.ElementalFunction.types.Radical:
