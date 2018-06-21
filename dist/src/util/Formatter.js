@@ -118,6 +118,24 @@ class Formatter {
             return a + "";
         }
     }
+    static displayPower(base, exponent, inverse) {
+        if (base === 1 || exponent === 0) {
+            return "";
+        }
+        if (exponent === 1) {
+            return base;
+        }
+        if (inverse) {
+            return base + "^{\\frac{1}{" + exponent + "}}";
+        }
+        return base + "^{" + exponent + "}";
+    }
+    static displayRoot(index, radicand) {
+        if (index === 2) {
+            return "\\sqrt{" + radicand + "}";
+        }
+        return "\\sqrt[" + index + "]{" + radicand + "}";
+    }
 }
 exports.Formatter = Formatter;
 //# sourceMappingURL=Formatter.js.map

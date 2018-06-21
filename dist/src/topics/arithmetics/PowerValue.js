@@ -19,7 +19,10 @@ let PowerValue = class PowerValue {
         const minExp = qGenOpts.question.minExp || -4;
         const maxExp = qGenOpts.question.maxExp || 4;
         const domain = qGenOpts.question.domain || 'Z';
-        const base = rnd.numericBetweenNotZero(-r, r, domain);
+        let base = rnd.numericBetweenNotZero(-r, r, domain);
+        while (base.isOne) {
+            base = rnd.numericBetweenNotZero(-r, r, domain);
+        }
         const exp = rnd.intBetween(minExp, maxExp);
         const decimal = Math.pow(base.toNumber(), exp);
         if (base.isNegative() || !base.isInt()) {
@@ -31,7 +34,7 @@ let PowerValue = class PowerValue {
         this.answer = decimal + "";
     }
     getFormulation() {
-        return "$" + this.question + "$";
+        return "$" + this.question + "={}$";
     }
     getAnswer() {
         return "$" + this.answer + "$";

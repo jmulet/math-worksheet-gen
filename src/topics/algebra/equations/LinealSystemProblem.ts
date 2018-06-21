@@ -47,22 +47,49 @@ const solve2ndDegreeEqn = function(a: number, b: number, c: number, condition?: 
 export class EquationsLinealSystem implements QuestionGenInterface {
  
     answer: string;
-    question: any;
+    question: any; 
    
     constructor(private qGenOpts: QuestionOptsInterface) {
         const rnd: Random = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
-        let dimension = qGenOpts.question.dimension || 2; 
+        const dimension = qGenOpts.question.dimension || 2; 
+        const uniqueQuestionsMap = qGenOpts.question.uniqueQuestionsMap || {};
+        let forbiddenIdentifiers = uniqueQuestionsMap["algebra/system/linealproblems"];
+        if (!forbiddenIdentifiers) {
+            forbiddenIdentifiers = [];
+            uniqueQuestionsMap["algebra/system/linealproblems"] = forbiddenIdentifiers;
+        }  
         
         let problem;
+
         //Nomes cridar una vegada aquesta funció, d'aquesta forma multiples cridadades resultara en duplicitat de problemes.
-        if (dimension < 3) {
+        //S'ha arreglat mitjnaçant el mapa uniqueQuestionsMap["algebra/system/linealproblems"]
+        if (dimension > 2) {
             // Problemes 3x3
+            const maxLen = 5;
+            let coin = rnd.intBetween(0, maxLen);
+            
+            if (forbiddenIdentifiers.length && forbiddenIdentifiers.length < maxLen) {
+                while (forbiddenIdentifiers.indexOf(coin) >=0 ) {
+                    coin = rnd.intBetween(0, maxLen);
+                }
+            }
+            forbiddenIdentifiers.push(coin);
+
             throw new Error("Problems 3x3 not implemented yet");
+          
 
         } else {
             // Problemes 2x2
-            const coin = rnd.intBetween(0, 5);
+            const maxLen = 5;
+            let coin = rnd.intBetween(0, maxLen);
+            
+            if (forbiddenIdentifiers.length && forbiddenIdentifiers.length < maxLen) {
+                while (forbiddenIdentifiers.indexOf(coin) >=0 ) {
+                    coin = rnd.intBetween(0, maxLen);
+                }
+            } 
+            forbiddenIdentifiers.push(coin);
 
             if (coin === 0) {
 
@@ -94,49 +121,70 @@ export class EquationsLinealSystem implements QuestionGenInterface {
                     answer: `Va fabricar ${bones} bombetes bones.`  
                 };
             } else if (coin === 2) {
-              
+                const grOr = rnd.intBetween(20, 140)*10;
+                const grPlata = rnd.intBetween(20, 140)*10;
+                const euroOr = rnd.intBetween(50, 100)/10;
+                const euroPlata = rnd.intBetween(2, 49)/10;
+                const despesa = euroOr*grOr + euroPlata*grPlata;
                 problem = {
                     tags: "system",
                     formulation: `Un orfebre rep l'encàrrec de confeccionar un trofeu, en or i en plata, per a un
-                    campionat esportiu. Una vegada realitzat, resulta un pes de 1.300 grams, i un cost de 2,840 €.
-                    Quina quantitat ha utilitzat de cada preciós de metall, si l'or es ven 8 €/gram i la plata
-                    per 1,7 €/gram?`,
+                    campionat esportiu. Una vegada realitzat, resulta un pes de ${grOr + grPlata} grams, i un cost de ${despesa} €.
+                    Quina quantitat ha utilitzat de cada preciós de metall, si l'or es ven ${euroOr.toFixed(2)} €/gram i la plata
+                    per ${euroPlata.toFixed(2)} €/gram?`,
                     answer: `${grOr} g d'or i ${grPlata} g de plata` 
                 };
             } else if (coin === 3) {
-                 
+                const alpha = rnd.intBetween(2, 10); 
                 problem = {
                     tags: "system",
-                    formulation: `Determinau el perímetre d'un triangle equilàter sabent que té una àrea de ${area} cm$^2$.`,
-                    answer: `El perímetre és ${perimetre} cm` 
+                    formulation: ` Un pastor diu a un altre pastor: Dóna’m ${alpha} ovelles, i així en tindré el doble que tu. I
+                    l’altre li contesta: Dóna-me’n tú ${alpha} ovelles, i així en tindrem tots dos igual. Quantes ovelles
+                    té cada pastor?`,
+                    answer: `El primer té ${7*alpha} i el segon ${5*alpha} ovelles.` 
                 };
             } else if (coin === 4) {
-                 
+                const x = rnd.intBetween(20, 100);                 
+                const y = rnd.intBetween(2, 19);
+                const result = x/(1.0*y);
+                const quotient = Math.floor(result);
+                const remainder = x - quotient*y;
                 problem = {
                     tags: "system",
-                    formulation: `D'un panell metàl·lic que té forma de quadrat li retallam un cercle d'igual diàmetre. Sabent que l'àrea de la figura que en resulta és ${area}, trobau la mida del quadrat.`,
-                    answer: `El costat mesura ${x} cm` 
+                    formulation: `En dividir un nombre entre un altre el quocient és ${quotient} i el residu és ${remainder}. 
+                    Si la diferència entre el dividend i el divisor és ${x-y}, quins són aquests nombres? (Recorda: $D = d\\cdot q + R$)`,
+                    answer: `Els nombres són ${x} i ${y}` 
                 };
             } else if (coin === 5) {
-                const delta = rnd.intBetween(3, r);                        
-                const x = rnd.intBetween(3, 100);
-                const y = x + delta;
+                const x = rnd.intBetween(6, 50);
+                const y = rnd.intBetween(6, 50);
+                const dx1 = rnd.intBetween(1, 5);
+                const dx2 = rnd.intBetween(1, 5);
+                const dy1 = rnd.intBetween(1, 5);
+                const dy2 = rnd.intBetween(1, 5);
+                const dA1 = (x+dx1)*(y+dy1) - x*y;
+                const dA2 = (x+dx2)*(y+dy2) - x*y;
+                const case1 = dA1>0? "augmenta" : "disminueix";
+                const case2 = dA2>0? "augmenta" : "disminueix";
                 problem = {
                     tags: "system",
-                    formulation: `Calcula les dimensions d'un rectangle, sabent que mesura ${delta} m més de llarg que d'ample i que el perímetre mesura ${perimetre} m.`,
-                    answer: `Les dimensions són ${x} i ${y} m` 
+                    formulation: `Si la llargària d’un rectangle s’augmenta ${dx1} centímetres i l’amplària ${dy1} centímetres, l’àrea ${case1} ${dA1}
+                    centímetres quadrats. Si, en canvi, la llargària s’augmenta ${dx2} centímetre i l’amplària ${dy2} centímetres, l’àrea
+                    ${case2} ${dA2} centímetres quadrats. Calcula la llargària i l’amplària del rectangle.`,
+                    answer: `Les dimensions són ${x} i ${y} cm` 
                 };
             }
         } 
- 
+        this.question = problem.formulation;
+        this.answer = problem.answer;
     }
 
     getFormulation(): string {
-        return "$" + this.question + "$";
+        return  this.question ;
     }
 
     getAnswer(): string {
-        return "$ \\left(" + this.answer + " \\right)$" ;
+        return  this.answer;
     }
 
     getDistractors(): string[] {

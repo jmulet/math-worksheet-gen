@@ -79,7 +79,7 @@ class Numeric {
         }
         else {
             const f = math.fraction(str);
-            return new Numeric(f["n"] * f["n"], f["d"]);
+            return Numeric.fromFraction(f["s"] * f["n"], f["d"]);
         }
     }
     constructor(reNum, reDen, imNum, imDen) {

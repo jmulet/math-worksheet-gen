@@ -11,7 +11,7 @@ export class MysqlStorage implements Storage {
             host: 'localhost',
             user: 'root',
             password: 'root',
-            database: 'piworld'
+            database: 'imaths'
         }
         this.pool = mysql.createPool(config);
 

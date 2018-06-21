@@ -9,12 +9,32 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const PolyMonomial_1 = require("../../../math/PolyMonomial");
 const Random_1 = require("../../../util/Random");
 const WsGenerator_1 = require("../../../util/WsGenerator");
-const Monomial_1 = require("../../../math/Monomial");
-const Literal_1 = require("../../../math/Literal");
 const PolyCommonFactor_1 = require("../polynomials/PolyCommonFactor");
+const Polynomial_1 = require("../../../math/Polynomial");
+const AlgebraicFraction_1 = require("../../../math/AlgebraicFraction");
+const Giac_1 = require("../../../math/Giac");
+// Identity type 0= (a+b)^2; 1=(a-b)^2; 2=(a+b)*(a-b);
+function rootsFromIdentityType(factorX1, type1, root) {
+    const roots = [];
+    for (let i = 0; i < factorX1; i++) {
+        roots.push(0);
+    }
+    if (type1 === 0) {
+        roots.push(root);
+        roots.push(root);
+    }
+    else if (type1 === 1) {
+        roots.push(-root);
+        roots.push(-root);
+    }
+    else {
+        roots.push(root);
+        roots.push(-root);
+    }
+    return Polynomial_1.Polynomial.fromRoots(roots);
+}
 let FractionsOperations = class FractionsOperations {
     constructor(qGenOpts) {
         this.qGenOpts = qGenOpts;
@@ -29,22 +49,57 @@ let FractionsOperations = class FractionsOperations {
         coef4 = rnd.numericBetweenNotZero(1, r);
         const expo1 = rnd.intBetween(1, r);
         const expo2 = rnd.intBetween(1, r);
-        let mono1, mono2, mono3, factor;
-        let poly, question;
+        const generateFraction = function (useRoot) {
+            const factorX2 = rnd.intBetween(0, 3);
+            let polyNum, polyDen;
+            // Identity type 0= (a+b)^2; 1=(a-b)^2; 2=(a+b)*(a-b);
+            const type2 = rnd.intBetween(0, 2);
+            const numCoefs = rnd.numericList(2, r, 'Z');
+            polyNum = new Polynomial_1.Polynomial(numCoefs);
+            polyDen = rootsFromIdentityType(factorX2, type2, useRoot);
+            return new AlgebraicFraction_1.AlgebraicFraction(polyNum, polyDen);
+        };
+        /**
         switch (complexity) {
             case 0:
-                poly = PolyMonomial_1.PolyMonomial.fromCoefs([coef1, coef2, coef3], letter1);
-                factor = new Monomial_1.Monomial(coef4, [new Literal_1.Literal(letter1, expo1)]);
-                question = PolyMonomial_1.PolyMonomial.multiply(factor, poly);
+                poly = PolyMonomial.fromCoefs([coef1, coef2, coef3], letter1);
+                factor = new Monomial(coef4, [new Literal(letter1, expo1)]);
+                question = PolyMonomial.multiply(factor, poly);
                 break;
             default:
-                poly = PolyMonomial_1.PolyMonomial.fromCoefs([coef1, coef2, coef3], letter1);
-                factor = new Monomial_1.Monomial(coef4, [new Literal_1.Literal(letter1, expo1), new Literal_1.Literal(letter2, expo2)]);
-                question = PolyMonomial_1.PolyMonomial.multiply(factor, poly);
+                poly = PolyMonomial.fromCoefs([coef1, coef2, coef3], letter1);
+                factor = new Monomial(coef4, [new Literal(letter1, expo1), new Literal(letter2, expo2)]);
+                question = PolyMonomial.multiply(factor, poly);
                 break;
         }
-        this.question = question.toTeX();
-        this.answer = factor.toTeX() + " \\cdot \\left(" + poly.toTeX() + "\\right)";
+        */
+        const root = rnd.intBetweenNotZero(-r, r);
+        if (complexity <= 1) {
+            const frac1 = generateFraction(root);
+            const frac2 = generateFraction(root);
+            const op = rnd.pickOne(['+', '-']);
+            this.question = frac1.toTeX() + " " + op + " " + frac2.toTeX();
+            const computation = frac1.toString() + " " + op + " " + frac2.toString();
+            this.answer = Giac_1.Giac.evaluate("latex(collect(simplify(" + computation + ")))").replace(/"/g, "").replace(/\\frac/g, "\\dfrac");
+        }
+        else {
+            const frac1 = generateFraction(root);
+            const frac2 = generateFraction(root);
+            const frac3 = generateFraction(root);
+            const op = rnd.pickOne(['+', '-']);
+            const op2 = rnd.pickOne(['*', '/']);
+            this.question = frac1.toTeX() + " " + op + " " + frac2.toTeX();
+            let computation = frac1.toString() + " " + op + " " + frac2.toString();
+            if (op2 === "*") {
+                computation = "(" + computation + ") * " + frac3.toString();
+                this.question = "\\left(" + this.question + "\\right) \\cdot " + frac3.toTeX();
+            }
+            else {
+                computation = "(" + computation + ") / (" + frac3.toString() + ")";
+                this.question = "\\left(" + this.question + "\\right) : " + frac3.toTeX();
+            }
+            this.answer = Giac_1.Giac.evaluate("latex(collect(simplify(" + computation + ")))").replace(/"/g, "").replace(/\\frac/g, "\\dfrac");
+        }
     }
     getFormulation() {
         return "$" + this.question + " = {}$";

@@ -42,17 +42,32 @@ const solve2ndDegreeEqn = function (a: number, b: number, c: number, condition?:
 export class QuadraticProblems implements QuestionGenInterface {
 
     answer: string;
-    question: any;
+    question: any; 
 
     constructor(private qGenOpts: QuestionOptsInterface) {
         const rnd: Random = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
         let dimension = qGenOpts.question.dimension || 2;
+        const uniqueQuestionsMap = qGenOpts.question.uniqueQuestionsMap || {};
+        let forbiddenIdentifiers = uniqueQuestionsMap["algebra/equations/quadraticproblems"];
+        if (!forbiddenIdentifiers) {
+            forbiddenIdentifiers = [];
+            uniqueQuestionsMap["algebra/equations/quadraticproblems"] = forbiddenIdentifiers;
+        }  
+
 
         let problem;
         //Nomes cridar una vegada aquesta funció, d'aquesta forma multiples cridadades resultara en duplicitat de problemes.
 
-        const coin = rnd.intBetween(0, 5);
+        const maxLen = 5;
+        let coin = rnd.intBetween(0, maxLen);
+
+        if (forbiddenIdentifiers.length && forbiddenIdentifiers.length < maxLen) {
+            while (forbiddenIdentifiers.indexOf(coin) >=0 ) {
+                coin = rnd.intBetween(0, maxLen);
+            }
+        } 
+        forbiddenIdentifiers.push(coin);
 
         if (coin === 0) {
             const mult = rnd.intBetween(1, r);
@@ -60,7 +75,7 @@ export class QuadraticProblems implements QuestionGenInterface {
             const units = x * x - mult * x;
             problem = {
                 tags: "quadratic",
-                formulation: `Quina és l'edat d'una persona si en multiplicar-la per ${mult} li falten ${units} per completar el seu quadrat?`,
+                formulation: `Quina és l'edat d'una persona si en multiplicar-la per ${mult} li falten ${units} unitats per completar el seu quadrat?`,
                 answer: x + " anys"
             };
         } else if (coin === 1) {
@@ -105,7 +120,7 @@ export class QuadraticProblems implements QuestionGenInterface {
             const sumen = x * x + (x + 1) * (x + 1) + (x + 2) * (x + 2);
             problem = {
                 tags: "quadratic",
-                formulation: `Troba tres números consecutius tals que la suma dels seus quadrats sigui ${sumen}.`,
+                formulation: `Troba tres nombres consecutius tals que la suma dels seus quadrats sigui ${sumen}.`,
                 answer: `Els nombres són ${x}, ${x + 1}, ${x + 2}`
             };
         }
@@ -116,14 +131,14 @@ export class QuadraticProblems implements QuestionGenInterface {
     }
 
     getFormulation(): string {
-        return "$" + this.question + "$";
+        return this.question;
     }
 
     getAnswer(): string {
-        return "$ \\left(" + this.answer + " \\right)$";
+        return this.answer;
     }
 
-    getDistractors(): string[]  {
+    getDistractors(): string[] {
         return [];
     }
 } 

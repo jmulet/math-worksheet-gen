@@ -26,6 +26,7 @@ function displayPower(base: string, n: number): string {
             return base + "^{" + n + "}";
         }
     }  
+    return base + "^{" + n + "}";
 }
 
 // Display exponent; no exponent printed if one

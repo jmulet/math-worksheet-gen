@@ -17,7 +17,7 @@ class MysqlStorage {
             host: 'localhost',
             user: 'root',
             password: 'root',
-            database: 'piworld'
+            database: 'imaths'
         };
         this.pool = mysql.createPool(config);
         this.synchronizeDB();

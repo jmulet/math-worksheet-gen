@@ -13,6 +13,7 @@ export class WsSection {
     activities: WsActivity[] = [];
 
     constructor(public title: string, private opts: SectionOptsInterface) {
+
     }
 
     createActivity(formulation: string, scope?: any, qClass?: GenClass, qGenOpts?: any) {   
@@ -35,8 +36,7 @@ export class WsSection {
             } catch(Ex) {
                 console.log(Ex);
             }
-        } 
-        
+        }  
         const activity = new WsActivity(formulation, {scope: scope, ...this.opts}, qClass, qGenOpts);
         this.activities.push(activity);
         return activity;

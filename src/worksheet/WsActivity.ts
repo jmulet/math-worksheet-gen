@@ -5,20 +5,15 @@ import { GenClass } from "../interfaces/GenClass";
 export class WsActivity {
     questions: WsQuestion[] = []
     constructor(public formulation: string, private opts: ActivityOptsInterface, private qClass?: GenClass, private qGenOpts?: any) {
-        this.qGenOpts = this.qGenOpts || {};
+        this.qGenOpts = this.qGenOpts || {}; 
     }
 
-    // if times < 0, then reuse the same question gen object for all times
     useRepeat(qClass?: GenClass, qGenOpts?: any, times = 1, type?: string, reuse?: boolean): WsActivity {
         qClass = qClass || this.qClass;
         qGenOpts = qGenOpts || this.qGenOpts || {};
-
-        let question;
-        for (var i = 0; i < times; i++) {
-            if (!reuse || !question) {
-                question = new WsQuestion(qClass, { question: qGenOpts, ...this.opts });
-                question.type = type;
-            }
+      
+        for (let i=0; i<times; i++) {
+            const question = new WsQuestion(qClass, { question: qGenOpts, ...this.opts });
             this.questions.push(question);
         }
         return this;
@@ -116,16 +111,22 @@ export class WsActivity {
 
     answersToHtml(): string[] {
         const latex = [];
-        if (this.questions.length) {
+        const n = this.questions.length;
+        if (n) {
             latex.push('  <li>');
-            latex.push('    <ol class="olalpha">');
+            if (n > 1) {
+                latex.push('    <ol class="olalpha">');
 
-            // Skip activity with no questions
-            this.questions.forEach((question) => {
-                latex.push('    <li> <p class="questiontion">' + question.answerToHtml() + "</p></li>");
-            });
-            latex.push("    </ol>");
+                // Skip activity with no questions
+                this.questions.forEach((question) => {
+                    latex.push('    <li> <p class="questiontion">' + question.answerToHtml() + "</p></li>");
+                });
+                latex.push("    </ol>");
+            } else {
+                latex.push(' <p class="questiontion">' + this.questions[0].answerToHtml() + "</p>");
+            }
             latex.push("  </li>");
+            
         }
         return latex;
     }

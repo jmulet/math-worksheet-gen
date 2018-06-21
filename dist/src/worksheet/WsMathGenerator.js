@@ -307,7 +307,7 @@ class WsMathGenerator {
                 code.push("<h2 class=\"arial arial-large\" style=\"color:blue;text-align:center;\"><b>" + this.worksheet.title + "</b></h2>");
             }
             if (this.worksheet.instructions) {
-                code.push('<center><div class=\"instructions\"><p>' + this.worksheet.instructions + "</p></div></center>");
+                code.push('<div class=\"instructions\"><p>' + this.worksheet.instructions.replace(/\n/g, "<br/>") + "</p></div>");
             }
             code.push("<p class=\"arial\"><b>Referència:</b> " + this.rand.seed + ". <b>Nom i llinatges:</b> " +
                 (this.worksheet.fullname ? this.worksheet.fullname : "..........................................................</p>"));
@@ -331,7 +331,7 @@ class WsMathGenerator {
         code.push(" var options = {delimiters: [");
         code.push('     {left: "$", right: "$", display: false}, ');
         code.push('     {left: "\\[", right: "\\]", display: true}, ');
-        code.push('     {left: "\\(", right: "\\)", display: false} ');
+        // code.push('     {left: "\\(", right: "\\)", display: false} ');
         code.push(' ]};');
         code.push(' document.addEventListener("DOMContentLoaded", function() {');
         code.push("   renderMathInElement(document.body, options);");
@@ -348,7 +348,7 @@ class WsMathGenerator {
             quiz.ele("question", { type: "category" }).ele("category").ele("text", {}, "$course$/" + section.title);
             section.activities.forEach((activity) => {
                 activity.questions.forEach((question) => {
-                    let formulation = activity.formulation;
+                    let formulation = activity.formulation.replace("\n", "<br/>");
                     formulation += ". " + question.toHtml();
                     const type = question.type;
                     createQuestion(quiz, formulation, type, question.answerToHtml(), question.distractorsHtml());

@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const mathjs = require("mathjs");
+const Formatter_1 = require("../util/Formatter");
+const Giac_1 = require("./Giac");
+const Literal_1 = require("./Literal");
 const Monomial_1 = require("./Monomial");
 const Numeric_1 = require("./Numeric");
-const mathjs = require("mathjs");
-const Literal_1 = require("./Literal");
-const Giac_1 = require("./Giac");
-const Formatter_1 = require("../util/Formatter");
 function factor2TeX(factors) {
     let y = "";
     let sep = "";

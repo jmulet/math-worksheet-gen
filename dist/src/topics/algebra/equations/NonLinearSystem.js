@@ -14,13 +14,15 @@ const WsGenerator_1 = require("../../../util/WsGenerator");
 const Giac_1 = require("../../../math/Giac");
 const Formatter_1 = require("../../../util/Formatter");
 const Numeric_1 = require("../../../math/Numeric");
+const Polynomial_1 = require("../../../math/Polynomial");
 const VARNAMES = ["x", "y", "z", "t", "w"];
 let EquationsNonlinearSystem = class EquationsNonlinearSystem {
     constructor(qGenOpts) {
         this.qGenOpts = qGenOpts;
         const rnd = qGenOpts.rand || new Random_1.Random();
         const r = qGenOpts.question.interval || 10;
-        const complexity = qGenOpts.question.complexity || 1;
+        let complexity = qGenOpts.question.complexity || 1;
+        const graphical = qGenOpts.question.graphical || false;
         const dimension = 2;
         let operations = (qGenOpts.question.operations || "*,^").split(",").map(e => e.trim());
         if (operations.length === 0) {
@@ -38,6 +40,9 @@ let EquationsNonlinearSystem = class EquationsNonlinearSystem {
         }
         const eqns = [];
         const eqnsTeX = [];
+        if (graphical) {
+            complexity = 1;
+        }
         if (complexity === 1) {
             // In complexity 1: Create a linear equation with at least one coef being +- 1
             const linCoefs = rnd.intList(2, r);
@@ -59,31 +64,51 @@ let EquationsNonlinearSystem = class EquationsNonlinearSystem {
             });
             eqns.push(lhs.join("") + "=" + rightScalar);
             eqnsTeX.push(lhsTeX.join("") + "&=" + rightScalar);
-            // The second equation is non-linear and picked from the allowed operations
-            if (op === "^") {
-                const op2 = rnd.pickOne(["+", "-"]);
-                const lhs = "x**2 " + op2 + "y**2";
-                const lhsTeX = "x^2 " + op2 + "y^2";
-                let rhs = rootX * rootX;
-                if (op2 === "+") {
-                    rhs += rootY * rootY;
+            if (graphical) {
+                // Make the second equation non-linear but easy to draw
+                const coin = rnd.intBetween(0, 1);
+                if (coin === 0) {
+                    // The second eq. is a parabola
+                    const alpha = rnd.intBetween(-r, r);
+                    const beta = rootY + rootX * (2 * alpha - rootX);
+                    const coefs = [1, -2 * alpha, beta];
+                    eqns.push("y=" + new Polynomial_1.Polynomial(coefs).toString());
+                    eqnsTeX.push("y&=" + new Polynomial_1.Polynomial(coefs).toTeX() + "");
                 }
                 else {
-                    rhs -= rootY * rootY;
+                    // The second eq. is inverse proportional
+                    const rhs = rootX * rootY;
+                    eqns.push("x*y=" + rhs);
+                    eqnsTeX.push("x \\cdot y" + "&=" + rhs + "");
                 }
-                eqns.push(lhs + "=" + rhs);
-                eqnsTeX.push(lhsTeX + "&=" + rhs);
-            }
-            else if (op === "*") {
-                const rhs = rootX * rootY;
-                eqns.push("x*y=" + rhs);
-                eqnsTeX.push("x \\cdot y" + "&=" + rhs);
             }
             else {
-                const beta = rnd.intBetween(2, 5);
-                const rhs = beta * rootX + Math.sqrt(rootX + rootY);
-                eqns.push(beta + "*x + sqrt(x + y) =" + rhs);
-                eqnsTeX.push(beta + " x + \\sqrt{x + y} &=" + rhs);
+                // The second equation is non-linear and picked from the allowed operations
+                if (op === "^") {
+                    const op2 = rnd.pickOne(["+", "-"]);
+                    const lhs = "x**2 " + op2 + "y**2";
+                    const lhsTeX = "x^2 " + op2 + "y^2";
+                    let rhs = rootX * rootX;
+                    if (op2 === "+") {
+                        rhs += rootY * rootY;
+                    }
+                    else {
+                        rhs -= rootY * rootY;
+                    }
+                    eqns.push(lhs + "=" + rhs);
+                    eqnsTeX.push(lhsTeX + "&=" + rhs);
+                }
+                else if (op === "*") {
+                    const rhs = rootX * rootY;
+                    eqns.push("x*y=" + rhs);
+                    eqnsTeX.push("x \\cdot y" + "&=" + rhs);
+                }
+                else {
+                    const beta = rnd.intBetween(2, 5);
+                    const rhs = beta * rootX + Math.sqrt(rootX + rootY);
+                    eqns.push(beta + "*x + sqrt(x + y) =" + rhs);
+                    eqnsTeX.push(beta + " x + \\sqrt{x + y} &=" + rhs);
+                }
             }
         }
         else {
@@ -155,6 +180,11 @@ EquationsNonlinearSystem = __decorate([
                 name: "operations",
                 defaults: "*,^,sqrt",
                 description: "which operations can lead to non-linearity"
+            },
+            {
+                name: "graphical",
+                defaults: false,
+                description: "When true, the activity is prepared to be done graphically"
             }
         ]
     }),

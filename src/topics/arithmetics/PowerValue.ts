@@ -41,8 +41,11 @@ export class PowerValue implements QuestionGenInterface {
         const maxExp = qGenOpts.question.maxExp || 4; 
         const domain = qGenOpts.question.domain || 'Z';
          
-        const base = rnd.numericBetweenNotZero(-r, r, domain);
-        const exp = rnd.intBetween(minExp, maxExp);
+        let base = rnd.numericBetweenNotZero(-r, r, domain);
+        while (base.isOne()) {
+            base = rnd.numericBetweenNotZero(-r, r, domain);
+        }
+        const exp = rnd.intBetweenNotZero(minExp, maxExp);
         const decimal = Math.pow(base.toNumber(), exp); 
         
         if (base.isNegative() || !base.isInt()) {

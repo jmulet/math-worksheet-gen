@@ -110,6 +110,9 @@ class Equation {
             }
             else {
                 const poly2 = this.rnd.polynomial({ minDegree: 1, maxDegree: 1 });
+                // make sure that the last coef is not zero
+                const cfs = poly2.coefs;
+                cfs[cfs.length - 1] = this.rnd.numericBetweenNotZero(-10, 10);
                 const poly3 = poly2.power(2);
                 this.lhs = poly.add(poly3).toTeX(this.bar);
                 this.rhs = "\\left(" + poly2.toTeX(this.bar) + "\\right)^2";

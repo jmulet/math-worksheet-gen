@@ -395,8 +395,16 @@ export const BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
                     return new LinealFunction(m, n);
                     
                 case ElementalFunction.types.Quadratic: 
-                    const a = this.numericBetweenNotZero(-2, 2);
-                    const b = this.numericBetween(-opts.range, opts.range, opts.domain);
+                    let a = this.numericBetweenNotZero(-1, 1); 
+                    if(opts.complexity > 0) {
+                        a = this.numericBetweenNotZero(-2, 2);
+                    } 
+                    let b;
+                    if(opts.complexity === 0) {
+                        b = this.numericBetween(-5, 5, 'Z').multiply(Numeric.fromNumber(2));
+                    } else {
+                        b = this.numericBetween(-opts.range, opts.range, opts.domain);
+                    }
                     const c = this.numericBetween(-opts.range, opts.range, opts.domain);
                     return new QuadraticFunction(a, b, c);
 

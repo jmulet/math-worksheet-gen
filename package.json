@@ -22,7 +22,7 @@
     "glob": "^7.1.2",
     "helmet": "^3.12.0",
     "katex": "^0.9.0",
-    "mathjs":"4.4.2",
+    "mathjs": "4.4.2",
     "method-override": "^2.3.10",
     "mysql": "^2.15.0",
     "nerdamer": "^0.7.16",

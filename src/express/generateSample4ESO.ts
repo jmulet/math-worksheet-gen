@@ -113,25 +113,36 @@ export function generateSample4ESO() {
                         },
                         {
                             formulation: "", questions: [
-                                { gen: "algebra/equations/quadraticproblems", repeat: 1}  
+                                { gen: "algebra/equations/quadraticproblems", repeat: 1, options: {}}  
                             ]
                         },
                         {
                             formulation: "", questions: [
-                                { gen: "algebra/system/linealproblems", repeat: 1}  
+                                { gen: "algebra/equations/quadraticproblems", repeat: 1, options: {}}  
                             ]
-                        }
-                    ]
-                },
-                {
-                    name: "Logaritmes", activities: [
+                        },
                         {
-                            formulation: "Utilitza la definició de logaritme  per calcular el valor de de $x$ en les equacions següents", questions: [
-                                { gen: "arithmetics/logarithm/definition", repeat: 6, options: { interval: 5 } }
+                            formulation: "", questions: [
+                                { gen: "algebra/equations/quadraticproblems", repeat: 1, options: {}}  
+                            ]
+                        },
+                        {
+                            formulation: "", questions: [
+                                { gen: "algebra/system/linealproblems", repeat: 1, options: {dimension: 2}}  
+                            ]
+                        },
+                        {
+                            formulation: "", questions: [
+                                { gen: "algebra/system/linealproblems", repeat: 1, options: {dimension: 2}}  
+                            ]
+                        },
+                        {
+                            formulation: "", questions: [
+                                { gen: "algebra/system/linealproblems", repeat: 1, options: {dimension: 2}}  
                             ]
                         }
                     ]
-                },
+                }, 
                 {
                     name: "Funcions", activities: [
                         {
@@ -141,12 +152,7 @@ export function generateSample4ESO() {
                         },
                         {
                             formulation: "Calcula el vèrtex i representa aquestes paràboles", questions: [
-                                { gen: "calculus/elemental/graph", repeat: 4, options: { interval: 10, types: [1] } }
-                            ]
-                        },
-                        {
-                            formulation: "Representa aquestes funcions elementals i calcula el seu domini", questions: [
-                                { gen: "calculus/elemental/graph", repeat: 6, options: { interval: 10, types: [0, 1, 2, 3, 4, 5] } }
+                                { gen: "calculus/elemental/graph", repeat: 4, options: { interval: 10, types: [1], complexity: 0 } }
                             ]
                         }
                     ]
