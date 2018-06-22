@@ -86,13 +86,14 @@ var applyOneOp = function (str: string, v: Numeric, op: string) {
 
 export interface ElementalFunctionInterface {
     getType(): number;
-    eval(x: Numeric): number;
+    eval(x: Numeric | number): number;
     toTeX(bar?: string): string;
     toString(bar?: string): string;
     inverse(): ElementalFunction[];
     getDomain(): Intervals;
     getRange(): Intervals;
     getExtrema(): Point[];
+    getBoundingBox(): number[];
 }
 
 export abstract class ElementalFunction {
@@ -158,6 +159,14 @@ export class LinealFunction extends ElementalFunction implements ElementalFuncti
     getExtrema(): Point[] {
         return [];
     }
+    getBoundingBox(): number[] {
+        let x0 = 0;
+        if (!this.m.isZero()) {
+            x0 = Math.floor(this.n.divide(this.m).toNumber());
+        }
+        const y0 = Math.floor(this.n.toNumber());
+        return [x0-5, y0-5, x0+5, y0+5];
+    }
 
 };
 
@@ -173,6 +182,9 @@ export class QuadraticFunction extends ElementalFunction implements ElementalFun
         this.a = a;
         this.b = b;
         this.c = c;
+        if (a.isZero()) {
+            this.a = Numeric.fromNumber(1);
+        }
     }
     inverse(): ElementalFunction[] {
         return [];
@@ -190,13 +202,17 @@ export class QuadraticFunction extends ElementalFunction implements ElementalFun
             return new Intervals(yv, Number.POSITIVE_INFINITY, true, false);
         }
     }
-    getType = function () {
+    getType() {
         return ElementalFunction.types.Quadratic;
     }
-    eval = function (x) {
-        return (this.a * x + this.b) * x + this.c;
+    eval(x: Numeric | number): number {
+        let x2: any = x;
+        if (x instanceof Numeric) {
+            x2 = x.toNumber();
+        }
+        return (this.a.toNumber() * x2 + this.b.toNumber()) * x2 + this.c.toNumber();
     }
-    toTeX = function (x) {
+    toTeX(x) {
         x = x || 'x';
         if (x.length > 1) {
             x = "(" + x + ")";
@@ -220,6 +236,12 @@ export class QuadraticFunction extends ElementalFunction implements ElementalFun
         const xv = this.b.oposite().divide(this.a.multiply(Numeric.fromNumber(2)));
         const yv = this.eval(xv);
         return [new Point([xv, yv])];
+    }
+    getBoundingBox(): number[] {
+        let x0: any = this.b.oposite().divide(this.a.multiply(Numeric.fromNumber(2)));
+        x0 = Math.floor(x0.toNumber());
+        const y0 = Math.floor(this.eval(x0));
+        return [x0-5, y0-5, x0+5, y0+5];
     }
 }
 
@@ -291,6 +313,11 @@ export class RadicalFunction extends ElementalFunction implements ElementalFunct
     getExtrema(): Point[] {
         return [];
     }
+    getBoundingBox(): number[] {
+        const x0 = Math.floor(this.a.toNumber());
+        const y0 = 0;
+        return [x0-2, y0-2, x0+8, y0+8];
+    }
 }
 
 
@@ -347,6 +374,11 @@ export class HyperboleFuntion extends ElementalFunction implements ElementalFunc
     getExtrema(): Point[] {
         return [];
     }
+    getBoundingBox(): number[] {
+        const x0 = Math.floor(this.a.toNumber());
+        const y0 = Math.floor(this.c.toNumber());
+        return [x0-5, y0-5, x0+5, y0+5];
+    }
 
 };
 
@@ -394,6 +426,9 @@ export class ExponentialFunction extends ElementalFunction implements ElementalF
     getExtrema(): Point[] {
         return [];
     }
+    getBoundingBox(): number[] {
+        return [-5, -1, 5, 10];
+    }
 }
 
 
@@ -432,6 +467,9 @@ export class LogarithmFunction extends ElementalFunction implements ElementalFun
      getExtrema(): Point[] {
          return [];
      }
+     getBoundingBox(): number[] {
+        return [-1, -5, 10, 5];
+    }
 }
  
 
@@ -440,6 +478,12 @@ export class TrigonometricFunction extends ElementalFunction implements Elementa
     b: any;
     a: any;
     t: any;
+    constructor(t, a, b) {
+        super();
+        this.t = t || "sin";
+        this.a = a || 1;
+        this.b = b || 1;
+    }
     getType(): number {
         return ElementalFunction.types.Trigonometric;
     }
@@ -464,11 +508,8 @@ export class TrigonometricFunction extends ElementalFunction implements Elementa
     getExtrema(): Point[] {
         throw new Error("Method not implemented.");
     }
-    constructor(t, a, b) {
-        super();
-        this.t = t || "sin";
-        this.a = a || 1;
-        this.b = b || 1;
+    getBoundingBox(): number[] {
+        return [-10, -5, 5, 10];
     }
       
 };

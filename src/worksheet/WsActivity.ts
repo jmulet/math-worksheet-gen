@@ -73,15 +73,15 @@ export class WsActivity {
 
         if (this.questions.length === 0) {
             // Assume that this is not a question and it is displayed as theory block
-            latex.push('<div style="background:rgb(200,200,255); box-shadow: 5px 5px grey; webkit-box-shadow: 5px 5px grey; moz-box-shadow: 5px 5px grey; border-radius: 5px; width:95%; border:1px solid blue; padding:5px">' +
-                this.formulation + "</div>");
+            latex.push('<div style="background:rgb(200,200,255); box-shadow: 5px 5px grey; webkit-box-shadow: 5px 5px grey; moz-box-shadow: 5px 5px grey; border-radius: 5px; width:95%; border:1px solid blue; padding:5px"><p class="activity-formulation">' +
+                this.formulation + "</p></div>");
         } else if (this.questions.length === 1) {
             const q = this.questions[0];
-            latex.push('    <li> <p><span class="activity-}tion">' + this.formulation.replace(/\n/g, '<br/>') + ' ');
+            latex.push('    <li> <p><span class="activity-formulation">' + this.formulation.replace(/\n/g, '<br/>') + ' ');
             latex.push(q.toHtml());
             latex.push('</span></p></li>');
         } else {
-            latex.push('    <li> <p><span class="activity-}tion">' + this.formulation.replace(/\n/g, '<br/>') + "</span></p></li>");
+            latex.push('    <li> <p><span class="activity-formulation">' + this.formulation.replace(/\n/g, '<br/>') + "</span></p></li>");
             latex.push('    <ol class="olalpha">');
             this.questions.forEach((question, indx) => {
                 let sampleAnswer = "";
@@ -96,7 +96,7 @@ export class WsActivity {
                     sampleAnswer += answer;
                 }
                 try {
-                    latex.push('      <li> <p class="question-}tion">' + qHtml + '<span style="color:red">' + sampleAnswer + "</span></p></li>");
+                    latex.push('      <li> <p class="question-formulation">' + qHtml + '<span style="color:red">' + sampleAnswer + "</span></p></li>");
                 } catch (Ex) {
                     console.log('EXCEPTION:: Skipping question:: ', Ex);
                     const ind = this.questions.indexOf(question);
@@ -119,11 +119,11 @@ export class WsActivity {
 
                 // Skip activity with no questions
                 this.questions.forEach((question) => {
-                    latex.push('    <li> <p class="questiontion">' + question.answerToHtml() + "</p></li>");
+                    latex.push('    <li> <p class="question-formulation">' + question.answerToHtml() + "</p></li>");
                 });
                 latex.push("    </ol>");
             } else {
-                latex.push(' <p class="questiontion">' + this.questions[0].answerToHtml() + "</p>");
+                latex.push(' <p class="question-formulation">' + this.questions[0].answerToHtml() + "</p>");
             }
             latex.push("  </li>");
             

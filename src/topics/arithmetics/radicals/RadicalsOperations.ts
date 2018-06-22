@@ -38,6 +38,11 @@ import { Formatter } from "../../../util/Formatter";
             description: "Only one base appears in the operations"
         },
         {
+            name: "forceDifferentIndex",
+            defaults: false,
+            description: "When true all generated roots will have different indexes"
+        },
+        {
             name: "miscellania",
             defaults: false,
             description: "When true; generates simple but diverse operations involving radicals, fractions, powers and algebraic identities. That's why is called miscellania"
@@ -47,7 +52,7 @@ import { Formatter } from "../../../util/Formatter";
 export class RadicalsOperations implements QuestionGenInterface {
 
     question: string;
-    radicals: any[];
+    radicals: Radical[];
     answer: string;
 
     constructor(private qGenOpts: QuestionOptsInterface) {
@@ -58,6 +63,7 @@ export class RadicalsOperations implements QuestionGenInterface {
         const operators = qGenOpts.question.operators || '*/^r';
         const miscellania = qGenOpts.question.miscellania || false;
         const useSingleBase = qGenOpts.question.useSingleBase || false;
+        const forceDifferentIndex = qGenOpts.question.forceDifferentIndex || false;
 
 
         if (!miscellania) {
@@ -72,6 +78,12 @@ export class RadicalsOperations implements QuestionGenInterface {
             }
             for (let i = 0; i < n; i++) {
                 this.radicals[i] = rnd.radical(options);
+            }
+            if (forceDifferentIndex) {
+                const indexes: number[] = rnd.shuffle(new Array(n).fill(2).map( (v, i) => i+2));
+                console.log(indexes);
+                this.radicals.forEach( (e, i) => e.index = indexes[i] );
+                console.log(this.radicals)
             }
 
             // A single radical to be simplified

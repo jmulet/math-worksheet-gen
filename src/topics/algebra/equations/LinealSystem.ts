@@ -22,6 +22,11 @@ const VARNAMES = ["x", "y", "z", "t", "w"];
             description: "Complexity; From 1-2"
         },
         {
+            name: "extraComplexity",
+            defaults: false,
+            description: "Does not generate a matrix form sytem, needs reduction"
+        },
+        {
             name: "dimension",
             defaults: 2,
             description: "number of variables of the system from 2 to 5"
@@ -56,6 +61,7 @@ export class EquationsLinealSystem implements QuestionGenInterface {
         let nequations = qGenOpts.question.nequations || dimension; 
         const allowIncompatible = qGenOpts.question.allowIncompatible || false;
         const allowIndeterminate = qGenOpts.question.allowIndeterminate || false; 
+        const extraComplexity = qGenOpts.question.extraComplexity || false; 
 
         if (dimension >5) {
             dimension = 5;
@@ -136,10 +142,24 @@ export class EquationsLinealSystem implements QuestionGenInterface {
                 return str;
             }); 
             eqns.push(lhs.join("") + "=" + rightVector[i]);
-            eqnsTeX.push(lhsTeX.join("") + "&=" + rightVector[i]);
+
+            if (extraComplexity) {
+                const a = rnd.intBetween(2, 5);
+                const b = rnd.intBetween(2, 5);
+                const c = rnd.intBetween(2, 5);
+                const d = rnd.intBetween(2, 5);
+                const distractor1 =  `${a}*(x-${b}*y )`;
+                const distractor2 = `${d}*(x-y)`;
+                const distractor1LaTeX =  `${a} \\cdot (x-${b}y )`;
+                const distractor2LaTeX = `${d} \\cdot (x-y)`;
+                const newLHS = Giac.evaluate("latex(simplify(" + lhs.join("") + "+"+ distractor1 + "))").replace(/"/g, "") + " + " + distractor2LaTeX;
+                const newRHS = Giac.evaluate("latex(simplify(" + rightVector[i] + "+" + distractor2 + "))").replace(/"/g, "")  + " + " + distractor1LaTeX;
+                eqnsTeX.push(newLHS.replace(/\\cdot/g, "\\, ") + "&=" + newRHS.replace(/\\cdot/g, "\\, "));
+            } else {
+                eqnsTeX.push(lhsTeX.join("") + "&=" + rightVector[i]);
+            }
         }
-        this.answer =  Giac.evaluate("latex(linsolve(["+ eqns.join(",") +"], [" + bars + "]))").replace(/"/g, "").replace(/,/g, ", \\quad ").replace(/\[/,'').replace(/\]/,'');
-            
+        this.answer =  Giac.evaluate("latex(linsolve(["+ eqns.join(",") +"], [" + bars + "]))").replace(/"/g, "").replace(/,/g, ", \\quad ").replace(/\[/,'').replace(/\]/,'');            
 
         this.question = "\\left\\{ \\begin{array}{ll}  ";
         this.question += eqnsTeX.join("\\\\");

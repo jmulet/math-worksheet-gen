@@ -39,8 +39,8 @@ export function generateSample4ESO() {
                         {
                             formulation: "Opera els radicals (expressant-los prèviament en forma de potència i operant les potències)",
                             questions: [
-                                { gen: "arithmetics/radicals/operations", repeat: 4, options: {useSingleBase: true} },
-                                { gen: "arithmetics/radicals/operations", repeat: 4, options: { algebraic: true, useSingleBase: true } }
+                                { gen: "arithmetics/radicals/operations", repeat: 4, options: {useSingleBase: true, forceDifferentIndex: true} },
+                                { gen: "arithmetics/radicals/operations", repeat: 4, options: { algebraic: true, useSingleBase: true, forceDifferentIndex: true } }
                             ]
                         }  
                     ] //
@@ -108,7 +108,8 @@ export function generateSample4ESO() {
                         },
                         {
                             formulation: "Resol aquestes sistemes d'equacions", questions: [
-                                { gen: "algebra/system/lineal", repeat: 4, options: { interval: 10, dimension: 2, nequations: 2} },
+                                { gen: "algebra/system/lineal", repeat: 2, options: { interval: 10, dimension: 2, nequations: 2} },
+                                { gen: "algebra/system/lineal", repeat: 2, options: { interval: 10, dimension: 2, nequations: 2, extraComplexity: true} }
                             ]
                         },
                         {
