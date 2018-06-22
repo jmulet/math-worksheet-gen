@@ -140,6 +140,14 @@ class LinealFunction extends ElementalFunction {
     getExtrema() {
         return [];
     }
+    getBoundingBox() {
+        let x0 = 0;
+        if (!this.m.isZero()) {
+            x0 = Math.floor(this.n.divide(this.m).toNumber());
+        }
+        const y0 = Math.floor(this.n.toNumber());
+        return [x0 - 5, y0 - 5, x0 + 5, y0 + 5];
+    }
 }
 exports.LinealFunction = LinealFunction;
 ;
@@ -147,25 +155,12 @@ class QuadraticFunction extends ElementalFunction {
     // y = a*x^2 + b*x + c
     constructor(a, b, c) {
         super();
-        this.getType = function () {
-            return ElementalFunction.types.Quadratic;
-        };
-        this.eval = function (x) {
-            return (this.a * x + this.b) * x + this.c;
-        };
-        this.toTeX = function (x) {
-            x = x || 'x';
-            if (x.length > 1) {
-                x = "(" + x + ")";
-            }
-            var str = "" + applyProductTeX(this.a, "\\,", x + "^2");
-            str = applyTeX(str, this.b, "\\," + x);
-            str = applyTeX(str, this.c);
-            return str;
-        };
         this.a = a;
         this.b = b;
         this.c = c;
+        if (a.isZero()) {
+            this.a = Numeric_1.Numeric.fromNumber(1);
+        }
     }
     inverse() {
         return [];
@@ -183,6 +178,26 @@ class QuadraticFunction extends ElementalFunction {
             return new Intervals_1.Intervals(yv, Number.POSITIVE_INFINITY, true, false);
         }
     }
+    getType() {
+        return ElementalFunction.types.Quadratic;
+    }
+    eval(x) {
+        let x2 = x;
+        if (x instanceof Numeric_1.Numeric) {
+            x2 = x.toNumber();
+        }
+        return (this.a.toNumber() * x2 + this.b.toNumber()) * x2 + this.c.toNumber();
+    }
+    toTeX(x) {
+        x = x || 'x';
+        if (x.length > 1) {
+            x = "(" + x + ")";
+        }
+        var str = "" + applyProductTeX(this.a, "\\,", x + "^2");
+        str = applyTeX(str, this.b, "\\," + x);
+        str = applyTeX(str, this.c);
+        return str;
+    }
     toString(x) {
         x = x || 'x';
         if (x.length > 1) {
@@ -197,6 +212,12 @@ class QuadraticFunction extends ElementalFunction {
         const xv = this.b.oposite().divide(this.a.multiply(Numeric_1.Numeric.fromNumber(2)));
         const yv = this.eval(xv);
         return [new Point_1.Point([xv, yv])];
+    }
+    getBoundingBox() {
+        let x0 = this.b.oposite().divide(this.a.multiply(Numeric_1.Numeric.fromNumber(2)));
+        x0 = Math.floor(x0.toNumber());
+        const y0 = Math.floor(this.eval(x0));
+        return [x0 - 5, y0 - 5, x0 + 5, y0 + 5];
     }
 }
 exports.QuadraticFunction = QuadraticFunction;
@@ -259,6 +280,11 @@ class RadicalFunction extends ElementalFunction {
     getExtrema() {
         return [];
     }
+    getBoundingBox() {
+        const x0 = Math.floor(this.a.toNumber());
+        const y0 = 0;
+        return [x0 - 2, y0 - 2, x0 + 8, y0 + 8];
+    }
 }
 exports.RadicalFunction = RadicalFunction;
 // y = b / (x+a) + c
@@ -311,6 +337,11 @@ class HyperboleFuntion extends ElementalFunction {
     getExtrema() {
         return [];
     }
+    getBoundingBox() {
+        const x0 = Math.floor(this.a.toNumber());
+        const y0 = Math.floor(this.c.toNumber());
+        return [x0 - 5, y0 - 5, x0 + 5, y0 + 5];
+    }
 }
 exports.HyperboleFuntion = HyperboleFuntion;
 ;
@@ -352,6 +383,9 @@ class ExponentialFunction extends ElementalFunction {
     getExtrema() {
         return [];
     }
+    getBoundingBox() {
+        return [-5, -1, 5, 10];
+    }
 }
 exports.ExponentialFunction = ExponentialFunction;
 // y = log_a x  or y= ln x
@@ -388,10 +422,19 @@ class LogarithmFunction extends ElementalFunction {
     getExtrema() {
         return [];
     }
+    getBoundingBox() {
+        return [-1, -5, 10, 5];
+    }
 }
 exports.LogarithmFunction = LogarithmFunction;
 //t=sin, cos, tan  e.g.  b*sin(a*x)
 class TrigonometricFunction extends ElementalFunction {
+    constructor(t, a, b) {
+        super();
+        this.t = t || "sin";
+        this.a = a || 1;
+        this.b = b || 1;
+    }
     getType() {
         return ElementalFunction.types.Trigonometric;
     }
@@ -416,11 +459,8 @@ class TrigonometricFunction extends ElementalFunction {
     getExtrema() {
         throw new Error("Method not implemented.");
     }
-    constructor(t, a, b) {
-        super();
-        this.t = t || "sin";
-        this.a = a || 1;
-        this.b = b || 1;
+    getBoundingBox() {
+        return [-10, -5, 5, 10];
     }
 }
 exports.TrigonometricFunction = TrigonometricFunction;

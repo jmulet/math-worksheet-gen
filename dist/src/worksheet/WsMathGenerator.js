@@ -161,7 +161,11 @@ class WsMathGenerator {
         this.showKeys = showKeys;
         return this;
     }
-    exportAs(format) {
+    exportAs(uid, format, showKeys) {
+        this.uid = uid;
+        if (showKeys !== undefined) {
+            this.showKeys = showKeys;
+        }
         switch (format) {
             case (WsExportFormats.LATEX):
                 return this.exportLatex();
@@ -192,7 +196,7 @@ class WsMathGenerator {
             if (this.worksheet.instructions) {
                 latex.push("" + this.worksheet.instructions + "");
             }
-            latex.push("\n \\textbf{Referència:} " + this.rand.seed + ". \\textbf{Nom i llinatges:} " +
+            latex.push("\n \\textbf{Referència:} " + this.uid + " / " + this.rand.seed + ". \\textbf{Nom i llinatges:} " +
                 (this.worksheet.fullname ? this.worksheet.fullname :
                     "........................................................... \n"));
         }
@@ -231,14 +235,19 @@ class WsMathGenerator {
            .olsection:first-of-type { counter-reset: sectioncounter }           
            .olsection > li { counter-increment: sectioncounter; list-style-type: none; }
            .olsection > li:before { 
+               margin-left: -30px;
                font-size: 120%;
                font-weight: bold;
                content: counter(sectioncounter) ". "; 
             }
 
-           .olactivity:first-of-type { counter-reset: activitycounter }           
+           .olactivity:first-of-type { 
+               counter-reset: activitycounter;
+               margin-left: -10px; }           
            .olactivity > li { counter-increment: activitycounter; list-style-type: none; font-weight: 'bold' }       
-           .olactivity > li:before { content: counter(activitycounter) ". "; }
+           .olactivity > li:before { 
+               content: counter(activitycounter) ". "; 
+            }
 
             .olalpha {
                 counter-reset: alphacounter;
@@ -253,6 +262,7 @@ class WsMathGenerator {
             }
             
             .olalpha > li:before {
+                margin-left: -10px;
                 counter-increment: alphacounter;
                 content: counter(alphacounter, lower-alpha) ") ";
                 position: absolute;
@@ -278,25 +288,25 @@ class WsMathGenerator {
                     font-size: 12px;
                 }
                 p {
-                    font-size: 100%;
+                    font-size: 90%;
                 }
                 h2 {
-                    font-size: 100%;
+                    font-size: 90%;
                 } 
                 h3 {
-                    font-size: 100%;
+                    font-size: 90%;
                 }  
                 h4 {
-                    font-size: 100%;
+                    font-size: 90%;
                 } 
                 @page {
-                    margin: 1.5cm 1.5cm;
+                    margin: 1.5cm 1cm;
                 }
                 .activity-formulation {
-                    font-size: 13px;
+                    font-size: 12px;
                 }
                 .arial-large {
-                    font-size: 18px;
+                    font-size: 16px;
                 }
                 .question-formulation {
                     font-size: 12px;
@@ -315,7 +325,7 @@ class WsMathGenerator {
             if (this.worksheet.instructions) {
                 code.push('<div class=\"instructions\"><p>' + this.worksheet.instructions.replace(/\n/g, "<br/>") + "</p></div>");
             }
-            code.push("<p class=\"arial\"><b>Referència:</b> " + this.rand.seed + ". <b>Nom i llinatges:</b> " +
+            code.push("<p class=\"arial\"><b>Referència:</b> " + this.uid + " / " + this.rand.seed + ". <b>Nom i llinatges:</b> " +
                 (this.worksheet.fullname ? this.worksheet.fullname : "..........................................................</p>"));
         }
         let activityCounter = 1;

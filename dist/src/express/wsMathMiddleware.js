@@ -9,11 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
-const WsMathGenerator_1 = require("../worksheet/WsMathGenerator");
 const latexToPdf_1 = require("../util/latexToPdf");
-const MsqlStorage_1 = require("./MsqlStorage");
 const WsGenerator_1 = require("../util/WsGenerator");
+const WsMathGenerator_1 = require("../worksheet/WsMathGenerator");
 const generateSample4ESO_1 = require("./generateSample4ESO");
+const MsqlStorage_1 = require("./MsqlStorage");
 function generateMoodleSample() {
     var body = {
         worksheet: {
@@ -38,26 +38,44 @@ function generateMoodleSample() {
 ;
 //Mysql - Cache is cleared after 5 minutes
 const deltaTime = 5 * 60 * 1000;
-function generateDocument(doc, res) {
+function displayGenerated(type, doc, res) {
+    if (type === 'html') {
+        res.setHeader("Content-type", "text/html");
+        res.status(200).send(doc);
+    }
+    else if (type === 'tex' || type === 'latex') {
+        res.setHeader("Content-type", "text/plain");
+        res.status(200).send(doc);
+    }
+}
+function generateDocument(uid, doc, storage, isSaved, res) {
     const generator = new WsMathGenerator_1.WsMathGenerator(doc);
     generator.create(doc);
     if (doc.type === 'html') {
-        const htmlPage = generator.exportAs(WsMathGenerator_1.WsExportFormats.HTML);
+        const htmlPage = generator.exportAs(uid, WsMathGenerator_1.WsExportFormats.HTML);
         res.setHeader("Content-type", "text/html");
         res.status(200).send(htmlPage);
+        if (isSaved) {
+            const htmlPageWithKeys = generator.exportAs(uid, WsMathGenerator_1.WsExportFormats.HTML, true);
+            storage.saveGenerated(uid, doc.seed, "html", htmlPage, htmlPageWithKeys);
+        }
     }
     else if (doc.type === 'tex' || doc.type === 'latex') {
-        const tex = generator.exportAs(WsMathGenerator_1.WsExportFormats.LATEX);
+        const tex = generator.exportAs(uid, WsMathGenerator_1.WsExportFormats.LATEX);
         res.setHeader("Content-type", "text/plain");
         res.status(200).send(tex);
+        if (isSaved) {
+            const texWithKeys = generator.exportAs(uid, WsMathGenerator_1.WsExportFormats.LATEX, true);
+            storage.saveGenerated(uid, doc.seed, "latex", tex, texWithKeys);
+        }
     }
     else if (doc.type === 'moodlexml') {
-        const tex = generator.exportAs(WsMathGenerator_1.WsExportFormats.MOODLEXML);
+        const tex = generator.exportAs(uid, WsMathGenerator_1.WsExportFormats.MOODLEXML);
         res.setHeader("Content-type", "text/plain");
         res.status(200).send(tex);
     }
     else {
-        const tex = generator.exportAs(WsMathGenerator_1.WsExportFormats.LATEX);
+        const tex = generator.exportAs(uid, WsMathGenerator_1.WsExportFormats.LATEX);
         const outputStream = latexToPdf_1.latexToPdf(tex);
         outputStream.on("error", function (err) {
             res.status(400).send("Error producing pdf:: " + err);
@@ -106,7 +124,22 @@ function wsMathMiddleware(options) {
     router.get(url, function (req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             const id = req.query.id;
-            let doc = yield options.storage.load(id);
+            const seed = req.query.seed + "b";
+            const type = req.query.type;
+            // Intenta primer mirar si ja ha estat generat i si no el genera
+            let gen = yield options.storage.loadGenerated(id, seed);
+            if (gen && gen[type]) {
+                let generated = gen[type];
+                if (req.query.includeKeys) {
+                    generated = gen[type + "_keys"];
+                }
+                displayGenerated(type, generated, res);
+                return;
+            }
+            // Normal flow if not generated
+            const row = yield options.storage.load(id);
+            const doc = row.json;
+            const isSaved = row.saved;
             if (!doc) {
                 res.render('notfound', {
                     id: id
@@ -153,7 +186,7 @@ function wsMathMiddleware(options) {
                 }
                 // Generate document
                 try {
-                    generateDocument(doc, res);
+                    generateDocument(id, doc, options.storage, isSaved, res);
                 }
                 catch (Ex) {
                     console.log("An error occurred while generating the document::", Ex);

@@ -14,6 +14,6 @@ activity.useRepeat(PolyDivision, {}, 4);
 activity = section.createActivity("Compute these operations with fractions.");
 activity.useRepeat(FractionsOperations, {}, 2);
 
-const html = generator.includeKeys(true).exportAs(WsExportFormats.HTML);
+const html = generator.includeKeys(true).exportAs("test", WsExportFormats.HTML);
 console.log(html);
 fs.writeFileSync("index.html", html);

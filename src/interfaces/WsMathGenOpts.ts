@@ -14,5 +14,5 @@ export interface WsMathGenOpts {
     seed?: number,
     rand?: Random,
     worksheet?: Worksheet,
-    uniqueQuestionsMap: any
+    uniqueQuestionsMap?: any
 }

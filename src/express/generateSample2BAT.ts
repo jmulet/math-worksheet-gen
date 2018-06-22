@@ -1,5 +1,5 @@
 
-function generateSample2BAT() {
+export  function generateSample2BAT() {
     var body = {
 
         worksheet: {

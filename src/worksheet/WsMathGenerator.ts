@@ -117,6 +117,7 @@ export class WsMathGenerator {
     showKeys: boolean = false;
     sections: WsSection[] = [];
     wsGenOpts: WsMathGenOpts;
+    uid: string;
 
  
     constructor(wsGenOpts?: WsMathGenOpts) {
@@ -176,7 +177,11 @@ export class WsMathGenerator {
         return this;
     }
 
-    exportAs(format: WsExportFormats) {
+    exportAs(uid: string, format: WsExportFormats, showKeys?: boolean) {
+        this.uid = uid;
+        if (showKeys!==undefined) {
+            this.showKeys = showKeys;
+        }
         switch(format) {
             case(WsExportFormats.LATEX):
                 return this.exportLatex();                
@@ -211,7 +216,7 @@ export class WsMathGenerator {
                 latex.push("" + this.worksheet.instructions + "");
             }
 
-            latex.push("\n \\textbf{Referència:} " + this.rand.seed + ". \\textbf{Nom i llinatges:} " +
+            latex.push("\n \\textbf{Referència:} " + this.uid + " / " + this.rand.seed + ". \\textbf{Nom i llinatges:} " +
             (this.worksheet.fullname? this.worksheet.fullname :
             "........................................................... \n"));
         }
@@ -346,7 +351,7 @@ export class WsMathGenerator {
                 code.push('<div class=\"instructions\"><p>' + this.worksheet.instructions.replace(/\n/g, "<br/>") + "</p></div>")
             }
 
-            code.push("<p class=\"arial\"><b>Referència:</b> " + this.rand.seed + ". <b>Nom i llinatges:</b> " +
+            code.push("<p class=\"arial\"><b>Referència:</b> " + this.uid + " / " + this.rand.seed + ". <b>Nom i llinatges:</b> " +
             (this.worksheet.fullname? this.worksheet.fullname : "..........................................................</p>"))
         }
 

@@ -30,10 +30,11 @@ let ElementalFunctionGraph = class ElementalFunctionGraph {
     getAnswer(type) {
         if (type === "html") {
             const uid = "box" + Math.random().toString(32).substr(2);
+            const [xmin, ymin, xmax, ymax] = this.fun.getBoundingBox();
             return `<div id="${uid}" class="jxgbox" style="width:400px; height:400px; display: inline-block"></div>
             <script>
                 var board = JXG.JSXGraph.initBoard("${uid}",
-                            {axis:true, boundingbox:[-5, 10, 5, -10], showCopyright: false});
+                            {axis:true, boundingbox:[${xmin}, ${ymax}, ${xmax}, ${ymin}], showCopyright: false});
  
                 var f = board.jc.snippet("${this.fun.toString()}", true, 'x', true);
                 var curve = board.create('functiongraph',[f,

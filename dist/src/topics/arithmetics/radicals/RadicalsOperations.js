@@ -25,6 +25,7 @@ let RadicalsOperations = class RadicalsOperations {
         const operators = qGenOpts.question.operators || '*/^r';
         const miscellania = qGenOpts.question.miscellania || false;
         const useSingleBase = qGenOpts.question.useSingleBase || false;
+        const forceDifferentIndex = qGenOpts.question.forceDifferentIndex || false;
         if (!miscellania) {
             this.radicals = [];
             const bar = rnd.pickOne(Random_1.BAR_NAMES);
@@ -35,6 +36,10 @@ let RadicalsOperations = class RadicalsOperations {
             }
             for (let i = 0; i < n; i++) {
                 this.radicals[i] = rnd.radical(options);
+            }
+            if (forceDifferentIndex) {
+                const indexes = rnd.shuffle(new Array(n).fill(2).map((v, i) => i + 2));
+                this.radicals.forEach((e, i) => e.index = indexes[i]);
             }
             // A single radical to be simplified
             if (this.radicals.length === 1) {
@@ -181,6 +186,11 @@ RadicalsOperations = __decorate([
                 name: "useSingleBase",
                 defaults: false,
                 description: "Only one base appears in the operations"
+            },
+            {
+                name: "forceDifferentIndex",
+                defaults: false,
+                description: "When true all generated roots will have different indexes"
             },
             {
                 name: "miscellania",

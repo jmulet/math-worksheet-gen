@@ -11,6 +11,78 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mysql = require("mysql");
 const uniqid = require("uniqid");
 class MysqlStorage {
+    saveGenerated(uid, seed, format, doc, docWithKeys) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const found = yield this.loadGenerated(uid, seed);
+            let connection;
+            try {
+                connection = yield this.getConnection();
+                const post = {
+                    uid: uid,
+                    seed: seed,
+                };
+                post[format] = doc;
+                post[format + "_keys"] = docWithKeys;
+                let sql;
+                if (found) {
+                    sql = "UPDATE wsmath_generated SET ? WHERE id=" + found.id;
+                }
+                else {
+                    sql = "INSERT INTO wsmath_generated SET ?";
+                    post.created = new Date();
+                }
+                const [err, results, fields] = yield this.queryAsync(connection, sql, post);
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                if (results.affectedRows) {
+                    return uid;
+                }
+                else {
+                    return null;
+                }
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+        });
+    }
+    loadGenerated(uid, seed) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let connection;
+            try {
+                connection = yield this.getConnection();
+                const [err, results, fields] = yield this.queryAsync(connection, "SELECT * FROM wsmath_generated WHERE uid=? AND seed=? ORDER BY id desc LIMIT 1 ", [uid, seed]);
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                if (results.length) {
+                    try {
+                        return results[0];
+                    }
+                    catch (Ex2) {
+                        console.log(Ex2);
+                        return null;
+                    }
+                }
+                else {
+                    return null;
+                }
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+            return null;
+        });
+    }
     constructor() {
         const config = {
             connectionLimit: 10,
@@ -49,7 +121,7 @@ class MysqlStorage {
             let connection;
             try {
                 connection = yield this.getConnection();
-                const [err, results, fields] = yield this.queryAsync(connection, "SHOW TABLES LIKE 'wsmath'");
+                let [err, results, fields] = yield this.queryAsync(connection, "SHOW TABLES LIKE 'wsmath'");
                 if (err) {
                     console.log(err);
                     return;
@@ -72,6 +144,41 @@ class MysqlStorage {
                         console.log(err);
                         return;
                     }
+                    console.log("Created table wsmath");
+                }
+                else {
+                    console.log("OK table wsmath");
+                }
+                // Check if generated table has been created
+                [err, results, fields] = yield this.queryAsync(connection, "SHOW TABLES LIKE 'wsmath_generated'");
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                if (results.length === 0) {
+                    // Create a new table
+                    const sql = `
+                        CREATE TABLE \`wsmath_generated\` (
+                            \`id\` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                            \`uid\` varchar(255) DEFAULT '',
+                            \`seed\` varchar(255) DEFAULT '',
+                            \`html\` longtext DEFAULT NULL,
+                            \`html_keys\` longtext DEFAULT NULL,
+                            \`latex\` longtext DEFAULT NULL,
+                            \`latex_keys\` longtext DEFAULT NULL,
+                            \`created\` datetime DEFAULT NULL,                           
+                            PRIMARY KEY (\`id\`)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+                    `;
+                    const [err, results, fields] = yield this.queryAsync(connection, sql);
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    console.log("Created table wsmath_generated");
+                }
+                else {
+                    console.log("OK wsmath_generated table");
                 }
             }
             catch (Ex) {
@@ -114,7 +221,8 @@ class MysqlStorage {
                 }
                 if (results.length) {
                     try {
-                        const obj = JSON.parse(results[0].json);
+                        results[0].json = JSON.parse(results[0].json);
+                        const obj = results[0];
                         return obj;
                     }
                     catch (Ex2) {
