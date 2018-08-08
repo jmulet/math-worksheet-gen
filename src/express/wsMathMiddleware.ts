@@ -6,11 +6,9 @@ import { Container } from '../util/WsGenerator';
 import { WsExportFormats, WsMathGenerator } from '../worksheet/WsMathGenerator';
 import { generateSample4ESO } from './generateSample4ESO';
 import { generateSample1BAT } from './generateSample1BAT';
-<<<<<<< HEAD
-=======
 import { MysqlStorage } from './MsqlStorage';
 import { Storage } from './Storage';
->>>>>>> 5473922f248d68732bd06c61c4b16d7b8c757cd3
+import { Store } from 'tough-cookie';
 
 export interface wsMathMdwOptions {
     basePrefix: string;
@@ -53,7 +51,7 @@ function displayGenerated(type: string, doc: string, res: Response) {
     if (type === 'html') {
         res.setHeader("Content-type", "text/html");
         res.status(200).send(doc);
-    } else if (type === 'tex' ||type === 'latex') {
+    } else if (type === 'tex' || type === 'latex') {
         res.setHeader("Content-type", "text/plain");
         res.status(200).send(doc);
     }
@@ -64,10 +62,10 @@ function generateDocument(uid: string, doc: any, storage: Storage, isSaved: bool
     generator.create(doc);
 
     if (doc.type === 'html') {
-        const htmlPage = generator.exportAs(uid, WsExportFormats.HTML);       
+        const htmlPage = generator.exportAs(uid, WsExportFormats.HTML);
         res.setHeader("Content-type", "text/html");
         res.status(200).send(htmlPage);
-       
+
         if (isSaved) {
             const htmlPageWithKeys = generator.exportAs(uid, WsExportFormats.HTML, true);
             storage.saveGenerated(uid, doc.seed, "html", htmlPage, htmlPageWithKeys);
@@ -149,11 +147,11 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         const type = req.query.type;
         // Intenta primer mirar si ja ha estat generat i si no el genera
         let gen = await options.storage.loadGenerated(id, seed);
-         
+
         if (gen && gen[type]) {
             let generated = gen[type];
-            if(req.query.includeKeys) {
-               generated = gen[type+"_keys"];
+            if (req.query.includeKeys) {
+                generated = gen[type + "_keys"];
             }
             displayGenerated(type, generated, res);
             return;
@@ -163,7 +161,7 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         const row = await options.storage.load(id);
         const doc = row.json;
         const isSaved = row.saved;
-        
+
         if (!doc) {
             res.render('notfound', {
                 id: id
@@ -219,20 +217,6 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
 
     url = (options.basePrefix || '') + '/wsmath/editor';
     router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
-<<<<<<< HEAD
- 
-            const textarea: string = JSON.stringify(generateSample1BAT(), null, 2)
-                .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
- 
-            const uri = (options.basePrefix || '') + '/wsmath';
-            res.render("editor", {
-                textarea: textarea,
-                url: uri,
-                questionTypesList: Object.keys(Container).sort(),
-                questionTypesMeta: Container,
-                user: {id: 0, fullname: "Admin", username:"admin"}
-            });
-=======
 
         const textarea: string = JSON.stringify(generateSample1BAT(), null, 2)
             .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
@@ -244,10 +228,26 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
             questionTypesList: Object.keys(Container).sort(),
             questionTypesMeta: Container,
             user: { id: 0, fullname: "Admin", username: "admin" }
->>>>>>> 5473922f248d68732bd06c61c4b16d7b8c757cd3
         });
     });
 
+    //This provides a report of the generated pages
+    //Requires the id or ids of the worksheets
+    url = (options.basePrefix || '') + '/wsmath/generated';
+    router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
+
+        const ids: string[] = req.params.ids.split(",");
+        
+        const reports = ids.map((id) => {
+            return options.storage.loadGenerated(id);
+        });
+
+        const uri = (options.basePrefix || '') + '/wsmath';
+        res.render("generated", {
+            url: uri,
+            reports: reports
+        });
+    });
 
     return router;
 }
