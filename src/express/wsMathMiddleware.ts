@@ -8,6 +8,7 @@ import { Storage } from "./Storage";
 import { Container } from "../util/WsGenerator";
 import * as httpRequest from 'request';
 import { generateSample4ESO } from './generateSample4ESO';
+import { generateSample1BAT } from './generateSample1BAT';
 
 export interface wsMathMdwOptions {
     basePrefix: string;
@@ -178,7 +179,7 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
     url = (options.basePrefix || '') + '/wsmath/editor';
     router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
  
-            const textarea: string = JSON.stringify(generateSample4ESO(), null, 2)
+            const textarea: string = JSON.stringify(generateSample1BAT(), null, 2)
                 .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
  
             const uri = (options.basePrefix || '') + '/wsmath';

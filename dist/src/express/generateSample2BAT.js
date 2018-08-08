@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 function generateSample2BAT() {
     var body = {
         worksheet: {
@@ -39,8 +41,8 @@ function generateSample2BAT() {
                         {
                             formulation: "Opera els radicals (passa-los prèviament a forma de potència)",
                             questions: [
-                                { gen: "arithmetics/radicals/operations", repeat: 4, options: { useSingleBase: true } },
-                                { gen: "arithmetics/radicals/operations", repeat: 4, options: { algebraic: true, useSingleBase: true } }
+                                { gen: "arithmetics/radicals/operations", repeat: 4, options: { useSingleBase: true, forceDifferentIndex: true } },
+                                { gen: "arithmetics/radicals/operations", repeat: 4, options: { algebraic: true, useSingleBase: true, forceDifferentIndex: true } }
                             ]
                         }
                     ]
@@ -181,4 +183,5 @@ function generateSample2BAT() {
     };
     return body;
 }
+exports.generateSample2BAT = generateSample2BAT;
 //# sourceMappingURL=generateSample2BAT.js.map

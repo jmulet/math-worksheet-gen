@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 function generateSample1BAT() {
     var body = {
         worksheet: {
@@ -18,8 +20,8 @@ function generateSample1BAT() {
                         {
                             formulation: "Utilitza les propietats per expressar com un únic radical:",
                             questions: [
-                                { gen: "arithmetics/radicals/operations", repeat: 4, options: {} },
-                                { gen: "arithmetics/radicals/operations", repeat: 4, options: { algebraic: true } }
+                                { gen: "arithmetics/radicals/operations", repeat: 4, options: { forceDifferentIndex: true } },
+                                { gen: "arithmetics/radicals/operations", repeat: 4, options: { algebraic: true, forceDifferentIndex: true } }
                             ]
                         },
                         {
@@ -134,7 +136,8 @@ function generateSample1BAT() {
                         },
                         {
                             formulation: "Resol aquestes sistemes d'equacions lineals", questions: [
-                                { gen: "algebra/system/lineal", repeat: 4, options: { interval: 10, dimension: 2, nequations: 2 } }
+                                { gen: "algebra/system/lineal", repeat: 2, options: { interval: 10, dimension: 2, nequations: 2 } },
+                                { gen: "algebra/system/lineal", repeat: 2, options: { interval: 10, dimension: 2, nequations: 2, extraComplexity: true } }
                             ]
                         },
                         {
@@ -180,4 +183,5 @@ function generateSample1BAT() {
     };
     return body;
 }
+exports.generateSample1BAT = generateSample1BAT;
 //# sourceMappingURL=generateSample1BAT.js.map

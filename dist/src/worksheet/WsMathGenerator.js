@@ -231,14 +231,19 @@ class WsMathGenerator {
            .olsection:first-of-type { counter-reset: sectioncounter }           
            .olsection > li { counter-increment: sectioncounter; list-style-type: none; }
            .olsection > li:before { 
+               margin-left: -30px;
                font-size: 120%;
                font-weight: bold;
                content: counter(sectioncounter) ". "; 
             }
 
-           .olactivity:first-of-type { counter-reset: activitycounter }           
+           .olactivity:first-of-type { 
+               counter-reset: activitycounter;
+               margin-left: -10px; }           
            .olactivity > li { counter-increment: activitycounter; list-style-type: none; font-weight: 'bold' }       
-           .olactivity > li:before { content: counter(activitycounter) ". "; }
+           .olactivity > li:before { 
+               content: counter(activitycounter) ". "; 
+            }
 
             .olalpha {
                 counter-reset: alphacounter;
@@ -253,6 +258,7 @@ class WsMathGenerator {
             }
             
             .olalpha > li:before {
+                margin-left: -10px;
                 counter-increment: alphacounter;
                 content: counter(alphacounter, lower-alpha) ") ";
                 position: absolute;
@@ -278,25 +284,25 @@ class WsMathGenerator {
                     font-size: 12px;
                 }
                 p {
-                    font-size: 100%;
+                    font-size: 90%;
                 }
                 h2 {
-                    font-size: 100%;
+                    font-size: 90%;
                 } 
                 h3 {
-                    font-size: 100%;
+                    font-size: 90%;
                 }  
                 h4 {
-                    font-size: 100%;
+                    font-size: 90%;
                 } 
                 @page {
-                    margin: 1.5cm 1.5cm;
+                    margin: 1.5cm 1cm;
                 }
                 .activity-formulation {
-                    font-size: 13px;
+                    font-size: 12px;
                 }
                 .arial-large {
-                    font-size: 18px;
+                    font-size: 16px;
                 }
                 .question-formulation {
                     font-size: 12px;

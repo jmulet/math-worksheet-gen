@@ -101,12 +101,23 @@ class Equation {
         }
         else if (complexity > 1) {
             if (roots.length === 2 && degree === 2) {
-                const [r1, r2] = roots;
-                const beta = r1.substract(r2).divide(Numeric_1.Numeric.fromNumber(2)).power(2);
-                const alpha = r1.add(r2).divide(Numeric_1.Numeric.fromNumber(2));
-                const poly3 = new Polynomial_1.Polynomial([1, alpha.oposite()]);
-                this.lhs = "\\left(" + poly3.toTeX(this.bar) + "\\right)^2";
-                this.rhs = beta.toTeX();
+                const dice = this.rnd.intBetween(0, 1);
+                if (dice === 0) {
+                    // Crea una equació del tipo (x-a)^2 = b^2
+                    let [r1, r2] = roots;
+                    const beta = r1.substract(r2).divide(Numeric_1.Numeric.fromNumber(2)).power(2);
+                    const alpha = r1.add(r2).divide(Numeric_1.Numeric.fromNumber(2));
+                    const poly3 = new Polynomial_1.Polynomial([1, alpha.oposite()]);
+                    this.lhs = "\\left(" + poly3.toTeX(this.bar) + "\\right)^2";
+                    this.rhs = beta.toTeX();
+                }
+                else if (dice === 1) {
+                    // Crea una equació del tipo Poly + x^2+2a+a^2 = (x+a)^2
+                    const poly2 = this.rnd.polynomial({ minDegree: 1, maxDegree: 1 });
+                    const poly3 = poly2.power(2);
+                    this.lhs = poly.add(poly3).toTeX(this.bar);
+                    this.rhs = "\\left(" + poly2.toTeX(this.bar) + "\\right)^2";
+                }
             }
             else {
                 const poly2 = this.rnd.polynomial({ minDegree: 1, maxDegree: 1 });
