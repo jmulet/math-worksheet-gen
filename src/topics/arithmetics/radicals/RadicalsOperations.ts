@@ -81,9 +81,7 @@ export class RadicalsOperations implements QuestionGenInterface {
             }
             if (forceDifferentIndex) {
                 const indexes: number[] = rnd.shuffle(new Array(n).fill(2).map( (v, i) => i+2));
-                console.log(indexes);
                 this.radicals.forEach( (e, i) => e.index = indexes[i] );
-                console.log(this.radicals)
             }
 
             // A single radical to be simplified

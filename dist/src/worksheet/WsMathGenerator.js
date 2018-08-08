@@ -161,7 +161,11 @@ class WsMathGenerator {
         this.showKeys = showKeys;
         return this;
     }
-    exportAs(format) {
+    exportAs(uid, format, showKeys) {
+        this.uid = uid;
+        if (showKeys !== undefined) {
+            this.showKeys = showKeys;
+        }
         switch (format) {
             case (WsExportFormats.LATEX):
                 return this.exportLatex();
@@ -192,7 +196,7 @@ class WsMathGenerator {
             if (this.worksheet.instructions) {
                 latex.push("" + this.worksheet.instructions + "");
             }
-            latex.push("\n \\textbf{Referència:} " + this.rand.seed + ". \\textbf{Nom i llinatges:} " +
+            latex.push("\n \\textbf{Referència:} " + this.uid + " / " + this.rand.seed + ". \\textbf{Nom i llinatges:} " +
                 (this.worksheet.fullname ? this.worksheet.fullname :
                     "........................................................... \n"));
         }
@@ -321,7 +325,7 @@ class WsMathGenerator {
             if (this.worksheet.instructions) {
                 code.push('<div class=\"instructions\"><p>' + this.worksheet.instructions.replace(/\n/g, "<br/>") + "</p></div>");
             }
-            code.push("<p class=\"arial\"><b>Referència:</b> " + this.rand.seed + ". <b>Nom i llinatges:</b> " +
+            code.push("<p class=\"arial\"><b>Referència:</b> " + this.uid + " / " + this.rand.seed + ". <b>Nom i llinatges:</b> " +
                 (this.worksheet.fullname ? this.worksheet.fullname : "..........................................................</p>"));
         }
         let activityCounter = 1;

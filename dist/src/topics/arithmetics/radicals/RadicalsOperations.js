@@ -39,9 +39,13 @@ let RadicalsOperations = class RadicalsOperations {
             }
             if (forceDifferentIndex) {
                 const indexes = rnd.shuffle(new Array(n).fill(2).map((v, i) => i + 2));
+<<<<<<< HEAD
                 console.log(indexes);
                 this.radicals.forEach((e, i) => e.index = indexes[i]);
                 console.log(this.radicals);
+=======
+                this.radicals.forEach((e, i) => e.index = indexes[i]);
+>>>>>>> 5473922f248d68732bd06c61c4b16d7b8c757cd3
             }
             // A single radical to be simplified
             if (this.radicals.length === 1) {

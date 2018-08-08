@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 export function generateSample2BAT() {
+=======
+export  function generateSample2BAT() {
+>>>>>>> 5473922f248d68732bd06c61c4b16d7b8c757cd3
     var body = {
 
         worksheet: {

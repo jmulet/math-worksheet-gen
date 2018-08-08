@@ -12,7 +12,7 @@ let activity = section.createActivity("Divide these polynomials using Ruffini's 
 activity.useRepeat(PolyDivision_1.PolyDivision, {}, 4);
 activity = section.createActivity("Compute these operations with fractions.");
 activity.useRepeat(FractionsOperations_1.FractionsOperations, {}, 2);
-const html = generator.includeKeys(true).exportAs(WsMathGenerator_1.WsExportFormats.HTML);
+const html = generator.includeKeys(true).exportAs("test", WsMathGenerator_1.WsExportFormats.HTML);
 console.log(html);
 fs.writeFileSync("index.html", html);
 //# sourceMappingURL=index.js.map

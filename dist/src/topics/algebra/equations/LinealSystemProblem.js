@@ -94,7 +94,7 @@ let EquationsLinealSystem = class EquationsLinealSystem {
                     tags: "system",
                     formulation: `Un fabricant de bombetes guanya ${guany.toFixed(2)} € per cada bombeta que surt de fàbrica, però
                     perd ${perdua.toFixed(2)} € per cada una defectuosa. Un determinat dia en què
-                    va fabricar ${bones + dolentes} bombetes va obtenir ${tipus} de ${benefici} €. Quantes bombetes bones
+                    va fabricar ${bones + dolentes} bombetes va obtenir ${tipus} de ${benefici.toFixed(2)} €. Quantes bombetes bones
                     va fabricar aquest dia?`,
                     answer: `Va fabricar ${bones} bombetes bones.`
                 };
