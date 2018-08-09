@@ -10,8 +10,9 @@ import { MysqlStorage } from './MsqlStorage';
 import { Storage } from './Storage';
 
 export interface wsMathMdwOptions {
-    basePrefix: string;
-    storage: Storage;
+    basePrefix?: string;
+    storage?: Storage;
+    piworldUrl?: string;
 }
 
 function generateMoodleSample() {
@@ -50,7 +51,7 @@ function displayGenerated(type: string, doc: string, res: Response) {
     if (type === 'html') {
         res.setHeader("Content-type", "text/html");
         res.status(200).send(doc);
-    } else if (type === 'tex' ||type === 'latex') {
+    } else if (type === 'tex' || type === 'latex') {
         res.setHeader("Content-type", "text/plain");
         res.status(200).send(doc);
     }
@@ -61,10 +62,10 @@ function generateDocument(uid: string, doc: any, storage: Storage, isSaved: bool
     generator.create(doc);
 
     if (doc.type === 'html') {
-        const htmlPage = generator.exportAs(uid, WsExportFormats.HTML);       
+        const htmlPage = generator.exportAs(uid, WsExportFormats.HTML);
         res.setHeader("Content-type", "text/html");
         res.status(200).send(htmlPage);
-       
+
         if (isSaved) {
             const htmlPageWithKeys = generator.exportAs(uid, WsExportFormats.HTML, true);
             storage.saveGenerated(uid, doc.seed, "html", htmlPage, htmlPageWithKeys);
@@ -99,7 +100,7 @@ function generateDocument(uid: string, doc: any, storage: Storage, isSaved: bool
 
 
 export function wsMathMiddleware(options?: wsMathMdwOptions) {
-    options = { basePrefix: '', ...options };
+    options = { basePrefix: '', piworldUrl: 'https://piworld.es', ...options };
     if (!options.storage) {
         options.storage = new MysqlStorage();
     }
@@ -146,11 +147,11 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         const type = req.query.type;
         // Intenta primer mirar si ja ha estat generat i si no el genera
         let gen = await options.storage.loadGenerated(id, seed);
-         
+
         if (gen && gen[type]) {
             let generated = gen[type];
-            if(req.query.includeKeys) {
-               generated = gen[type+"_keys"];
+            if (req.query.includeKeys) {
+                generated = gen[type + "_keys"];
             }
             displayGenerated(type, generated, res);
             return;
@@ -158,76 +159,90 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
 
         // Normal flow if not generated
         const row = await options.storage.load(id);
-        const doc = row.json;
-        const isSaved = row.saved;
-        
-        if (!doc) {
+        if (!row) {
             res.render('notfound', {
                 id: id
             });
-        } else {
-            // Pass extra information from query params
-            if (req.query.includeKeys === "true") {
-                doc.includeKeys = true;
-            }
-            if (req.query.seed) {
-                doc.seed = req.query.seed;
-            }
-            if (req.query.type) {
-                doc.type = req.query.type;
-            }
-            if (req.query.fullname) {
-                doc.fullname = req.query.fullname;
-            }
-            if (req.query.seed && !req.query.username && !req.query.idUser) {
-                req.query.username = req.query.seed + "b";
-            }
-            if (req.query.username) {
-                // get fullname of this username
-                doc.seed = req.query.username;
-                const user = await options.storage.userByUsername(req.query.username);
-                if (user) {
-                    doc.fullname = user["fullname"];
-                    if (user["idRole"] < 200) {
-                        doc.includeKeys = true;
-                    }
+            return;
+        }
+        const doc = row.json;
+        const isSaved = row.saved;
+
+
+        // Pass extra information from query params
+        if (req.query.includeKeys === "true") {
+            doc.includeKeys = true;
+        }
+        if (req.query.seed) {
+            doc.seed = req.query.seed;
+        }
+        if (req.query.type) {
+            doc.type = req.query.type;
+        }
+        if (req.query.fullname) {
+            doc.fullname = req.query.fullname;
+        }
+        if (req.query.seed && !req.query.username && !req.query.idUser) {
+            req.query.username = req.query.seed + "b";
+        }
+        if (req.query.username) {
+            // get fullname of this username
+            doc.seed = req.query.username;
+            const user = await options.storage.userByUsername(req.query.username);
+            if (user) {
+                doc.fullname = user["fullname"];
+                if (user["idRole"] < 200) {
+                    doc.includeKeys = true;
                 }
-            }
-            if (req.query.idUser) {
-                // get fullname of this idUser
-                doc.seed = req.query.idUser;
-                const user = await options.storage.userByIdUser(req.query.idUser);
-                if (user) {
-                    doc.fullname = user["fullname"];
-                    if (user["idRole"] < 200) {
-                        doc.includeKeys = true;
-                    }
-                }
-            }
-            // Generate document
-            try {
-                generateDocument(id, doc, options.storage, isSaved, res);
-            } catch (Ex) {
-                console.log("An error occurred while generating the document::", Ex);
             }
         }
+        if (req.query.idUser) {
+            // get fullname of this idUser
+            doc.seed = req.query.idUser;
+            const user = await options.storage.userByIdUser(req.query.idUser);
+            if (user) {
+                doc.fullname = user["fullname"];
+                if (user["idRole"] < 200) {
+                    doc.includeKeys = true;
+                }
+            }
+        }
+        // Generate document
+        try {
+            generateDocument(id, doc, options.storage, isSaved, res);
+        } catch (Ex) {
+            console.log("An error occurred while generating the document::", Ex);
+        }
+
     });
 
 
     url = (options.basePrefix || '') + '/wsmath/editor';
     router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
+        const session = req.session;
+      
+        session.reload(function (err) {
+            
+            if (!session ||  !session.user) {                
+                const redirect_url = options.piworldUrl + "/?app=wsmath/editor";
+                console.log(redirect_url); 
+                res.status(301).redirect(encodeURI(redirect_url));
+                return;
+            }
 
-        const textarea: string = JSON.stringify(generateSample1BAT(), null, 2)
-            .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
+            const textarea: string = JSON.stringify(generateSample1BAT(), null, 2)
+                .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
 
-        const uri = (options.basePrefix || '') + '/wsmath';
-        res.render("editor", {
-            textarea: textarea,
-            url: uri,
-            questionTypesList: Object.keys(Container).sort(),
-            questionTypesMeta: Container,
-            user: { id: 0, fullname: "Admin", username: "admin" }
+            const uri = (options.basePrefix || '') + '/wsmath';
+            res.render("editor", {
+                textarea: textarea,
+                url: uri,
+                questionTypesList: Object.keys(Container).sort(),
+                questionTypesMeta: Container,
+                user: { id: 0, fullname: "Admin", username: "admin" }
+            });
         });
+
     });
 
 
