@@ -160,7 +160,7 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
 
         // Normal flow if not generated
         const row = await options.storage.load(id);
-        if (!row) {
+        //if (!row) {
         const doc = row.json;
         const isSaved = row.saved;
 
@@ -210,6 +210,7 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
                 }
             }
         }
+     
         // Generate document
         try {
             generateDocument(id, doc, options.storage, isSaved, res);
