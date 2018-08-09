@@ -8,6 +8,7 @@ import { generateSample4ESO } from './generateSample4ESO';
 import { generateSample1BAT } from './generateSample1BAT';
 import { MysqlStorage } from './MsqlStorage';
 import { Storage } from './Storage';
+import { Store } from 'tough-cookie';
 
 export interface wsMathMdwOptions {
     basePrefix?: string;
@@ -160,13 +161,15 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
         // Normal flow if not generated
         const row = await options.storage.load(id);
         if (!row) {
+        const doc = row.json;
+        const isSaved = row.saved;
+
+        if (!doc) {
             res.render('notfound', {
                 id: id
             });
             return;
-        }
-        const doc = row.json;
-        const isSaved = row.saved;
+        } 
 
 
         // Pass extra information from query params
@@ -245,6 +248,23 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
 
     });
 
+    //This provides a report of the generated pages
+    //Requires the id or ids of the worksheets
+    url = (options.basePrefix || '') + '/wsmath/generated';
+    router.get(url, function (req: express.Request, res: express.Response, next: express.NextFunction) {
+
+        const ids: string[] = req.params.ids.split(",");
+        
+        const reports = ids.map((id) => {
+            return options.storage.loadGenerated(id);
+        });
+
+        const uri = (options.basePrefix || '') + '/wsmath';
+        res.render("generated", {
+            url: uri,
+            reports: reports
+        });
+    });
 
     return router;
 }

@@ -39,22 +39,33 @@ export class MysqlStorage implements Storage {
             connection && connection.release();
         }
     }
+    /**
+     * 
+     * @param uid is the uid of the worksheet
+     * @param seed is optional - if not set then generates the report of that worksheet
+     */
     async loadGenerated(uid: string, seed: string): Promise<any> {
         let connection;
         try {
             connection = await this.getConnection();
-            const [err, results, fields] = await this.queryAsync(connection, 
-                "SELECT * FROM wsmath_generated WHERE uid=? AND seed=? ORDER BY id desc LIMIT 1 ", [uid, seed]);
+            let sql, params;
+            if (seed) {
+                sql = "SELECT * FROM wsmath_generated WHERE uid=? AND seed=? ORDER BY id desc LIMIT 1 ";
+                params = [uid, seed];
+            } else {
+                sql = "SELECT wsg.seed, max(wsg.generated) as generatedDate, u.fullname, ws.json FROM wsmath_generated as wsg INNER JOIN users as u ON u.username+'b'=wsg.seed INNER JOIN wsmath as ws ON ws.uid=wsg.uid WHERE wsg.uid=? AND LENGTH(wsg.seed)=5  group by u.id ORDER BY wsg.generated, u.fullname";
+                params = [uid];
+            }
+            const [err, results, fields] = await this.queryAsync(connection, sql, params);
             if (err) {
                 console.log(err);
                 return;
             }
             if (results.length) {
-                try{                  
+               if (seed) {                  
                     return results[0];
-                } catch(Ex2) {
-                    console.log(Ex2);
-                    return null;
+               } else {
+                    return results;
                 }
             } else {
                 return null;
@@ -64,7 +75,7 @@ export class MysqlStorage implements Storage {
         } finally {
             connection && connection.release();
         }
-        return null;
+        return seed? null: [];
     }
     
 

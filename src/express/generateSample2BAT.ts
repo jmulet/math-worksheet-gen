@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
+export function generateSample2BAT() {
+=======
 export  function generateSample2BAT() {
+>>>>>>> 5473922f248d68732bd06c61c4b16d7b8c757cd3
     var body = {
 
         worksheet: {
@@ -41,8 +45,8 @@ export  function generateSample2BAT() {
                         {
                             formulation: "Opera els radicals (passa-los prèviament a forma de potència)",
                             questions: [
-                                { gen: "arithmetics/radicals/operations", repeat: 4, options: {useSingleBase: true} },
-                                { gen: "arithmetics/radicals/operations", repeat: 4, options: { algebraic: true, useSingleBase: true } }
+                                { gen: "arithmetics/radicals/operations", repeat: 4, options: {useSingleBase: true, forceDifferentIndex: true} },
+                                { gen: "arithmetics/radicals/operations", repeat: 4, options: { algebraic: true, useSingleBase: true,forceDifferentIndex: true } }
                             ]
                         } 
                     ]

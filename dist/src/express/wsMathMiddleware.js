@@ -11,9 +11,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const latexToPdf_1 = require("../util/latexToPdf");
 const WsGenerator_1 = require("../util/WsGenerator");
+<<<<<<< HEAD
+const generateSample1BAT_1 = require("./generateSample1BAT");
+=======
 const WsMathGenerator_1 = require("../worksheet/WsMathGenerator");
 const generateSample4ESO_1 = require("./generateSample4ESO");
 const MsqlStorage_1 = require("./MsqlStorage");
+>>>>>>> 5473922f248d68732bd06c61c4b16d7b8c757cd3
 function generateMoodleSample() {
     var body = {
         worksheet: {
@@ -196,7 +200,7 @@ function wsMathMiddleware(options) {
     });
     url = (options.basePrefix || '') + '/wsmath/editor';
     router.get(url, function (req, res, next) {
-        const textarea = JSON.stringify(generateSample4ESO_1.generateSample4ESO(), null, 2)
+        const textarea = JSON.stringify(generateSample1BAT_1.generateSample1BAT(), null, 2)
             .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
         const uri = (options.basePrefix || '') + '/wsmath';
         res.render("editor", {
