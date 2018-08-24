@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>wsMath mySheets</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+     <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <style>
+        html 
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            margin-bottom: 60px;
+            padding-top: 60px;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+
+        <div id="confirmModal" class="modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Confirm delete</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <p>CAUTION: All data associated with this sheet will be destroyed.</p>
+                      <p>Confirm you want to continue?</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                      <button type="button" class="btn btn-danger">Delete</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+<a href="/nova">Nova</a>    
+
+
+
+<h4>wsMath mySheets <button id="createSheet" class="btn-sm btn-success">+</button></h4>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>sid</th>
+            <th>title</th>
+            <th>created</th>
+            <th>actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% templates.forEach( (templ) => { %>
+            <tr>
+                <td><%=templ.uid%></td>
+                <td><%=templ.json.title%></td>
+                <td><%=formatDate(templ.created)%></td>
+                <td><button class="btn-sm btn-primary edit-btn" data-sid="<%=templ.uid%>">Edit</button> 
+                 <button class="btn-sm duplicate-btn x2-btn" data-sid="<%=templ.uid%>">x2</button> 
+                <button class="btn-sm btn-danger trash-btn" data-sid="<%=templ.uid%>">Trash</button>
+               <button class="btn-sm btn-info review-btn" data-sid="<%=templ.uid%>">Rev</button></td>
+            </tr>
+        <% }); %>
+    </tbody>
+    
+</table>
+
+
+<script>
+    $(function(){
+        var $createSheet = $("#createSheet");
+        var $editSheet = $(".edit-btn");
+        var $trashSheet = $(".trash-btn");
+        var $x2Sheet = $(".x2-btn");
+        var $reviewSheet = $(".review-btn");
+
+        $createSheet.click(function(evt){
+            window.location.href = "/wsmath/e/0";
+        });
+        
+        $editSheet.click(function(evt){
+            var btn = evt.currentTarget;
+            var sid = btn.dataset["sid"];
+            window.location.href = "/wsmath/e/" + sid;
+        });
+
+        $reviewSheet.click(function(evt){
+            var btn = evt.currentTarget;
+            var sid = btn.dataset["sid"];
+            window.location.href = "/wsmath/r/" + sid;
+        });
+
+
+        $trashSheet.click(function(evt){
+            var btn = evt.currentTarget;
+            var sid = btn.dataset["sid"];         
+
+            var callback = function() {
+                $.ajax({
+                method: "DELETE",
+                url:  "/wsmath/e/" + sid,
+                success: function() {
+                    window.location.reload();
+                }
+                });              
+            };
+
+            $("#confirmModal .btn-danger").off();
+            $("#confirmModal .btn-danger").on("click", function(evt){
+                callback();
+            });
+            $("#confirmModal").modal('show');            
+        });
+
+
+        $x2Sheet.click(function(evt){
+            var btn = evt.currentTarget;
+            var sid = btn.dataset["sid"];         
+            $.ajax({
+                method: "PUT",
+                url:  "/wsmath/e/" + sid,
+                success: function() {
+                    window.location.reload();
+                }
+            });              
+        });
+    });
+
+    
+</script>
+
+</body>
+
+</html>

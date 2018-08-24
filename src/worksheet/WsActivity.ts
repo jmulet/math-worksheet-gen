@@ -2,6 +2,16 @@ import { WsQuestion } from "./WsQuestion";
 import { ActivityOptsInterface } from "../interfaces/ActivityOptsInterface";
 import { GenClass } from "../interfaces/GenClass";
 
+function removeLaTeXCmds(cmd: string): string {
+    const filtered = (cmd || "").replace(/\s/g,"").replace(/\\/gm, "").replace(/\{/gm, "").replace(/\}/gm, "")
+                      .replace(/dfrac/gmi,"").replace(/frac/gmi,"").replace(/sqrt/gmi,"").replace(/cdot/gmi, ".")
+                      .replace(/beginarray/gmi," ").replace(/endarray/gmi," ")
+                      .replace(/left/gmi,"").replace(/right/gmi,"")
+                      .replace(/\^/gmi,"").replace(/\_/gmi,"");
+ 
+    return filtered;
+}
+
 export class WsActivity {
     questions: WsQuestion[] = []
     constructor(public formulation: string, private opts: ActivityOptsInterface, private qClass?: GenClass, private qGenOpts?: any) {
@@ -28,20 +38,30 @@ export class WsActivity {
 
         if (this.questions.length === 0) {
             // Assume that this is a theory box
-            latex.push("\n\n \\makebox[\\textwidth]{" + this.formulation.replace(/\n/g, '\n\n') + "}\n\n");
+            latex.push("\\par \\noindent \\vspace{0.25cm} \\fcolorbox{purple}{MORAT}{ \\parbox{0.88\\textwidth}{" + this.formulation.replace(/\n/g, '\n\n')  + "}}\n\\vspace{0.25cm}\n\n");
+
         } else if (this.questions.length === 1) {
-            latex.push("    \\item ");
-            latex.push("    \\begin{tasks}(2)");
             this.questions.forEach((question) => {
                 latex.push("    \\item " + this.formulation.replace(/\n/g, '\n\n') + question.toLaTeX());
-            });
-            latex.push("    \\end{tasks}");
-        } else {
+            });           
+        } else { 
             latex.push("    \\item " + this.formulation.replace(/\n/g, '\n\n'));
-            latex.push("    \\begin{tasks}(2)");
-            this.questions.forEach((question) => {
+
+            // Try to guess the number of columns
+            const lengths = this.questions.map(question => removeLaTeXCmds(question.toLaTeX()).length);
+            const maxLength = Math.max(...lengths);
+            const cols = maxLength < 26? 2 : 1;
+
+            latex.push("    \\begin{tasks}(" + cols + ")");
+            this.questions.forEach((question, i) => {
+                const questionLaTeX = question.toLaTeX();
+                const length = lengths[i];
+                let decorator = " ";
+                if (length >= 30) {
+                    decorator="! ";
+                }
                 try {
-                    latex.push("      \\task " + question.toLaTeX());
+                    latex.push("      \\task" + decorator + questionLaTeX);
                 } catch (Ex) {
                     console.log('EXCEPTION:: Skipping question:: ', Ex);
                     const ind = this.questions.indexOf(question);

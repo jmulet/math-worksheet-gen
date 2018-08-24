@@ -1,4 +1,4 @@
-export function generateSample1BAT() {
+module.exports = function generateSample1BAT() {
     var body = {
 
         worksheet: {

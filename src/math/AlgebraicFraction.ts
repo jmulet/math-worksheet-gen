@@ -49,8 +49,7 @@ export class AlgebraicFraction {
     }
 
     simplified(): AlgebraicFraction {
-        const res = Giac.simplify(this.toString(), AlgebraicFraction);        
-        console.log(res.toString());
+        const res = Giac.simplify(this.toString(), AlgebraicFraction);  
         return res;
     }
 

@@ -7,7 +7,18 @@ import { Random } from '../util/Random';
 import * as xmlBuilder from 'xmlbuilder';
   
 // Load all generators
-const topics = path.resolve('src/topics/');
+let topics;
+
+let typesArray; 
+if (process.argv[1].endsWith(".ts"))  {
+    typesArray = [".ts", ".js"];
+    topics = path.resolve('./src/topics/')
+} else {
+    typesArray = [".js"];
+    topics = path.resolve('./dist/src/topics/')
+}
+
+console.log("WsMathGenerator:: Loading generator classes from ", topics ,"...");
 const genClasses = importClassesFromDirectories([path.join(topics,'/algebra/**/*.ts'), 
                                                  path.join(topics, '/algebra/**/*.js'),
                                                  path.join(topics, '/arithmetics/**/*.ts'),
@@ -22,9 +33,9 @@ const genClasses = importClassesFromDirectories([path.join(topics,'/algebra/**/*
                                                  path.join(topics, '/statistics/**/*.js'),
                                                  path.join(topics, '/special/**/*.ts'),
                                                  path.join(topics, '/special/**/*.js')
-                                                ]);
-console.log("WsMathGenerator:: Loaded generator classes ...");
+                                                ], typesArray);
 console.log(genClasses.map( (clazz) => clazz.name ).join(", "));
+console.log("WsMathGenerator:: Done loading classes.");
 
 export enum WsExportFormats {
     LATEX = 0,
@@ -205,18 +216,22 @@ export class WsMathGenerator {
             "\\usepackage[T1]{fontenc}",
             "\\usepackage{enumitem}",
             "\\usepackage{amsmath}",
+            "\\usepackage{eurosym}",  
+            "\\usepackage{xcolor}",
+            "\\definecolor{BLAUCLAR}{RGB}{240,240,255}",
+            "\\definecolor{MORAT}{RGB}{240,230,255}",
             "\\begin{document}",           
         ];
 
         if (this.worksheet) {
             if (this.worksheet.title) {
-                latex.push("\\begin{center}\\large \\textbf{" + this.worksheet.title + "} \\end{center}\n");
+                latex.push("\\begin{center}\\large \\textbf{ \\color{blue} " + this.worksheet.title + "} \\end{center}\n\\vspace{0.5cm}\n");
             }
             if (this.worksheet.instructions) {
-                latex.push("" + this.worksheet.instructions + "");
+                latex.push("\\fcolorbox{blue}{BLAUCLAR}{ \\parbox{0.93\\textwidth}{" + this.worksheet.instructions + "}}\n\\vspace{0.5cm}\n");
             }
 
-            latex.push("\n \\textbf{Referència:} " + this.uid + " / " + this.rand.seed + ". \\textbf{Nom i llinatges:} " +
+            latex.push("\n {\\small \\textbf{Referència:} " + this.uid + " / " + this.rand.seed + ".} \\textbf{Nom i llinatges:} " +
             (this.worksheet.fullname? this.worksheet.fullname :
             "........................................................... \n"));
         }

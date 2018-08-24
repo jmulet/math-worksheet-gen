@@ -2,12 +2,19 @@
 <html>
 
 <head>
-    <title>wsMath</title>
+    <title>wsMath editor</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
+
+    
     <style>
         html {
             position: relative;
@@ -43,28 +50,38 @@
     </style>
 </head>
 
-<body ng-app="wsMathEditor">
+<body ng-app="wsMathEditor" ng-controller="wsMathController" >
 
         <header>
                 <!-- Fixed navbar -->
                 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-                    <a class="navbar-brand" href="#">wsMath</a>
+                    <a class="navbar-brand" href="/wsmath/e"> (-- wsMath</a>
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse"
                         aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarCollapse">
                         <ul class="navbar-nav mr-auto">
-                            <li><%=user.username%></li>
+                            <li style="color:white"><%=user.username%></li>                           
+                        </ul>                     
+                    </div>
+                    <div class="">
+                        <ul class="navbar-nav">
+                            <li>
+                                    <button class="btn-sm btn-success" ng-click="saveMe()">Save</button>
+                            </li>
+                            
+                            <li>
+                                    <button class="btn-sm btn-danger" ng-click="closeMe()">Close</button>
+                            </li>
                         </ul>
                     </div>
                 </nav>
             </header>
 
 
-    <div ng-controller="wsMathController" class="container-fluid">
-            <h5>Hi <%=user.fullname%>!</h5>
-
+    <div class="container-fluid">
+            
             <ul class="nav nav-tabs">
                     <li class="nav-item">
                         <a class="nav-link active" data-toggle="tab" href="#currentPreferences">Worksheet</a>
@@ -83,7 +100,22 @@
                                 <p><span style="width: 200px; display: inline-block;"><b>Title</b></span> <input style="width:80%" type="text" ng-model="ws.title"/></p>
                                 <p><span style="width: 200px; display: inline-block;"><b>Instructions</b></span> <textarea type="text" ng-model="ws.instructions" rows="5" style="width:80%"></textarea></p>
                                 <p><span style="width: 200px; display: inline-block;"><b>Include keys</b></span> <input type="checkbox" ng-model="ws.includeKeys"/></p>
-                                <p><span style="width: 200px; display: inline-block;"><b>Show first question answer</b></span> <input type="checkbox" ng-model="ws.showFirstQuestionAnswer"/></p>
+
+                                <p><span style="width: 200px; display: inline-block;"><b>Sectionless</b></span> <input type="checkbox" ng-model="ws.sectionless"/></p>
+                               <!-- <p><span style="width: 200px; display: inline-block;"><b>Show first question answer</b></span> <input type="checkbox" ng-model="ws.showFirstQuestionAnswer"/></p>-->
+                                <div><span style="width: 200px; display: inline-block;"><b>Default format</b></span>                                                                                                   
+                                <div class="btn-group" style="display: inline-block;">
+                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span>{{ws.type}}</span>
+                                        <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#" ng-click="ws.type='html'">html</a>
+                                        <a class="dropdown-item" href="#" ng-click="ws.type='latex'">latex</a>
+                                        <a class="dropdown-item" href="#" ng-click="ws.type='pdf'">pdf</a>
+                                        <a class="dropdown-item" href="#" ng-click="ws.type='moodlexml'">moodlexml</a>                                        
+                                        </div>
+                                    </div>                                                                  
+                                </div>
+                                
                                 <br/>
                         
                                 <button class="btn btn-md btn-success" ng-click="addSection()"> <i class="fas fa-plus"></i> Add section</button>
@@ -154,9 +186,6 @@
                                 <p>
                                     <span style="width: 150px; display: inline-block;"><b>Seed:</b></span> <input ng-model="seed" type="number" min="0" />
                                 </p>
-                                <p>
-                                    <span style="width: 150px; display: inline-block;"><b>Store:</b></span> <input ng-model="store" type="checkbox"/>
-                                </p>
                                 <br/>
                                 <p>
                                 <button class="btn btn-info" ng-click="postWorksheet('latex')">Generate LaTeX</button>
@@ -185,10 +214,6 @@
        
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
 
     <script>
         var questionTypesList = <%-JSON.stringify(questionTypesList)%>;
@@ -199,17 +224,9 @@
         ngApp.controller("wsMathController", function ($scope, $http) {  
             $scope.moodleActivityTypes = ['shortanswer', 'multiplechoice', 'numerical'];
             $scope.user = <%-JSON.stringify(user)%>; 
-            $scope.textarea = "<%-textarea%>";
-            try {
-                $scope.ws = JSON.parse($scope.textarea).worksheet;
-            } catch(Ex) {
-                console.log(Ex);
-                console.log($scope.textarea);
-                return;
-            }
-           
-            
-            //
+            $scope.textarea = <%-JSON.stringify(textarea)%>;
+            $scope.ws = <%-textarea%>;
+             
             $scope.questionTypesList = questionTypesList;
             $scope.generatorChanged = function(question, extend) {
                 var gen = questionTypesMeta[question.gen];
@@ -261,26 +278,7 @@
                     console.log(Ex);
                 }
             }
-
-            $scope.postWorksheet = function (type) { 
-                type = type || 'pdf';
-                var bodyEncoded = $scope.ws;
-                 
-                var url = '<%=url%>/store?seed=' + $scope.seed + (extraSeed ? ("." + extraSeed) : "") + '&type=' + type
-                    + "&idUser=" + $scope.user.id + "&persist=" + ($scope.store? 1 : 0);
-                $http.post(url, bodyEncoded).then(function (res) {
-                    var data = res.data;
-                    console.log(data);
-                    if (data.id) {
-                        $scope.worksheetID = data.id;
-                        var link = '<%=url%>/?id=' + data.id + '&seed=' + $scope.seed + (extraSeed ? ("." + extraSeed) : "") + '&type=' + type;
-                        window.open(link, '_blank')
-                    }
-                }, function (err) {
-                    extraSeed += 1;
-                    console.log(err);
-                });
-            };
+ 
 
             $scope.moveupSection = function(sec, indx) {
                 if (indx === 0) {
@@ -300,6 +298,10 @@
             };
 
             $scope.removeSection = function(sec, indx) {
+
+                //Confirm dialog
+
+
                 $scope.ws.sections.splice(indx, 1);
                 $scope.selectedSection = $scope.ws.sections[0];
             };
@@ -362,6 +364,19 @@
                 act.questions.push(question); 
                 $scope.generatorChanged(question);
             };
+
+            $scope.saveMe = function() {
+                var bodyEncoded = $scope.ws;
+                var url = window.location.href;
+                $http.post(url, bodyEncoded).then(function (res) {
+                    var data = res.data; 
+                    console.log(data);    
+                });
+            };
+
+            $scope.closeMe = function() {
+                window.location.href = "/wsmath/e";
+            }
 
            
         });

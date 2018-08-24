@@ -16,7 +16,9 @@ const fse = require('fs-extra')
  *
  * @return {DestroyableTransform}
  */
-export function latexToPdf(src: string | Stream, options?: any): Stream {
+export async function latexToPdf(src: string | Stream, options?: any): Promise<any> {
+  // Instead of a stream return a promised buffer
+  return new Promise( (resolve, reject)=> {
   const outputStream = through()
   options = options || {}
   
@@ -59,7 +61,9 @@ export function latexToPdf(src: string | Stream, options?: any): Stream {
     errorLogStream.on('end', () => {
       const errMessage = `LaTeX Syntax Error\n${errors.join('\n')}`
       const error = new Error(errMessage)
-      outputStream.emit('error', error);
+      //outputStream.emit('error', error);
+      console.log(src);
+      reject(error);
     })
   }
   const dirname = "node-latex-" + Math.random().toString(32).substring(2);
@@ -172,16 +176,21 @@ export function latexToPdf(src: string | Stream, options?: any): Stream {
      */
     const returnDocument = () => {
       const pdfPath = path.join(tempPath, 'texput.pdf')
-      const pdfStream = fs.createReadStream(pdfPath)
-
-      pdfStream.pipe(outputStream)
-      pdfStream.on('close', () => fse.removeSync(tempPath))
-      pdfStream.on('error', handleErrors)
+      fs.readFile(pdfPath, function(err, buffer) {
+          if (err) {
+           reject(err);
+           return;
+         }
+         fse.removeSync(tempPath);
+         //Resolve the promise
+         resolve(buffer);
+      });
     }
 
     // Start the first run.
     runLatex(inputStream)
   });
 
-  return outputStream
+  //end promise bloc
+  });
 }

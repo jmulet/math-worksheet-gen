@@ -1,9 +1,75 @@
 import * as mysql from 'mysql';
-import * as uniqid from 'uniqid';
+import * as shortid from 'shortid';
 import { Storage } from './Storage';
 
+const MConfig = require("../../../../micro-config.json");
+
+const sqlListTemplate = "SELECT * FROM `wsmath` WHERE `idUser`=?";
+const sqlDeleteTemplate1 = "DELETE FROM `wsmath` WHERE `uid`=? LIMIT 1;";
+const sqlDeleteTemplate2 = "DELETE FROM `wsmath_generated` WHERE `uid`=?";
+const sqlUpdateTemplate = "UPDATE `wsmath` SET `json`=? WHERE `uid`=?";
+
 export class MysqlStorage implements Storage {
-    async saveGenerated(uid: string, seed: string, format: "html" | "latex", doc: string, docWithKeys: string): Promise<string> {
+
+    async update(sid: string, json: any): Promise<number> {
+        let connection;
+        let nup = 0;
+        try {
+            connection = await this.getConnection();            
+            const [err, results] = await this.queryAsync(connection, sqlUpdateTemplate, [JSON.stringify(json), sid]);  
+            if (!err) {
+                nup = results.affectedRows;
+            } else {
+                console.log(err);
+            }
+            
+        } catch (Ex) {
+            console.log(Ex);
+        } finally {
+            connection && connection.release();
+        }
+        return nup;
+    }
+    
+    async delete(sid: string): Promise<any> { 
+        const connection = await this.getConnection();
+        let nup = 0;
+        try{
+            let [err, results] = await this.queryAsync(connection, sqlDeleteTemplate1, [sid]);
+            nup += results.affectedRows;
+            [err, results] = await this.queryAsync(connection, sqlDeleteTemplate2, [sid]);
+            nup += results.affectedRows;
+        } catch(Ex) {      
+            console.log(Ex);      
+        } finally {
+            connection && connection.release();        
+        }        
+        return nup;
+    }
+    
+    async listTemplatesByUser(idTeacher: string): Promise<any> {
+        const connection = await this.getConnection();
+        let list;
+        try{
+            const [err, results] = await this.queryAsync(connection, sqlListTemplate, [idTeacher]);
+            if (err) {
+                list = [];
+            }
+            list = results.map( e => {
+                try {
+                    e.json = JSON.parse(e.json);
+                } catch(Ex){}
+                return e;
+            });
+        } catch(Ex) {      
+            console.log(Ex);      
+        } finally {
+            connection && connection.release();        
+        }        
+        return list;
+    }
+
+    async saveGenerated(uid: string, seed: string, format: "html" | "latex" | "pdf", doc: string | Buffer, docWithKeys: string | Buffer): Promise<string> {
         
         const found = await this.loadGenerated(uid, seed);
         let connection;
@@ -53,10 +119,10 @@ export class MysqlStorage implements Storage {
                 sql = "SELECT * FROM wsmath_generated WHERE uid=? AND seed=? ORDER BY id desc LIMIT 1 ";
                 params = [uid, seed];
             } else {
-                sql = "SELECT wsg.seed, max(wsg.generated) as generatedDate, u.fullname, ws.json FROM wsmath_generated as wsg INNER JOIN users as u ON u.username+'b'=wsg.seed INNER JOIN wsmath as ws ON ws.uid=wsg.uid WHERE wsg.uid=? AND LENGTH(wsg.seed)=5  group by u.id ORDER BY wsg.generated, u.fullname";
+                sql = "SELECT wsg.seed, max(wsg.created) as created, u.fullname, ws.json, ws.uid FROM wsmath_generated as wsg LEFT JOIN users as u ON u.username=wsg.seed INNER JOIN wsmath as ws ON ws.uid=wsg.uid WHERE wsg.uid=? group by u.id ORDER BY wsg.created, u.fullname";
                 params = [uid];
-            }
-            const [err, results, fields] = await this.queryAsync(connection, sql, params);
+            } 
+            const [err, results] = await this.queryAsync(connection, sql, params);
             if (err) {
                 console.log(err);
                 return;
@@ -82,11 +148,11 @@ export class MysqlStorage implements Storage {
     pool: mysql.Pool;
     constructor()  {
         const config = {
-            connectionLimit: 10,
-            host: 'localhost',
-            user: 'root',
-            password: 'root',
-            database: 'imaths'
+            connectionLimit: MConfig.Pool.connectionLimit || 10,
+            host: MConfig.Pool.host,
+            user: MConfig.Pool.user,
+            password: MConfig.Pool.password,
+            database: MConfig.Pool.database
         }
         this.pool = mysql.createPool(config);
 
@@ -132,7 +198,10 @@ export class MysqlStorage implements Storage {
                             \`json\` json DEFAULT NULL,
                             \`idUser\` int(11) DEFAULT NULL,
                             \`created\` datetime DEFAULT NULL,
-                            \`saved\` tinyint(11) NOT NULL DEFAULT '0',
+                            \`saved\` tinyint(11) NOT NULL DEFAULT '1',
+                            \`opens\` datetime DEFAULT NULL,
+                            \`keysOpens\` datetime DEFAULT NULL,
+                            \`closes\` datetime DEFAULT NULL,
                             PRIMARY KEY (\`id\`)
                         ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
                     `;
@@ -164,6 +233,8 @@ export class MysqlStorage implements Storage {
                             \`html_keys\` longtext DEFAULT NULL,
                             \`latex\` longtext DEFAULT NULL,
                             \`latex_keys\` longtext DEFAULT NULL,
+                            \`pdf\` longblob DEFAULT NULL,
+                            \`pdf_keys\` longblob DEFAULT NULL,
                             \`created\` datetime DEFAULT NULL,                           
                             PRIMARY KEY (\`id\`)
                         ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -203,23 +274,15 @@ export class MysqlStorage implements Storage {
 
     async load(uid: string): Promise<any> {
         let connection;
+        let output = null;
         try {
             connection = await this.getConnection();
             const [err, results, fields] = await this.queryAsync(connection, "SELECT * FROM wsmath WHERE uid=? LIMIT 1", [uid]);
-            
             if (err) {
-                console.log(err);
-                return;
-            }
-            if (results.length) {
-                try{
+                console.log(err); 
+            } else if (results.length) {
                     results[0].json = JSON.parse(results[0].json);
-                    const obj = results[0];
-                    return obj;
-                } catch(Ex2) {
-                    console.log(Ex2);
-                    return null;
-                }
+                    output = results[0];                                    
             } else {
                 return null;
             }
@@ -228,13 +291,14 @@ export class MysqlStorage implements Storage {
         } finally {
             connection && connection.release();
         }
+        return output;
     }
 
     async save(json: any, idUser = 0, save = 0): Promise<string> {
         let connection;
         try {
             connection = await this.getConnection();
-            const uid = uniqid();
+            const uid = shortid.generate();  //sheet id
             const post = {
                 uid: uid,
                 json: JSON.stringify(json),

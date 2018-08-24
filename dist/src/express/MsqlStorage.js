@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const mysql = require("mysql");
 const uniqid = require("uniqid");
+const MConfig = require("../../../../micro-config.json");
 class MysqlStorage {
     saveGenerated(uid, seed, format, doc, docWithKeys) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -51,23 +52,36 @@ class MysqlStorage {
             }
         });
     }
+    /**
+     *
+     * @param uid is the uid of the worksheet
+     * @param seed is optional - if not set then generates the report of that worksheet
+     */
     loadGenerated(uid, seed) {
         return __awaiter(this, void 0, void 0, function* () {
             let connection;
             try {
                 connection = yield this.getConnection();
-                const [err, results, fields] = yield this.queryAsync(connection, "SELECT * FROM wsmath_generated WHERE uid=? AND seed=? ORDER BY id desc LIMIT 1 ", [uid, seed]);
+                let sql, params;
+                if (seed) {
+                    sql = "SELECT * FROM wsmath_generated WHERE uid=? AND seed=? ORDER BY id desc LIMIT 1 ";
+                    params = [uid, seed];
+                }
+                else {
+                    sql = "SELECT wsg.seed, max(wsg.generated) as generatedDate, u.fullname, ws.json FROM wsmath_generated as wsg INNER JOIN users as u ON u.username+'b'=wsg.seed INNER JOIN wsmath as ws ON ws.uid=wsg.uid WHERE wsg.uid=? AND LENGTH(wsg.seed)=5  group by u.id ORDER BY wsg.generated, u.fullname";
+                    params = [uid];
+                }
+                const [err, results, fields] = yield this.queryAsync(connection, sql, params);
                 if (err) {
                     console.log(err);
                     return;
                 }
                 if (results.length) {
-                    try {
+                    if (seed) {
                         return results[0];
                     }
-                    catch (Ex2) {
-                        console.log(Ex2);
-                        return null;
+                    else {
+                        return results;
                     }
                 }
                 else {
@@ -80,16 +94,16 @@ class MysqlStorage {
             finally {
                 connection && connection.release();
             }
-            return null;
+            return seed ? null : [];
         });
     }
     constructor() {
         const config = {
-            connectionLimit: 10,
-            host: 'localhost',
-            user: 'root',
-            password: 'root',
-            database: 'imaths'
+            connectionLimit: MConfig.Pool.connectionLimit || 10,
+            host: MConfig.Pool.host,
+            user: MConfig.Pool.user,
+            password: MConfig.Pool.password,
+            database: MConfig.Pool.database
         };
         this.pool = mysql.createPool(config);
         this.synchronizeDB();
@@ -212,23 +226,16 @@ class MysqlStorage {
     load(uid) {
         return __awaiter(this, void 0, void 0, function* () {
             let connection;
+            let output = null;
             try {
                 connection = yield this.getConnection();
                 const [err, results, fields] = yield this.queryAsync(connection, "SELECT * FROM wsmath WHERE uid=? LIMIT 1", [uid]);
                 if (err) {
                     console.log(err);
-                    return;
                 }
-                if (results.length) {
-                    try {
-                        results[0].json = JSON.parse(results[0].json);
-                        const obj = results[0];
-                        return obj;
-                    }
-                    catch (Ex2) {
-                        console.log(Ex2);
-                        return null;
-                    }
+                else if (results.length) {
+                    results[0].json = JSON.parse(results[0].json);
+                    output = results[0];
                 }
                 else {
                     return null;
@@ -240,6 +247,7 @@ class MysqlStorage {
             finally {
                 connection && connection.release();
             }
+            return output;
         });
     }
     save(json, idUser = 0, save = 0) {

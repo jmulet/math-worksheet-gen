@@ -7,7 +7,17 @@ const importClassesFromDirectories_1 = require("../util/importClassesFromDirecto
 const Random_1 = require("../util/Random");
 const xmlBuilder = require("xmlbuilder");
 // Load all generators
-const topics = path.resolve('src/topics/');
+let topics;
+let typesArray;
+if (process.argv[1].endsWith(".ts")) {
+    typesArray = [".ts", ".js"];
+    topics = path.resolve('./src/topics/');
+}
+else {
+    typesArray = [".js"];
+    topics = path.resolve('./dist/src/topics/');
+}
+console.log("WsMathGenerator:: Loading generator classes from ", topics, "...");
 const genClasses = importClassesFromDirectories_1.importClassesFromDirectories([path.join(topics, '/algebra/**/*.ts'),
     path.join(topics, '/algebra/**/*.js'),
     path.join(topics, '/arithmetics/**/*.ts'),
@@ -22,9 +32,9 @@ const genClasses = importClassesFromDirectories_1.importClassesFromDirectories([
     path.join(topics, '/statistics/**/*.js'),
     path.join(topics, '/special/**/*.ts'),
     path.join(topics, '/special/**/*.js')
-]);
-console.log("WsMathGenerator:: Loaded generator classes ...");
+], typesArray);
 console.log(genClasses.map((clazz) => clazz.name).join(", "));
+console.log("WsMathGenerator:: Done loading classes.");
 var WsExportFormats;
 (function (WsExportFormats) {
     WsExportFormats[WsExportFormats["LATEX"] = 0] = "LATEX";

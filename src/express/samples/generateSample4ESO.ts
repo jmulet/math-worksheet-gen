@@ -1,4 +1,4 @@
-export function generateSample4ESO() {
+module.exports = function generateSample4ESO() {
     var body = {
 
         worksheet: {

@@ -10,7 +10,7 @@ function displayPower(base: string, n: number): string {
     if (n === 0) {
         return "1";
     } else if (n===1) {
-        return base.replace("(","").replace(")", "");
+        return base.replace("\\left(","").replace("\\right)", "");
     } else {
         if (n % 2 === 0) {
             base = base.replace("-","");
@@ -50,7 +50,7 @@ function dExp(e: number){
         {
             name: "domain",
             defaults: "Z",
-            description: "Type of coefficent number generated"
+            description: "Type of coefficient number generated"
         }, 
         {
             name: "minExp",
@@ -137,7 +137,7 @@ export class PowerOperations implements QuestionGenInterface {
                 const b3 = rnd.intBetween(2, r, condition);
                 this.question =  "\\dfrac{ "+b1+"^{"+e1+"} \\cdot "+b2+"^{"+e1+"} }{"+ b3 + "^{" + e1 + "}}";  
                 const baseOp = Numeric.fromNumber(b1).multiply(Numeric.fromNumber(b2)).divide(Numeric.fromNumber(b3)).toTeX();
-                this.answer =  displayPower( "\\left(" + baseOp + "\\right)", e1 );
+                this.answer =  displayPower( baseOp, e1 );  // "\\left(" +  "\\right)"
             }
                          
         } else {

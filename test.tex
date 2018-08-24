@@ -1,80 +1,364 @@
 \documentclass[a4paper]{article}
-\usepackage{tasks}
-\usepackage{amsmath}
-\begin{document}
-     \begin{itemize}
-  \begin{section}{Polynomials}
-  \begin{itemize}
-    \item Dividide these polinomials using Ruffini's rule
-    \begin{tasks}(2)
-      \task $\left(-2 x^{4} -2 x^{3} -9 x^{2} -4 x + 4 \right) : \left( x -7 \right)$
-      \task $\left(4 x^{3} -5 x^{2}  + 3 \right) : \left( x + 3 \right)$
-      \task $\left(6 x^{2} -7 x -6 \right) : \left( x + 8 \right)$
-      \task $\left(-6 x^{2} + 2 x -2 \right) : \left( x -2 \right)$
-    \end{tasks}
-    \item Dividide these polinomials
-    \begin{tasks}(2)
-      \task $\left(20 x^{3} + 8 x^{2} -22 x + 4 \right) : \left(-4 x^{2} -4 x + 2 \right)$
-      \task $\left(9 x^{3} -3 x^{2} -27 x -10 \right) : \left(-3 x^{2} + 4 x + 5 \right)$
-      \task $\left(3 x^{3} + 2 x^{2} -6 x + 1 \right) : \left( x^{2}  -2 \right)$
-      \task $\left(-6 x^{3} + 11 x^{2} -1 x + 1 \right) : \left(-2 x^{2} +  x + 1 \right)$
-    \end{tasks}
-    \item Expand these algebraic identities
-    \begin{tasks}(2)
-      \task $\left(t - 4 m\right)^2 = {}$
-      \task $\left(x + 5 z\right) \cdot \left(x - 5 z\right) = {}$
-      \task $\left(5 z^{4} + y^{4}\right) \cdot \left(5 z^{4} - y^{4}\right) = {}$
-      \task $\left(5 t^{4} - 3 x^{4}\right)^2 = {}$
-      \task $\left(\frac{13}{5} y^{4} - 4 z^{4}\right)^2 = {}$
-      \task $\left(\frac{9}{5} m^{3} - 4 y^{3}\right)^2 = {}$
-    \end{tasks}
-    \item Write these polynomials as an algebraic identity
-    \begin{tasks}(2)
-      \task $z^{2} -10 x z +25 x^{2} = {}$
-      \task $z^{2} -2 b z +b^{2} = {}$
-      \task $x^{6} -6 x^{3} y^{3} +9 y^{6} = {}$
-      \task $\frac{121}{9} z^{8} -\frac{44}{3} x^{4} z^{4} +4 x^{8} = {}$
-    \end{tasks}
-    \item Extract common factor from these polynomials
-    \begin{tasks}(2)
-      \task $-2 x^{3} z^{2} +8 x^{2} z^{2} -8 x z^{2} = {}$
-      \task $12 a^{5} x^{7} +20 a^{5} x^{6} -12 a^{5} x^{5} = {}$
-      \task $-2 x^{4} y^{4} -10 x^{4} y^{3} +2 x^{4} y^{2} = {}$
-    \end{tasks}
-  \end{itemize}
-  \end{section}
-  \begin{section}{Answers}
-    \begin{tasks}(2)
-      \task $Q(x)=-2 x^{3} -16 x^{2} -121 x -851 $; $R=-5953 $ 
-      \task $Q(x)=4 x^{2} -17 x + 51 $; $R=-150 $ 
-      \task $Q(x)=6 x -55 $; $R=434 $ 
-      \task $Q(x)=-6 x -10 $; $R=-22 $ 
-    \end{tasks}
-    \begin{tasks}(2)
-      \task $Q(x)=-5 x + 3 $; $R=-2 $ 
-      \task $Q(x)=-3 x -3 $; $R=5 $ 
-      \task $Q(x)=3 x + 2 $; $R=5 $ 
-      \task $Q(x)=3 x -4 $; $R=5 $ 
-    \end{tasks}
-    \begin{tasks}(2)
-      \task $t^{2} -8 m t +16 m^{2}$ 
-      \task $x^{2} -25 z^{2}$ 
-      \task $25 z^{8} -y^{8}$ 
-      \task $25 t^{8} -30 t^{4} x^{4} +9 x^{8}$ 
-      \task $\frac{169}{25} y^{8} -\frac{104}{5} y^{4} z^{4} +16 z^{8}$ 
-      \task $\frac{81}{25} m^{6} -\frac{72}{5} m^{3} y^{3} +16 y^{6}$ 
-    \end{tasks}
-    \begin{tasks}(2)
-      \task $\left(z - 5 x\right)^2$ 
-      \task $\left(z - b\right)^2$ 
-      \task $\left(x^{3} - 3 y^{3}\right)^2$ 
-      \task $\left(\frac{11}{3} z^{4} - 2 x^{4}\right)^2$ 
-    \end{tasks}
-    \begin{tasks}(2)
-      \task $2 x z^{2} \cdot \left(-x^{2} +4 x -4\right)$ 
-      \task $4 a^{5} x^{5} \cdot \left(3 x^{2} +5 x -3\right)$ 
-      \task $2 x^{4} y^{2} \cdot \left(-y^{2} -5 y +1\right)$ 
-    \end{tasks}
-  \end{section}
-     \end{itemize}
-\end{document}
+  \usepackage{geometry}
+  \geometry{a4paper, total={170mm,257mm}, left=20mm, top=20mm}
+  \usepackage{tasks}
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{enumitem}
+  \usepackage{amsmath}
+  \usepackage{eurosym}
+  \usepackage{xcolor}
+  \definecolor{BLAUCLAR}{RGB}{240,240,255}
+  \definecolor{MORAT}{RGB}{240,230,255}
+  \begin{document}
+  \begin{center}\large \textbf{ \color{blue} Feina recomanada pels alumnes que han de cursar Matemàtiques Acadèmiques a 4t d'ESO} \end{center}
+  \vspace{0.5cm}
+  
+  \fcolorbox{blue}{BLAUCLAR}{ \parbox{0.93\textwidth}{INSTRUCCIONS: Imprimiu aquest dossier i realizeu les activitats proposades. Aquesta feina es presentaràal professor del proper curs dins la primera setmana de classe. La realització correcta d'aquesta tasca serà valorada com a nota de la 1a avaluació.
+   AJUDA: Si necessitau ajuda podeu consultar els apunts o el llibre de 3r d'ESO Matemàtiques i els recursos penjats al curs https://piworld.es}}
+  \vspace{0.5cm}
+  
+  
+   {\small \textbf{Referència:} 45lnf9pujiq8r40y / jl7s7phw.} \textbf{Nom i llinatges:} ...........................................................
+  
+    \section{Radicals}
+       \begin{enumerate}[resume]
+      \item Escriu les potències en forma d'arrel i viceversa
+      \begin{tasks}(2)
+        \task $5^{\frac{1}{2}}={}$
+        \task $ \sqrt[5]{10}={}$
+        \task $ \sqrt{5}={}$
+        \task $2^{\frac{1}{2}} \cdot 3^{\frac{1}{2}}={}$
+        \task $ \sqrt[3]{2}={}$
+        \task $2^{\frac{2}{3}}={}$
+      \end{tasks}
+      \item Calcula el valor numèric de les potències
+      \begin{tasks}(2)
+        \task $9^{-2}={}$
+        \task $6^{4}={}$
+        \task $7^{4}={}$
+        \task $6^{2}={}$
+        \task $5^{-2}={}$
+        \task $\left( -3\right)^{-1}={}$
+        \task $\left( -6\right)^{4}={}$
+        \task $\left( -4\right)^{-2}={}$
+      \end{tasks}
+      \item Redueix a una única potència
+      \begin{tasks}(1)
+        \task $\left[\left(-10\right)^{4} : \left(-10\right) \right] \cdot \left(-10\right)^{-2}={}$
+        \task $\left[\left(-5\right)^{4} : \left(-5\right)^{0} \right] \cdot \left(-5\right)^{0}={}$
+        \task $\dfrac{ 9^{1} \cdot 6^{1} }{2^{1}}={}$
+        \task $\dfrac{ \left[ 7\right]  \cdot 7^{2} : 7^{0}}{7^{3}}={}$
+        \task $\left[ \dfrac{5^{4}\cdot \left( 125 \right)^{4}}{\left( 1 \right)^{-1}} \right]^{4}={}$
+        \task $\left(\left( 4 \right)^{-3} \right)^{-1} \cdot 4^{-2} : \left( 64 \right)^{-1}={}$
+        \task $\left(\left( 64 \right)^{-4} \right)^{3} \cdot 8^{3} : \left( 8 \right)^{-4}={}$
+        \task $\left(\left( 100 \right)^{1} \right)^{3} \cdot \left(-10\right)^{-2} : \left( 1 \right)^{-1}={}$
+      \end{tasks}
+  \par \noindent \vspace{0.25cm} \fcolorbox{purple}{MORAT}{ \parbox{0.88\textwidth}{A vegades és possible simplificar una arrel traient factors defora d'ella. Per això, cal descomposar el radicand en factors primers. Després, tot els factors que estan elevants a l'índex poden sortir davant l'arrel. Exemple: $\sqrt[3]{250}  = \sqrt[3]{5^3 \cdot 2} = 5 \sqrt[3]{2}$}}
+  \vspace{0.25cm}
+  
+  
+      \item Treu factors i simplifica els radicals si és possible
+      \begin{tasks}(2)
+        \task $8  \sqrt[4]{75}={}$
+        \task $ \sqrt{2 \cdot 3^{4} \cdot 5}={}$
+        \task $-7  \sqrt[4]{2^{9} \cdot 3^{5} \cdot 5^{5}}={}$
+        \task $4  \sqrt{2^{3} \cdot 3^{2} \cdot 5^{2}}={}$
+      \end{tasks}
+      \item Opera els radicals (expressant-los prèviament en forma de potència i operant les potències)
+      \begin{tasks}(2)
+        \task $\dfrac{ \sqrt[3]{3} }{  \sqrt{3}}$ $={}$
+        \task $\dfrac{ \sqrt{4} \cdot  \sqrt[4]{4}}{ \sqrt[3]{4}}$ $={}$
+        \task $ \sqrt{4} \cdot  \sqrt[3]{4}$ $={}$
+        \task $\dfrac{ \sqrt[3]{2} }{  \sqrt{2}}$ $={}$
+        \task $\dfrac{ \sqrt{b^{4}} \cdot  \sqrt[3]{b^{4}}}{ \sqrt[4]{b^{4}}}$ $={}$
+        \task $ \sqrt[3]{n} \cdot  \sqrt{n}$ $={}$
+        \task $\dfrac{ \sqrt[3]{c^{2}} }{  \sqrt{c^{2}}}$ $={}$
+        \task $\dfrac{ \sqrt[3]{b^{3}} \cdot  \sqrt{b^{3}}}{ \sqrt[4]{b^{3}}}$ $={}$
+      \end{tasks}
+       \end{enumerate}
+  
+    \section{Polinomis}
+       \begin{enumerate}[resume]
+      \item Divideix aquests polinomis utilitzant la regla de Ruffini
+      \begin{tasks}(1)
+        \task $\left(7 x^{4} -8 x^{3} + 8 x^{2} -2 x + 6\right) : \left( x -9\right)$
+        \task $\left(-5 x^{5} -2 x^{4} +  x^{3} - x^{2} -4 x + 9\right) : \left( x + 5\right)$
+        \task! $\left(2 x^{5} -9 x^{4} -6 x^{3} -10 x^{2} -10 x -9\right) : \left( x + 10\right)$
+        \task $\left(-3 x^{2} + 8 x -8\right) : \left( x -3\right)$
+      \end{tasks}
+      \item Divideix els polinomis
+      \begin{tasks}(1)
+        \task! $\left(-20 x^{3} -12 x^{2} -4 x + 3\right) : \left(5 x^{2} + 3 x + 1\right)$
+        \task $\left(-4 x^{3} -7 x^{2} + 5 x + 11\right) : \left(-4 x^{2} +  x + 3\right)$
+        \task! $\left(12 x^{3} + 14 x^{2} + 20 x + 5\right) : \left(3 x^{2} + 2 x + 4\right)$
+        \task $\left(10 x^{3} - x^{2} -13 x + 3\right) : \left(2 x^{2} +  x -2\right)$
+      \end{tasks}
+      \item Desenvolupa les identitats notables.
+      \begin{tasks}(2)
+        \task $\left(x - 2 a\right)^2 = {}$
+        \task $\left(z + x\right)^2 = {}$
+        \task $\left(5 t^{3} + 2 x^{3}\right)^2 = {}$
+        \task $\left(\frac{7}{3} z^{3} - 4 x^{3}\right)^2 = {}$
+        \task $\left(5 x^{3} - 2 a^{3}\right)^2 = {}$
+        \task $\left(5 x^{4} + 4 y^{4}\right) \cdot \left(5 x^{4} - 4 y^{4}\right) = {}$
+      \end{tasks}
+      \item Escriu, si és possible, aquests polinomis com una identitat notable.
+      \begin{tasks}(2)
+        \task $y^{2} -4 y z +4 z^{2} = {}$
+        \task $y^{2} -8 x y +16 x^{2} = {}$
+        \task $\frac{13^{2}}{25} x^{8} -y^{8} = {}$
+        \task $9 z^{6} -6 y^{3} z^{3} +y^{6} = {}$
+      \end{tasks}
+      \item Extreu factor comú dels polinomis
+      \begin{tasks}(2)
+        \task $-3 x^{3} y^{4} -15 x^{2} y^{4} -9 x y^{4} = {}$
+        \task $-8 t^{7} x +20 t^{6} x -8 t^{5} x = {}$
+        \task $-16 t^{2} x^{7} -8 t^{2} x^{6} -20 t^{2} x^{5} = {}$
+        \task $-6 y^{3} z^{4} -2 y^{2} z^{4} +10 y z^{4} = {}$
+      \end{tasks}
+       \end{enumerate}
+  
+    \section{Equacions}
+       \begin{enumerate}[resume]
+      \item Resol aquestes equacions de segon grau
+      \begin{tasks}(2)
+        \task $ x^{2} - x -12 =0$
+        \task $ x^{2} +  x -6 =0$
+        \task $82 x^{2} + 71 x + 14 =\left(-9 x -4\right)^2$
+        \task $50 x^{2} -26 x + 1 =\left(-7 x + 2\right)^2$
+      \end{tasks}
+      \item Resol aquestes equacions biquadrades (Recorda a aplicar el canvi $t=x^2$)
+      \begin{tasks}(1)
+        \task $ x^{4}  + 13 x^{2}  + 36 =0$
+        \task $ x^{4}  + 5 x^{2}  + 4 =0$
+        \task $ x^{4}  -8 x^{2} -5 x -14 =-5 x -5$
+        \task! $ x^{4} + 8 x^{3} + 4 x^{2} -6 x -39 =8 x^{3} - x^{2} -6 x -3$
+      \end{tasks}
+      \item Resol aquestes equacions factoritzades
+      \begin{tasks}(2)
+        \task $\left( x -1\right) \cdot \left( x  + 3\right) =0$
+        \task $\left( x -3\right) \cdot \left( x -4\right)^{2} =0$
+        \task $\left( x -3\right) \cdot \left( x -4\right) \cdot \left( x  + 3\right) =0$
+        \task $\left( x  + 4\right) \cdot \left( x  + 3\right) =0$
+      \end{tasks}
+  \par \noindent \vspace{0.25cm} \fcolorbox{purple}{MORAT}{ \parbox{0.88\textwidth}{Per resoldre una equació polinòmica (de grau superior a 2): 1r) Intentam treure factor comú, 2n) Miram si identificam alguna identitat notable, 3r) Si el grau és 3 o més, caldrà fer Ruffini. VIDEO 52: Equacions polinòmiques}}
+  \vspace{0.25cm}
+  
+  
+      \item Resol aquestes equacions polinòmiques
+      \begin{tasks}(2)
+        \task $ x^{2}  -1 =0$
+        \task $ x^{2} + 4 x + 3 =0$
+        \task $ x^{3} -8 x^{2} + 19 x -12 =0$
+        \task $ x^{2} -4 x + 3 =0$
+      \end{tasks}
+      \item Resol aquestes sistemes d'equacions
+      \begin{tasks}(1)
+        \task $\left\{ \begin{array}{ll}  -6 x-7 y&=23\\x + 7 y&=2\end{array} \right.$
+        \task $\left\{ \begin{array}{ll}  x-9 y&=83\\8 x-3 y&=-26\end{array} \right.$
+        \task! $\left\{ \begin{array}{ll}  -3\,  x-15\,  y + 5 \,  (x-y)&=5\,  x-5\,  y-78 + 3 \,  (x-4y )\\6\,  x-9\,  y + 2 \,  (x-y)&=2\,  x-2\,  y+57 + 5\,  (x-3y )\end{array} \right.$
+        \task! $\left\{ \begin{array}{ll}  3\,  x + 3 \,  (x-y)&=3\,  x-3\,  y-37 + 2 \,  (x-3y )\\x-2\,  y + 3 \,  (x-y)&=3\,  x-3\,  y-44 + 5 \,  (x-2y )\end{array} \right.$
+      \end{tasks}
+      \item Els tres costats d'un triangle rectangle són proporcionals als números 5, 12, 13. Calcula la longitud de cada costat sabent que l'àrea del triangle és 270 m$^2$.
+      \item Determinau el perímetre d'un triangle equilàter sabent que té una àrea de 579 cm$^2$.
+      \item D'un panell metàl·lic que té forma de quadrat li retallam un cercle d'igual diàmetre. Sabent que l'àrea de la figura que en resulta és 677, trobau la mida del quadrat.
+      \item  Un pastor diu a un altre pastor: Dóna'm 10 ovelles, i així en tindré el doble que tu. I
+                      l'altre li contesta: Dóna-me'n tú 10 ovelles, i així en tindrem tots dos igual. Quantes ovelles
+                      té cada pastor?
+      \item Un orfebre rep l'encàrrec de confeccionar un trofeu, en or i en plata, per a un
+                      campionat esportiu. Una vegada realitzat, resulta un pes de 2020 grams, i un cost de 9302 \euro{} .
+                      Quina quantitat ha utilitzat de cada preciós de metall, si l'or es ven 8.00 \euro{} /gram i la plata
+                      per 2.60 \euro{} /gram?
+      \item Si la llargària d'un rectangle s'augmenta 4 centímetres i l'amplària 4 centímetres, l'àrea augmenta 280
+                      centímetres quadrats. Si, en canvi, la llargària s'augmenta 3 centímetre i l'amplària 5 centímetres, l'àrea
+                      augmenta 259 centímetres quadrats. Calcula la llargària i l'amplària del rectangle.
+       \end{enumerate}
+  
+    \section{Funcions}
+       \begin{enumerate}[resume]
+      \item Representa aquestes funcions lineals
+      \begin{tasks}(2)
+        \task $y = -\frac{5}{8}\,x+ \frac{10}{9}$
+        \task $y = -\frac{2}{5}\,x$
+        \task $y = -\frac{1}{3}\,x -\frac{8}{5}$
+        \task $y = -\frac{3}{10}\,x+ 3$
+      \end{tasks}
+      \item Calcula el vèrtex i representa aquestes paràboles
+      \begin{tasks}(2)
+        \task $y = x^2 -4\,x -3$
+        \task $y = -x^2+ 2\,x+ 2$
+        \task $y = -x^2 -10\,x -7$
+        \task $y = x^2+ 4\,x+ 10$
+      \end{tasks}
+       \end{enumerate}
+  
+    \section*{Respostes}
+    \begin{enumerate}
+      \item
+      \begin{tasks}(2)
+        \task $ \sqrt{5}$
+        \task $2^{\frac{1}{5}} \cdot 5^{\frac{1}{5}}$
+        \task $5^{\frac{1}{2}}$
+        \task $ \sqrt{6}$
+        \task $2^{\frac{1}{3}}$
+        \task $ \sqrt[3]{4}$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $0.012345679012345678$
+        \task $1296$
+        \task $2401$
+        \task $36$
+        \task $0.04$
+        \task $-0.3333333333333333$
+        \task $1296$
+        \task $0.0625$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $\left-10\right$
+        \task $\left(5\right)^{4}$
+        \task $\left27\right$
+        \task $1$
+        \task $5^{64}$
+        \task $4^{4}$
+        \task $8^{-17} = \dfrac{1}{8^{17}}$
+        \task $\left(10\right)^{4}$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $8  \sqrt[4]{75}$
+        \task $9  \sqrt{10}$
+        \task $-420  \sqrt[4]{30}$
+        \task $120  \sqrt{2}$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $ \sqrt[6]{\frac{1}{3}}$
+        \task $ \sqrt[6]{32}$
+        \task $2  \sqrt[3]{4}$
+        \task $ \sqrt[6]{\frac{1}{2}}$
+        \task $b^{2}  \sqrt[3]{b}$
+        \task $ \sqrt[6]{n^{5}}$
+        \task $ \sqrt[3]{\frac{1}{c^{1}}}$
+        \task $b  \sqrt[4]{b^{3}}$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $Q(x)=7 x^{3} + 55 x^{2} + 503 x + 4525$; $R=40731$
+        \task $Q(x)=-5 x^{4} + 23 x^{3} -114 x^{2} + 569 x -2849$; $R=14254$
+        \task $Q(x)=2 x^{4} -29 x^{3} + 284 x^{2} -2850 x + 28490$; $R=-284909$
+        \task $Q(x)=-3 x -1$; $R=-11$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $Q(x)=-4 x $; $R=3$
+        \task $Q(x)= x + 2$; $R=5$
+        \task $Q(x)=4 x + 2$; $R=-3$
+        \task $Q(x)=5 x -3$; $R=-3$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $x^{2} -4 a x +4 a^{2}$
+        \task $z^{2} +2 x z +x^{2}$
+        \task $25 t^{6} +20 t^{3} x^{3} +4 x^{6}$
+        \task $\frac{49}{9} z^{6} -\frac{56}{3} x^{3} z^{3} +16 x^{6}$
+        \task $25 x^{6} -20 a^{3} x^{3} +4 a^{6}$
+        \task $25 x^{8} -16 y^{8}$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $\left(y - 2 z\right)^2$
+        \task $\left(y - 4 x\right)^2$
+        \task $\left(\frac{13}{5} x^{4} + y^{4}\right) \cdot \left(\frac{13}{5} x^{4} - y^{4}\right)$
+        \task $\left(3 z^{3} - y^{3}\right)^2$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $3 x y^{4} \cdot \left(-x^{2} -5 x -3\right)$
+        \task $4 t^{5} x \cdot \left(-2 t^{2} +5 t -2\right)$
+        \task $4 t^{2} x^{5} \cdot \left(-4 x^{2} -2 x -5\right)$
+        \task $2 y z^{4} \cdot \left(-3 y^{2} -y +5\right)$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $x=4$; $x=-3$
+        \task $x=2$; $x=-3$
+        \task $x=-1$; $x=2$
+        \task $x=1$; $x=-3$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task Cap solució
+        \task Cap solució
+        \task $x=-3$; $x=3$
+        \task $x=-2$; $x=2$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $x=1$; $x=-3$
+        \task $x=3$; $x=4$
+        \task $x=-3$; $x=3$; $x=4$
+        \task $x=-4$; $x=-3$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $x=1$; $x=-1$
+        \task $x=-1$; $x=-3$
+        \task $x=3$; $x=4$; $x=1$
+        \task $x=1$; $x=3$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task $ \left(-5, \quad 1 \right)$
+        \task $ \left(-7, \quad -10 \right)$
+        \task $ \left(9, \quad 8 \right)$
+        \task $ \left(-1, \quad -6 \right)$
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task Costats 15 m, 36 m, 39
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task El perímetre és 109.70 cm
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task El costat mesura 28.08 cm
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task El primer té 70 i el segon 50 ovelles.
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task 750 g d'or i 1270 g de plata
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task Les dimensions són 23 i 43 cm
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task Correcció manual
+        \task Correcció manual
+        \task Correcció manual
+        \task Correcció manual
+      \end{tasks}
+      \item
+      \begin{tasks}(2)
+        \task Correcció manual
+        \task Correcció manual
+        \task Correcció manual
+        \task Correcció manual
+      \end{tasks}
+    \end{enumerate}
+  \end{document}

@@ -23,6 +23,29 @@
 
 <body>
 <h4>Generated report</h4>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Seed</th>
+            <th>Fullname</th>
+            <th>Link</th>
+            <th>Keys</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% report.forEach( (r)=> { %>
+            <tr>
+                <td><%=r.seed%></td>
+                <td><%=r.fullname%></td>
+                <td><a href="/wsmath/g/<%=r.uid%>?seed=<%=r.seed%>" target="_blank">Link</a></td>
+                <td><a href="/wsmath/g/<%=r.uid%>?seed=<%=r.seed%>&includeKeys=1" target="_blank">Link keys</a></td>
+                <td><%=formatDate(r.created)%></td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>
       
 </body>
 

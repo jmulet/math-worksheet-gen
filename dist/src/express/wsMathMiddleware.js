@@ -11,13 +11,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const latexToPdf_1 = require("../util/latexToPdf");
 const WsGenerator_1 = require("../util/WsGenerator");
-<<<<<<< HEAD
-const generateSample1BAT_1 = require("./generateSample1BAT");
-=======
 const WsMathGenerator_1 = require("../worksheet/WsMathGenerator");
-const generateSample4ESO_1 = require("./generateSample4ESO");
+const generateSample1BAT_1 = require("./generateSample1BAT");
 const MsqlStorage_1 = require("./MsqlStorage");
->>>>>>> 5473922f248d68732bd06c61c4b16d7b8c757cd3
 function generateMoodleSample() {
     var body = {
         worksheet: {
@@ -47,7 +43,7 @@ function displayGenerated(type, doc, res) {
         res.setHeader("Content-type", "text/html");
         res.status(200).send(doc);
     }
-    else if (type === 'tex' || type === 'latex') {
+    else {
         res.setHeader("Content-type", "text/plain");
         res.status(200).send(doc);
     }
@@ -90,7 +86,7 @@ function generateDocument(uid, doc, storage, isSaved, res) {
     }
 }
 function wsMathMiddleware(options) {
-    options = Object.assign({ basePrefix: '' }, options);
+    options = Object.assign({ basePrefix: '', piworldUrl: 'https://piworld.es' }, options);
     if (!options.storage) {
         options.storage = new MsqlStorage_1.MysqlStorage();
     }
@@ -140,66 +136,76 @@ function wsMathMiddleware(options) {
                 displayGenerated(type, generated, res);
                 return;
             }
-            // Normal flow if not generated
+            //S'ha de general el document Normal flow if not generated
             const row = yield options.storage.load(id);
+            if (!row) {
+                //Alerta es demana un document que no existeix
+                res.send("El document " + id + " no existeix en la base de dades. Segur que l'enllaç és correcte?");
+                return;
+            }
+            //if (!row) {
             const doc = row.json;
             const isSaved = row.saved;
             if (!doc) {
                 res.render('notfound', {
                     id: id
                 });
+                return;
             }
-            else {
-                // Pass extra information from query params
-                if (req.query.includeKeys === "true") {
-                    doc.includeKeys = true;
-                }
-                if (req.query.seed) {
-                    doc.seed = req.query.seed;
-                }
-                if (req.query.type) {
-                    doc.type = req.query.type;
-                }
-                if (req.query.fullname) {
-                    doc.fullname = req.query.fullname;
-                }
-                if (req.query.seed && !req.query.username && !req.query.idUser) {
-                    req.query.username = req.query.seed + "b";
-                }
-                if (req.query.username) {
-                    // get fullname of this username
-                    doc.seed = req.query.username;
-                    const user = yield options.storage.userByUsername(req.query.username);
-                    if (user) {
-                        doc.fullname = user["fullname"];
-                        if (user["idRole"] < 200) {
-                            doc.includeKeys = true;
-                        }
+            // Pass extra information from query params
+            if (req.query.includeKeys === "true") {
+                doc.includeKeys = true;
+            }
+            if (req.query.seed) {
+                doc.seed = req.query.seed;
+            }
+            if (req.query.type) {
+                doc.type = req.query.type;
+            }
+            if (req.query.fullname) {
+                doc.fullname = req.query.fullname;
+            }
+            if (req.query.seed && !req.query.username && !req.query.idUser) {
+                req.query.username = req.query.seed + "b";
+            }
+            if (req.query.username) {
+                // get fullname of this username
+                doc.seed = req.query.username;
+                const user = yield options.storage.userByUsername(req.query.username);
+                if (user) {
+                    doc.fullname = user["fullname"];
+                    if (user["idRole"] < 200) {
+                        doc.includeKeys = true;
                     }
                 }
-                if (req.query.idUser) {
-                    // get fullname of this idUser
-                    doc.seed = req.query.idUser;
-                    const user = yield options.storage.userByIdUser(req.query.idUser);
-                    if (user) {
-                        doc.fullname = user["fullname"];
-                        if (user["idRole"] < 200) {
-                            doc.includeKeys = true;
-                        }
+            }
+            if (req.query.idUser) {
+                // get fullname of this idUser
+                doc.seed = req.query.idUser;
+                const user = yield options.storage.userByIdUser(req.query.idUser);
+                if (user) {
+                    doc.fullname = user["fullname"];
+                    if (user["idRole"] < 200) {
+                        doc.includeKeys = true;
                     }
                 }
-                // Generate document
-                try {
-                    generateDocument(id, doc, options.storage, isSaved, res);
-                }
-                catch (Ex) {
-                    console.log("An error occurred while generating the document::", Ex);
-                }
+            }
+            // Generate document
+            try {
+                generateDocument(id, doc, options.storage, isSaved, res);
+            }
+            catch (Ex) {
+                console.log("An error occurred while generating the document::", Ex);
             }
         });
     });
     url = (options.basePrefix || '') + '/wsmath/editor';
     router.get(url, function (req, res, next) {
+        const session = req.session;
+        if (!session.user) {
+            res.redirect("/nova");
+            return;
+        }
         const textarea = JSON.stringify(generateSample1BAT_1.generateSample1BAT(), null, 2)
             .replace(/"/g, "\\\"").replace(/\n/g, "\\n");
         const uri = (options.basePrefix || '') + '/wsmath';
@@ -208,7 +214,21 @@ function wsMathMiddleware(options) {
             url: uri,
             questionTypesList: Object.keys(WsGenerator_1.Container).sort(),
             questionTypesMeta: WsGenerator_1.Container,
-            user: { id: 0, fullname: "Admin", username: "admin" }
+            user: { id: session.user.id, fullname: session.user.fullname, username: session.user.username }
+        });
+    });
+    //This provides a report of the generated pages
+    //Requires the id or ids of the worksheets
+    url = (options.basePrefix || '') + '/wsmath/generated';
+    router.get(url, function (req, res, next) {
+        const ids = req.params.ids.split(",");
+        const reports = ids.map((id) => {
+            return options.storage.loadGenerated(id);
+        });
+        const uri = (options.basePrefix || '') + '/wsmath';
+        res.render("generated", {
+            url: uri,
+            reports: reports
         });
     });
     return router;
