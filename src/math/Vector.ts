@@ -4,6 +4,19 @@ import { Random } from '../util/Random';
 import { Point } from './Point';
 import * as mathjs from 'mathjs';
 
+function trimArray(arr: Numeric[], len: number): Numeric[] {
+    const clen = arr.length;
+    const out = new Array(len);
+    for (var i=0; i < len; i++) {
+        if (i < clen) {
+            out[i] = arr[i];
+        } else {
+            out[i] = Numeric.fromNumber(0);
+        }
+    }
+    return out;
+}
+
 export class Vector {
     
     arrow: string;
@@ -83,6 +96,23 @@ export class Vector {
             throw "Invalid vector dimension"
         }
     }
+
+
+    crossProduct(v: Vector): Vector {
+        const n = this.dimension();
+        if (v.dimension() <= 3 && n <= 3) {
+            const a: Numeric[] = trimArray(this.components, 3);
+            const b: Numeric[] = trimArray(v.components, 3);
+            const c1 = a[1].multiply(b[2]).substract(b[1].multiply(a[2]));
+            const c2 = a[2].multiply(b[0]).substract(b[2].multiply(a[0]));
+            const c3 = a[0].multiply(b[1]).substract(b[0].multiply(a[1]));
+            return new Vector([c1, c2, c3]);
+        }
+        else {
+            throw "Invalid vector dimension"
+        }
+    }
+
 
     norm2(): Numeric {
         return this.dotProduct(this);

@@ -15,7 +15,7 @@ export class WsQuestion {
     }
 
     answerToLaTeX(): string {
-        return this.qsGen.getAnswer("latex");
+        return this.qsGen.getSteps("latex") || this.qsGen.getAnswer("latex");
     }
 
     toHtml(): string {
@@ -23,7 +23,7 @@ export class WsQuestion {
     }
 
     answerToHtml(): string {
-        return this.qsGen.getAnswer("html");
+        return this.qsGen.getSteps("html") || this.qsGen.getAnswer("html");
     }
 
     distractorsHtml(): string[] {
