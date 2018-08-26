@@ -10,19 +10,13 @@ export interface wsMathMdwOptions {
     storage?: Storage;
     piworldUrl?: string;
 }
- 
-//Mysql - Cache is cleared after 5 minutes
-const deltaTime = 5 * 60 * 1000;
-
+  
 export function wsMathMiddleware(options?: wsMathMdwOptions) {
     options = <wsMathMdwOptions> { basePrefix: '/wsmath', piworldUrl: 'https://piworld.es', ...options };
     if (!options.storage) {
         options.storage = new MysqlStorage();
     }
-
-    setInterval(function () {
-        options.storage.clear();
-    }, deltaTime);
+ 
 
     const router = express.Router();
 

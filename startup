@@ -1,0 +1,3 @@
+memcached &
+node ../proxy/proxy.js &
+node ../micro-nova/micro-nova.js &

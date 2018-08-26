@@ -55,14 +55,14 @@
         <header>
                 <!-- Fixed navbar -->
                 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-                    <a class="navbar-brand" href="/wsmath/e"> (-- wsMath</a>
+                    <a class="navbar-brand" href="/wsmath/e"><i class="fas fa-arrow-left"></i> wsMath Editor</a>
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse"
                         aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarCollapse">
                         <ul class="navbar-nav mr-auto">
-                            <li style="color:white"><%=user.username%></li>                           
+                            <li style="color:gray"><%=user.username%></li>                           
                         </ul>                     
                     </div>
                     <div class="">
@@ -84,17 +84,17 @@
             
             <ul class="nav nav-tabs">
                     <li class="nav-item">
-                        <a class="nav-link active" data-toggle="tab" href="#currentPreferences">Worksheet</a>
+                        <a class="nav-link active" data-toggle="tab" href="#worksheet">Worksheet</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#alternative">Activities</a>
+                        <a class="nav-link" data-toggle="tab" href="#activities">Activities</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#link" ng-click="updateJSON()">Generate</a>
+                        <a class="nav-link" data-toggle="tab" href="#preview">Preview</a>
                     </li>
                 </ul>
                 <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane active" id="currentPreferences">
+                    <div role="tabpanel" class="tab-pane active" id="worksheet">
                         <ul>
                                 <br/>
                                 <p><span style="width: 200px; display: inline-block;"><b>Title</b></span> <input style="width:80%" type="text" ng-model="ws.title"/></p>
@@ -115,11 +115,41 @@
                                         </div>
                                     </div>                                                                  
                                 </div>
-                                
+                               
                                 <br/>
-                        
-                                <button class="btn btn-md btn-success" ng-click="addSection()"> <i class="fas fa-plus"></i> Add section</button>
-                                <p><b>Sections:</b></p>
+
+                                <div><span style="width: 200px; display: inline-block;"><b>Visibility</b></span>                                                                                                   
+                                    <div class="btn-group" style="display: inline-block;">
+                                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span>{{displayVisibility(ws.visibility)}}</span>
+                                            <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#" ng-click="ws.visibility=0">Private</a>
+                                            <a class="dropdown-item" href="#" ng-click="ws.visibility=1">Shared</a>
+                                            <a class="dropdown-item" href="#" ng-click="ws.visibility=2">Public</a>                                            
+                                            </div>
+                                        </div>                                                                  
+                                </div>
+                                   
+                                <br>
+
+                                <div><span style="width: 200px; display: inline-block;"><b>Levels</b></span>                                                                                                   
+                                    <div class="btn-group" style="display: inline-block;">
+                                        <button ng-repeat="l in levels" type="button" class="btn" ng-class="l.selected?'btn-primary':'btn-secondary'" ng-click="l.selected=!l.selected">{{l.label}}</button>                                        
+                                    </div>                                                                  
+                                </div>
+
+                                <br>
+
+                                <div><span style="width: 200px; display: inline-block;"><b>Tags</b></span>                                                                                                   
+                                    <input style="width:80%" type="text" ng-model="ws.tags"/>                                                          
+                                </div>
+                                
+
+                                <br/>
+                                                        
+                                <p><b>Sections:</b>
+                                    <button class="btn btn-sm btn-success" style="border-radius:100%" ng-click="addSection()" title="Add section"> <i class="fas fa-plus"></i></button>
+                                </p>
                                 <div ng-repeat="sec in ws.sections track by $index">
                                     <button class="btn btn-sm btn-secondary" ng-click="moveupSection(sec, $index)"><i class="fas fa-arrow-up"></i></button>
                                     <button class="btn btn-sm btn-secondary" ng-click="movedownSection(sec, $index)"><i class="fas fa-arrow-down"></i></button>
@@ -128,7 +158,7 @@
                                 </div>
                         </ul>
                     </div>
-                    <div role="tabpanel" class="tab-pane fade in" id="alternative">
+                    <div role="tabpanel" class="tab-pane fade in" id="activities">
                         <ul>
                                 <b>Activities in section: </b>
                                 <div class="dropdown" style="display: inline-block;">
@@ -141,8 +171,8 @@
                                 </div>
 
                                 <div ng-if="selectedSection">
-                                        <button class="btn btn-md btn-success" ng-click="addActivity()"> <i class="fas fa-plus"></i> Add activity</button>
-                                        <p><b>Activities:</b></p>
+                                        
+                                        <p><b>Activities:</b> <button class="btn btn-sm btn-success" ng-click="addActivity()" title="Add activity" style="border-radius:100%"> <i class="fas fa-plus"></i> </button></p>
                                         <div ng-repeat="act in selectedSection.activities track by $index" style="width:90%;border: 1px solid gray; border-bottom: 20px; border-radius:5px">
                                             <button class="btn btn-sm btn-secondary" ng-click="moveupActivity(act, $index)"><i class="fas fa-arrow-up"></i></button>
                                             <button class="btn btn-sm btn-secondary" ng-click="movedownActivity(act, $index)"><i class="fas fa-arrow-down"></i></button>
@@ -151,7 +181,7 @@
                                             <p><b>Scope</b>  <button ng-click="act.expanded=!act.expanded;"><i class="fas" ng-class="act.expanded?'fa-minus-square':'fa-plus-square'"></i></button>:
                                                 <scope-editor ng-if="act.expanded" style="width:80%" ng-model="act.scope"></scope-editor>   </p>                                
                                             <b>Questions:</b>
-                                            <button class="btn btn-md btn-success" ng-click="addQuestion(act)"> <i class="fas fa-plus"></i> Add question</button>
+                                            <button class="btn btn-sm btn-success" ng-click="addQuestion(act)" title="Add question" style="border-radius:100%"> <i class="fas fa-plus"></i></button>
                                              
                                             <div ng-repeat="question in act.questions track by $index" style="width:80%; padding-left:120px;">
                                                 <p>
@@ -180,28 +210,24 @@
                                 </div>
                         </ul>
                     </div>
-                     <div role="tabpanel" class="tab-pane fade in" id="link">
+                     <div role="tabpanel" class="tab-pane fade in" id="preview">
                         <ul>
                                 <br/> 
                                 <p>
-                                    <span style="width: 150px; display: inline-block;"><b>Seed:</b></span> <input ng-model="seed" type="number" min="0" />
+                                    <span style="width: 150px; display: inline-block;"><b>Seed:</b></span> <input ng-model="preview.seed" type="text" />
                                 </p>
-                                <br/>
                                 <p>
-                                <button class="btn btn-info" ng-click="postWorksheet('latex')">Generate LaTeX</button>
-                                <button class="btn btn-info" ng-click="postWorksheet('html')">Generate HTML</button>
-                                <button class="btn btn-info" ng-click="postWorksheet('pdf')">Generate PDF</button>
-                                <button class="btn btn-info" ng-click="postWorksheet('moodlexml')">Generate Moodle XML</button>
+                                    <span style="width: 150px; display: inline-block;"><b>includeKeys:</b></span> <input ng-model="preview.includeKeys" type="checkbox" />
                                 </p>
-
-                                <p ng-if="worksheetID">
-                                        <span style="width: 150px; display: inline-block;"><b>worksheetID: </b></span> {{worksheetID}}
+                                <br/>                                
+                                <p>
+                                    <span style="width: 150px; display: inline-block;"><b>Type:</b></span>                                 
+                                    <button class="btn btn-sm btn-info" ng-click="genWorksheet('latex')">LaTeX</button>
+                                    <button class="btn btn-sm btn-info" ng-click="genWorksheet('html')">HTML</button>
+                                    <button class="btn btn-sm btn-info" ng-click="genWorksheet('pdf')">PDF</button>
+                                    <button class="btn btn-sm btn-info" ng-click="genWorksheet('moodlexml')">Moodle XML</button>
                                 </p>
                         </ul>
-
-                        <h4>JSON definition:</h4>
-                        <textarea style="width:99%;" rows="15" ng-model="textarea"></textarea> 
-                        <button ng-click="updateDocument()" class="btn btn-primary">Update</button>
                     </div>
                 </div>
 
@@ -226,6 +252,29 @@
             $scope.user = <%-JSON.stringify(user)%>; 
             $scope.textarea = <%-JSON.stringify(textarea)%>;
             $scope.ws = <%-textarea%>;
+            $scope.sid = '<%=sid%>';
+
+            $scope.levels = [
+                {label: "1 ESO", selected: false},
+                {label: "2 ESO", selected: false},
+                {label: "3 ESO", selected: false},
+                {label: "4 ESO", selected: false},
+                {label: "1 BAT", selected: false},
+                {label: "2 BAT", selected: false}
+            ];
+
+            var tmpLevels = ($scope.ws.levels || "").split(",");
+            for (var i=0; i < tmpLevels.length; i++) {
+                var lev = tmpLevels[i].toUpperCase().trim();
+                for (var j=0; j < $scope.levels.length; j++) {
+                    if (lev === $scope.levels[j].label) {
+                        $scope.levels[j].selected = true;
+                        break;
+                    }
+                }
+            }
+
+            $scope.preview = {seed: "", includeKeys: false};
              
             $scope.questionTypesList = questionTypesList;
             $scope.generatorChanged = function(question, extend) {
@@ -264,6 +313,16 @@
             $scope.seed = 0;
             var extraSeed = 0;
             $scope.selectedSection = $scope.ws.sections[0];
+
+            $scope.displayVisibility = function(n) {
+                if (n===2) {
+                    return "public";
+                } else if (n===1) {
+                    return "shared"
+                } else {
+                    return "private"
+                }
+            };
             
             $scope.updateJSON = function() {
                 $scope.textarea = JSON.stringify($scope.ws, null, 2);
@@ -366,6 +425,14 @@
             };
 
             $scope.saveMe = function() {
+                // Update levels
+                var levels = [];
+                for (var i=0; i < $scope.levels.length; i++) {
+                    if ($scope.levels[i].selected) {
+                        levels.push($scope.levels[i].label);
+                    }
+                }
+                $scope.ws.levels = levels.join(",");
                 var bodyEncoded = $scope.ws;
                 var url = window.location.href;
                 $http.post(url, bodyEncoded).then(function (res) {
@@ -376,7 +443,12 @@
 
             $scope.closeMe = function() {
                 window.location.href = "/wsmath/e";
-            }
+            };
+
+            $scope.genWorksheet = function(type) {
+                var link = "/wsmath/g/" + $scope.sid + "?seed="+$scope.preview.seed + "&includeKeys="+$scope.preview.includeKeys;
+                window.open(link, "Wsmath preview", "width=500,height=800");
+            };
 
            
         });

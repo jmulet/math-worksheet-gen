@@ -7,16 +7,48 @@ const MConfig = require("../../../../micro-config.json");
 const sqlListTemplate = "SELECT * FROM `wsmath` WHERE `idUser`=?";
 const sqlDeleteTemplate1 = "DELETE FROM `wsmath` WHERE `uid`=? LIMIT 1;";
 const sqlDeleteTemplate2 = "DELETE FROM `wsmath_generated` WHERE `uid`=?";
-const sqlUpdateTemplate = "UPDATE `wsmath` SET `json`=? WHERE `uid`=?";
+const sqlUpdateTemplate = "UPDATE `wsmath` SET `json`=?, `visibility`=?, `title`=?, `tags`=?, `levels`=? WHERE `uid`=?";
+const sqlEmptyGeneratedTemplate = "UPDATE `wsmath_generated` SET `html`=NULL, `html_keys`=NULL, `latex`=NULL, `latex_keys`=NULL, `pdf`=NULL, `pdf_keys`=NULL WHERE `uid`=? AND `seed`=?";
+const sqlEmptyAllGeneratedTemplate = "UPDATE `wsmath_generated` SET `html`=NULL, `html_keys`=NULL, `latex`=NULL, `latex_keys`=NULL, `pdf`=NULL, `pdf_keys`=NULL WHERE `uid`=?";
 
 export class MysqlStorage implements Storage {
+    
+    async emptyGenerated(uid: string, seed?: string): Promise<number> {
+        let connection;
+        let nup = 0;
+        try {
+            connection = await this.getConnection();            
+            let sql: string;
+            let params: any;
+            if (seed) {
+                sql = sqlEmptyGeneratedTemplate;
+                params = [uid, seed];
+            } else {
+                sql = sqlEmptyAllGeneratedTemplate;
+                params = [uid];
+            }
+            const [err, results] = await this.queryAsync(connection, sql, params);  
+            if (!err) {
+                nup = results.affectedRows;
+            } else {
+                console.log(err);
+            }
+            
+        } catch (Ex) {
+            console.log(Ex);
+        } finally {
+            connection && connection.release();
+        }
+        return nup;
+    }
 
     async update(sid: string, json: any): Promise<number> {
         let connection;
         let nup = 0;
         try {
             connection = await this.getConnection();            
-            const [err, results] = await this.queryAsync(connection, sqlUpdateTemplate, [JSON.stringify(json), sid]);  
+            const params = [JSON.stringify(json), json.visibility || 1, json.title || "", json.tags || "", json.levels || "*", sid];
+            const [err, results] = await this.queryAsync(connection, sqlUpdateTemplate, params);  
             if (!err) {
                 nup = results.affectedRows;
             } else {
@@ -195,10 +227,13 @@ export class MysqlStorage implements Storage {
                         CREATE TABLE \`wsmath\` (
                             \`id\` int(11) unsigned NOT NULL AUTO_INCREMENT,
                             \`uid\` varchar(255) DEFAULT '',
+                            \`levels\` varchar(255) NOT NULL DEFAULT '*',
+                            \`title\` longtext DEFAULT NULL,
+                            \`tags\` longtext DEFAULT NULL,                            
                             \`json\` json DEFAULT NULL,
                             \`idUser\` int(11) DEFAULT NULL,
                             \`created\` datetime DEFAULT NULL,
-                            \`saved\` tinyint(11) NOT NULL DEFAULT '1',
+                            \`visibility\` tinyint(11) NOT NULL DEFAULT '1',
                             \`opens\` datetime DEFAULT NULL,
                             \`keysOpens\` datetime DEFAULT NULL,
                             \`closes\` datetime DEFAULT NULL,
@@ -254,47 +289,46 @@ export class MysqlStorage implements Storage {
             connection && connection.release();
         }
     }
+ 
 
-    async clear(): Promise<number> {
-        let connection;
-        try {
-            connection = await this.getConnection();
-            const [err, results, fields] = await this.queryAsync(connection, "DELETE FROM wsmath WHERE saved=0 AND created");
-            if (err) {
-                console.log(err);
-                return;
-            }
-            return results.affectedRows;
-        } catch (Ex) {
-            console.log(Ex);
-        } finally {
-            connection && connection.release();
-        }
-    }
-
-    async load(uid: string): Promise<any> {
+    /**
+     * Loads the definition with a given uid
+     * If uid is not passed, then it will load all public sheet definitions 
+     * @param uid 
+     */
+    async load(uid?: string): Promise<any> {
         let connection;
         let output = null;
         try {
             connection = await this.getConnection();
-            const [err, results, fields] = await this.queryAsync(connection, "SELECT * FROM wsmath WHERE uid=? LIMIT 1", [uid]);
-            if (err) {
-                console.log(err); 
-            } else if (results.length) {
-                    results[0].json = JSON.parse(results[0].json);
-                    output = results[0];                                    
+            if (uid) {
+                const [err, results] = await this.queryAsync(connection, "SELECT * FROM wsmath WHERE uid=? LIMIT 1", [uid]);
+                output = results;
             } else {
-                return null;
-            }
+                const [err, results] = await this.queryAsync(connection, "SELECT w.*, u.fullname FROM wsmath as w INNER JOIN users as u ON u.id=w.idUser WHERE visibility=2");
+                output = results;
+            }                    
         } catch (Ex) {
             console.log(Ex);
         } finally {
             connection && connection.release();
         }
+
+        if (output && output.length) {            
+            if (uid) {
+                output.forEach(e => e.json = JSON.parse(e.json));            
+                if (output.length === 1) {
+                    output = output[0];  
+                }
+            }                                  
+        }  else {
+            return null;
+        }
+
         return output;
     }
 
-    async save(json: any, idUser = 0, save = 0): Promise<string> {
+    async save(json: any, idUser = 0): Promise<string> {
         let connection;
         try {
             connection = await this.getConnection();
@@ -303,10 +337,13 @@ export class MysqlStorage implements Storage {
                 uid: uid,
                 json: JSON.stringify(json),
                 idUser: idUser,
-                saved: save,
+                visibility: json.visibility,
+                title: json.title || "",
+                tags: json.tags || "",
+                levels: json.levels || "*",
                 created: new Date()
             };
-            const [err, results, fields] = await this.queryAsync(connection, "INSERT INTO wsmath SET ?", post);
+            const [err, results] = await this.queryAsync(connection, "INSERT INTO wsmath SET ?", post);
             if (err) {
                 console.log(err);
                 return;
@@ -347,7 +384,7 @@ export class MysqlStorage implements Storage {
         let connection;
         try {
             connection = await this.getConnection();
-            const [err, results, fields] = await this.queryAsync(connection, "SELECT * FROM users WHERE id='"+idUser+"'");
+            const [err, results] = await this.queryAsync(connection, "SELECT * FROM users WHERE id='"+idUser+"'");
             if (err) {
                 console.log(err);
                 return;

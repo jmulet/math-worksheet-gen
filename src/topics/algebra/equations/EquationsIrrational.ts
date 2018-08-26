@@ -20,8 +20,7 @@ import { WsGenerator } from '../../../util/WsGenerator';
     ]
 })
 export class EquationsIrrational implements QuestionGenInterface {
-
-   
+    name?: string; 
     answer: string;
     question: any;
    
@@ -37,15 +36,19 @@ export class EquationsIrrational implements QuestionGenInterface {
         this.answer = eqn.solutionsTeX();
     }
 
-    getFormulation(): string {
+    getFormulation(type?: string): string {
         return "$" + this.question + "$";
     }
 
-    getAnswer(): string {
+    getAnswer(type?: string): string {
         return this.answer;
     }
 
-    getDistractors(): string[] {
+    getDistractors(type?: string): string[] {
         return [];
+    }
+    
+    getSteps(type?: string): string {
+         return "";
     }
 }

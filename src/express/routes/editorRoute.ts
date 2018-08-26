@@ -10,6 +10,9 @@ function pad(n: number): string {
 }
 
 export function formatDate(date: string | Date) {
+    if (!date) {
+        return "Mai";
+    }
     if (typeof (date) === "string") {
         date = new Date(date);
     }
@@ -38,6 +41,32 @@ export function editorRoute(router: Router, options: wsMathMdwOptions) {
 
     });
 
+
+    url = (options.basePrefix || '') + "/e";
+
+    router.post(url, async function (req: Request, res: Response) {
+        const session = req["session"];
+        if (!(session.user && session.user.idRole < 200)) {
+            res.redirect(options.basePrefix || '');
+            return;
+        }
+ 
+         // create an new sheet
+         const json = {
+            type: "html",
+            title: "Full d'activitats",
+            baseURL: options.basePrefix,
+            sections: [
+                { name: "Apartat", activities: [] }
+            ],
+            sectionless: false,
+            includeKeys: false,
+            visibility: 1
+        };
+        const sid = await options.storage.save(json, session.user.id);
+        res.send({sid: sid});
+    });
+
     /**
      * This route is to edit the sheet
      */
@@ -50,24 +79,7 @@ export function editorRoute(router: Router, options: wsMathMdwOptions) {
             return;
         }
 
-        let sid = req.params["sid"];
-        if (!sid || sid === "0") {
-            // create an new sheet
-            const json = {
-                type: "html",
-                title: "Full activitats",
-                baseURL: options.basePrefix,
-                sections: [
-                    { name: "Secció 1", activities: [] }
-                ],
-                sectionless: false,
-                includeKeys: false
-            };
-            sid = await options.storage.save(json, session.user.id, 1);
-        }
-
-
-
+        const sid = req.params["sid"];
         const uri = (options.basePrefix || '');
         const template = await options.storage.load(sid);
         if (!template || template.idUser != session.user.id) {
@@ -79,7 +91,8 @@ export function editorRoute(router: Router, options: wsMathMdwOptions) {
             url: uri,
             questionTypesList: Object.keys(Container).sort(),
             questionTypesMeta: Container,
-            user: { id: session.user.id, fullname: session.user.fullname, username: session.user.username }
+            user: { id: session.user.id, fullname: session.user.fullname, username: session.user.username },
+            sid: sid
         });
 
     });
@@ -118,7 +131,8 @@ export function editorRoute(router: Router, options: wsMathMdwOptions) {
             res.send(404);
         }
         template.json.title = "(copy) " + template.json.title;
-        const clonedSid = await options.storage.save(template.json, session.user.id, template.save);
+        template.json.visibility = 1;
+        const clonedSid = await options.storage.save(template.json, session.user.id);
         res.send(clonedSid);
     });
 
@@ -145,7 +159,7 @@ export function editorRoute(router: Router, options: wsMathMdwOptions) {
     //This provides a report of the generated pages
     //Requires the id or ids of the worksheets
     url = (options.basePrefix || '') + '/r/:sid';
-    router.get(url, async function (req: Request, res: Response, next: NextFunction) {
+    router.get(url, async function (req: Request, res: Response) {
         const session = req["session"];
         if (!(session.user && session.user.idRole < 200)) {
             res.redirect("/wsmath/e");
@@ -162,8 +176,32 @@ export function editorRoute(router: Router, options: wsMathMdwOptions) {
         res.render("generated", {
             url: uri,
             report: report,
-            formatDate: formatDate
+            formatDate: formatDate,
+            sid: sid,
+            amOwner: session.user.id === template.idUser
         });
+    });
+
+
+    /***
+     * Deletes the content of generated documents for a given sid / seed
+     */
+    url = (options.basePrefix || '') + '/r/:sid/:seed';
+    router.delete(url, async function (req: Request, res: Response) {
+        const session = req["session"];
+        if (!(session.user && session.user.idRole < 200)) {
+            res.redirect("/wsmath/e");
+        }
+        const sid = req.params["sid"];
+        const seed = req.params["seed"];
+
+        // Can only delete own sheets
+        const template = await options.storage.load(sid);
+        if (!template || session.user.id !== template.idUser) {
+            res.send(404);
+        }
+        const nup = await options.storage.emptyGenerated(sid, seed);
+        res.send(nup? 200:500);
     });
 
 

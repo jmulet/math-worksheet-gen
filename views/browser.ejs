@@ -9,18 +9,16 @@
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-     <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
     <style>
-        html 
+        html {
             position: relative;
             min-height: 100%;
         }
 
         body {
-            margin-bottom: 60px;
-            padding-top: 60px;
-            margin-left: 20px;
+            margin: 60px 60px;            
         }
     </style>
 </head>
@@ -49,32 +47,58 @@
                 </div>
               </div>
 
+ 
+<header>
+        <!-- Fixed navbar -->
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <a class="navbar-brand" href="/wsmath"><i class="fas fa-arrow-left"></i> wsMath MySheets</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mr-auto">
+                     <li><span style="color: gray"><%=user.username%></span></li>
+                </ul>                     
+            </div>
+            <div class="">
+                <ul class="navbar-nav">
+                    <li>
+                            <button id="createSheet" class="btn-sm btn-success" style="border-radius: 100%"><i class="fa fa-plus"></i></button>
+                    </li>                            
+                </ul>
+            </div>
+        </nav>
+</header>
+ 
 
-<a href="/nova">Nova</a>    
-
-
-
-<h4>wsMath mySheets <button id="createSheet" class="btn-sm btn-success">+</button></h4>
-
-<table class="table table-bordered table-striped">
+<table class="table table-bordered table-striped table-responsive">
     <thead>
         <tr>
             <th>sid</th>
-            <th>title</th>
-            <th>created</th>
-            <th>actions</th>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         <% templates.forEach( (templ) => { %>
             <tr>
-                <td><%=templ.uid%></td>
+                <td><%=templ.uid%>
+                    <% if(templ.visibility===0) { %>
+                        <i class="fas fa-eye-slash"></i>
+                    <% } else if(templ.visibility===1) { %>
+                        <i class="fa fa-link"></i>
+                    <% } else { %>
+                        <i class="fas fa-eye"></i>
+                    <% } %>
+                </td>
                 <td><%=templ.json.title%></td>
                 <td><%=formatDate(templ.created)%></td>
-                <td><button class="btn-sm btn-primary edit-btn" data-sid="<%=templ.uid%>">Edit</button> 
-                 <button class="btn-sm duplicate-btn x2-btn" data-sid="<%=templ.uid%>">x2</button> 
-                <button class="btn-sm btn-danger trash-btn" data-sid="<%=templ.uid%>">Trash</button>
-               <button class="btn-sm btn-info review-btn" data-sid="<%=templ.uid%>">Rev</button></td>
+                <td><button class="btn-sm btn-primary edit-btn" data-sid="<%=templ.uid%>"><i class="fas fa-edit"></i></button> 
+                 <button class="btn-sm duplicate-btn x2-btn" data-sid="<%=templ.uid%>"><i class="fas fa-copy"></i></button> 
+                <button class="btn-sm btn-danger trash-btn" data-sid="<%=templ.uid%>"><i class="fas fa-trash"></i></button>
+               <button class="btn-sm btn-info review-btn" data-sid="<%=templ.uid%>"><i class="fas fa-glasses"></i></button></td>
             </tr>
         <% }); %>
     </tbody>
@@ -90,8 +114,17 @@
         var $x2Sheet = $(".x2-btn");
         var $reviewSheet = $(".review-btn");
 
-        $createSheet.click(function(evt){
-            window.location.href = "/wsmath/e/0";
+        $createSheet.click(function(evt){            
+            $.ajax({
+                method: "POST",
+                contentType: "application/json",
+                url: "/wsmath/e/",
+                success: function(data) {
+                    if (data.sid) {                    
+                        window.location.href = "/wsmath/e/" + data.sid;
+                    }
+                }
+            });          
         });
         
         $editSheet.click(function(evt){

@@ -1,10 +1,10 @@
-import { WsGenerator } from '../../../util/WsGenerator';
-import { QuestionGenInterface } from '../../../interfaces/QuestionGenInterface';
-import { QuestionOptsInterface } from '../../../interfaces/QuestionOptsInterface';
-import { Vector } from '../../../math/Vector';
-import { Random } from '../../../util/Random';
-import { Formatter } from '../../../util/Formatter';
-import { Conics, Circumference } from '../../../math/Conics';
+import { WsGenerator } from '../../../../util/WsGenerator';
+import { QuestionGenInterface } from '../../../../interfaces/QuestionGenInterface';
+import { QuestionOptsInterface } from '../../../../interfaces/QuestionOptsInterface';
+import { Vector } from '../../../../math/Vector';
+import { Random } from '../../../../util/Random';
+import { Formatter } from '../../../../util/Formatter';
+import { Conics, Circumference } from '../../../../math/Conics';
 
 @WsGenerator({
     category: "geometry/conics/excentricity",

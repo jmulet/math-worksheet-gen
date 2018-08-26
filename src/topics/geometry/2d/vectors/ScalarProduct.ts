@@ -1,9 +1,9 @@
-import { WsGenerator } from '../../../util/WsGenerator';
-import { QuestionGenInterface } from '../../../interfaces/QuestionGenInterface';
-import { QuestionOptsInterface } from '../../../interfaces/QuestionOptsInterface';
-import { Vector } from '../../../math/Vector';
-import { Random } from '../../../util/Random';
-import { Formatter } from '../../../util/Formatter';
+import { WsGenerator } from '../../../../util/WsGenerator';
+import { QuestionGenInterface } from '../../../../interfaces/QuestionGenInterface';
+import { QuestionOptsInterface } from '../../../../interfaces/QuestionOptsInterface';
+import { Vector } from '../../../../math/Vector';
+import { Random } from '../../../../util/Random';
+import { Formatter } from '../../../../util/Formatter';
 
 @WsGenerator({
     category: "geometry/vectors/scalar_product",

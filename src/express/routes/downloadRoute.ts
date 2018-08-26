@@ -34,8 +34,9 @@ export function downloadRoute(router: Router, options) {
         }
 
         const worksheet = await options.storage.load(uid);
-        console.log(worksheet)
-        if (!worksheet || !worksheet.json) {
+        const owner = worksheet.idUser === req["session"].user.id;
+      
+        if (!worksheet || !worksheet.json || (worksheet.visibility === 0 && !owner )) {
             //Alerta es demana un document que no existeix --> envia un 404
             res.status(404).render("notfound.ejs", {
                 id: uid
@@ -90,6 +91,9 @@ export function downloadRoute(router: Router, options) {
 
         const type = (req.query.type || worksheet.json.type || "html").toLowerCase();
         let seed = req.query.seed;
+
+        // pseudo seeds are
+        // request IP  %IP%
 
         //seed-less requests must Always be generated!
         if (seed && !forceGen) {
