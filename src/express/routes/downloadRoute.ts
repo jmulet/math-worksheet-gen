@@ -3,11 +3,12 @@ import { sendGeneratedSheet } from '../services/sendGeneratedSheet';
 import { generateSheet } from '../services/generateSheet';
 import { storeGeneratedSheet } from '../services/storeGeneratedSheet';
 import { formatDate } from './editorRoute';
+import { latexToOOO } from '../../util/latexToOOO';
 
 export function assertTrue(value: string) {
     if (value) {
         value = value.toLowerCase().trim();
-        return value === "1" || value === "yes" || value === "true";
+        return value !== "0" && value !=="false";
     }
     return false;
 }
@@ -44,10 +45,11 @@ export function downloadRoute(router: Router, options) {
             return;
         }
 
+        const now = new Date();
+
         // Te una data d'apertura
         if (!isTeacher && worksheet.opens) {
-            const opens = new Date(worksheet.opens);
-            const now = new Date();
+            const opens = new Date(worksheet.opens);           
             if (opens.getTime() > now.getTime()) {
                 res.status(200).render("notavailable.ejs", {
                     id: uid,
@@ -62,7 +64,6 @@ export function downloadRoute(router: Router, options) {
          // Te una data de tancada
          if (!isTeacher && worksheet.closes) {
             const closes = new Date(worksheet.closes);
-            const now = new Date();
             if (closes.getTime() < now.getTime()) {
                 res.status(200).render("notavailable.ejs", {
                     id: uid,
@@ -75,17 +76,23 @@ export function downloadRoute(router: Router, options) {
         }
 
          // Te una data d'apertura de solucions
-         if (!isTeacher && !worksheet.json.includeKeys && assertTrue(req.query.includeKeys) && worksheet.keysOpens) {             
-            const keysOpens = new Date(worksheet.keysOpens);
-            const now = new Date();
-            if (keysOpens.getTime() > now.getTime()) {
-                res.status(200).render("notavailable.ejs", {
-                    id: uid,
-                    keysOpens: formatDate(keysOpens),
-                    closes: "",
-                    opens: ""
-                });
-                return;
+         if (!isTeacher && worksheet.keysOpens && assertTrue(req.query.includeKeys) ) {             
+            // Try to see if we are asking more keys than those in json includeKeys 
+            let showKeys = worksheet.includeKeys;
+            try {
+                showKeys = parseInt(req.query.includeKeys);                
+            } catch(Ex){}
+            if (showKeys > worksheet.includeKeys) {
+                const keysOpens = new Date(worksheet.keysOpens);
+                if (keysOpens.getTime() > now.getTime()) {
+                    res.status(200).render("notavailable.ejs", {
+                        id: uid,
+                        keysOpens: formatDate(keysOpens),
+                        closes: "",
+                        opens: ""
+                    });
+                    return;
+                }
             }
          }
 
@@ -98,16 +105,37 @@ export function downloadRoute(router: Router, options) {
         //seed-less requests must Always be generated!
         if (seed && !forceGen) {
                 //seed = seed + "b";
-                // Try to see if this document is already generated and stored in database with the desired type
+                // Try to see if this document is already generated and stored in database with the desired type                
                 let gen = await options.storage.loadGenerated(uid, seed);
-                if (gen && gen[type]) {
-                    let generated = gen[type];
-                    if (isTeacher && req.query.includeKeys) {
-                        generated = gen[type + "_keys"];
+
+                // IF LATEX is found then PDF can be generated from there
+                
+                if (["odt", "docx"].indexOf(type.toLowerCase())>=0) {
+                    // DOCX or ODT are never stored, so simply check for type=latex
+                    let generated = gen["latex"];
+                    if (assertTrue(req.query.includeKeys)) {
+                        generated = gen["latex_keys"];
                     } 
-                    sendGeneratedSheet(type, generated, res);
+                    const ooo = await latexToOOO(generated, {type: type.toLowerCase().trim()});
+                    res.setHeader("Content-Disposition", "attachment; filename=\"" + uid + "." + type + "\"");
+                    res.setHeader("Content-Length", ooo.byteLength);
+                    sendGeneratedSheet(type, ooo, res);
                     return;
+
+                } else {
+
+                    if (gen && gen[type]) {
+                        let generated = gen[type];
+                        if (assertTrue(req.query.includeKeys)) {
+                            generated = gen[type + "_keys"];
+                        } 
+                        sendGeneratedSheet(type, generated, res);
+                        return;
+                    }
+
                 }
+
+                
         }
         
         // The sheet must be generated
@@ -118,9 +146,10 @@ export function downloadRoute(router: Router, options) {
         const isShared = worksheet.saved;
  
         // Override db worksheet information with extra information passed from query params
-        if (isTeacher && assertTrue(req.query.includeKeys)) {
-            console.log("ISTEACER", isTeacher)
-            doc.includeKeys = true;
+        if (isTeacher && req.query.includeKeys!=null) {
+            try {
+                doc.includeKeys = parseInt(req.query.includeKeys);
+            } catch(Ex){}
         }
         if (req.query.seed) {
             doc.seed = req.query.seed;
@@ -159,7 +188,13 @@ export function downloadRoute(router: Router, options) {
                 storeGeneratedSheet(sheetInstance, options.storage);
             }
             // Finally display sheet to the end user
-            await sendGeneratedSheet(type, doc.includeKeys? sheetInstance.sheetWithkeys : sheetInstance.sheet, res);
+            let docToDisplay;
+            if (sheetInstance.ooo) {
+                docToDisplay = sheetInstance.ooo;
+            } else {
+                docToDisplay = doc.includeKeys? sheetInstance.sheetWithkeys : sheetInstance.sheet;
+            }
+            await sendGeneratedSheet(type, docToDisplay, res);
         
         } catch (Ex) {
             if (!res.headersSent) {

@@ -127,7 +127,7 @@ export const WsTopics = {
 export class WsMathGenerator { 
     worksheet: Worksheet;
     rand: Random;
-    showKeys: boolean = false;
+    showKeys: number = 0;   //0=none; 1=first keys; 2=all keys; -1=first step; -2=all steps
     sections: WsSection[] = [];
     wsGenOpts: WsMathGenOpts;
     uid: string;
@@ -151,15 +151,16 @@ export class WsMathGenerator {
         this.worksheet = worksheet;
         worksheet.sections.forEach( (section) => {
             const sec = this.addSection(section.name);
+            sec.sectionless = worksheet.sectionless;
             section.activities.forEach( (activity) => {               
                 let clazz = null;
                 if (activity.gen) {
                     clazz = (Container[activity.gen] || {}).clazz;
                 } 
-                activity.options = activity.options || {};
-                activity.options.showFirstQuestionAnswer = worksheet.showFirstQuestionAnswer;
-                           
+                activity.options = activity.options || {}; 
+
                 const act = sec.createActivity(activity.formulation, activity.scope, clazz, activity.options);
+                act.includeKeys = worksheet.includeKeys;
                 activity.questions.forEach( (question) => {
                         let clazz = (Container[question.gen] || {}).clazz;
                         // Special generators only allow for one repetition
@@ -185,16 +186,25 @@ export class WsMathGenerator {
         return section;
     }
 
-    includeKeys(showKeys: boolean) {
+    includeKeys(showKeys: number) {
         this.showKeys = showKeys;
         return this;
     }
 
-    exportAs(uid: string, format: WsExportFormats, showKeys?: boolean) {
+    exportAs(uid: string, format: WsExportFormats, showKeys?: number) {
         this.uid = uid;
+        console.log(showKeys);
         if (showKeys!==undefined) {
-            this.showKeys = showKeys;
+            this.showKeys = showKeys;            
+            // The type of keys should be passed to every activity and to every question
+            this.sections.forEach(s => {s.activities.forEach(a => {
+                a.includeKeys = this.showKeys;
+                a.questions.forEach(q => q.includeKeys = this.showKeys);            
+                });     
+            });   
         }
+    
+
         switch(format) {
             case(WsExportFormats.LATEX):
                 return this.exportLatex();                
@@ -221,7 +231,7 @@ export class WsMathGenerator {
             "\\usepackage{eurosym}",  
             "\\usepackage{xcolor}",
             "\\definecolor{BLAUCLAR}{RGB}{240,240,255}",
-            "\\definecolor{MORAT}{RGB}{240,230,255}",
+            "\\definecolor{MORAT}{RGB}{240,230,255}\n",
             "\\begin{document}",           
         ];
 
@@ -235,15 +245,21 @@ export class WsMathGenerator {
 
             latex.push("\n {\\small \\textbf{Referència:} " + this.uid + " / " + this.rand.seed + ".} \\textbf{Nom i llinatges:} " +
             (this.worksheet.fullname? this.worksheet.fullname :
-            "........................................................... \n"));
+            "\\dotfill \n"));
         }
 
 
+        if (this.worksheet.sectionless) {
+            latex.push("\\begin{enumerate}");
+        }
         this.sections.forEach((section) => {
             latex.push(...section.toLaTeX());
-        })
+        });
+        if (this.worksheet.sectionless) {
+            latex.push("\\end{enumerate}");
+        }
 
-        if (this.showKeys) {
+        if (this.showKeys !== 0) {
             latex.push("  \\section*{Respostes}");
             latex.push("  \\begin{enumerate}");
             this.sections.forEach((section) => {
@@ -373,12 +389,19 @@ export class WsMathGenerator {
         }
 
         let activityCounter = 1;
+        if(this.worksheet.sectionless) {
+            code.push('  <ol>');
+        }
         this.sections.forEach((section) => {
             code.push(...section.toHtml(activityCounter));
             activityCounter += section.activities.length;
-        })
+        });
 
-        if (this.showKeys) {
+        if(this.worksheet.sectionless) {
+            code.push('  </ol>');
+        }
+ 
+        if (this.showKeys !== 0) {
             activityCounter = 1;
             code.push("<hr/><h4><b>Respostes</b></h4>");
             code.push("  <ol>");

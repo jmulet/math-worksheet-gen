@@ -9,17 +9,16 @@
     <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
         crossorigin="anonymous">
-    <style>
-        html {
-            position: relative;
-            min-height: 100%;
-        }
-
-        body {
-            margin-bottom: 60px;
-            padding-top: 60px;
-        }
-    </style>
+        <style>
+            html {
+                position: relative;
+                min-height: 100%;
+            }
+    
+            body {
+                margin: 60px 60px;            
+            }
+        </style>
 </head>
 
 <body>
@@ -46,7 +45,22 @@
         </div>
     </div>
 
-    <h4>Generated report</h4>
+    <header>
+        <!-- Fixed navbar -->
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <a class="navbar-brand" href="/wsmath/e"><i class="fas fa-arrow-left"></i> wsMath Report</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mr-auto">
+                     <li><span style="color: gray"><%=user.username%></span></li>
+                </ul>                     
+            </div> 
+        </nav>
+    </header>
+ 
 
     <table class="table table-striped table-bordered">
         <thead>
@@ -82,6 +96,9 @@
                 <% }); %>
         </tbody>
     </table>
+    <% if(!report.length) { %>
+        <p><em>No generated sheets have been found </em></p>
+    <% } %>
 
     <script>
         var sid = <%=sid%>;

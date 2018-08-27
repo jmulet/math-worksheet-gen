@@ -10,7 +10,6 @@ export interface WsGeneratorInterface {
 }
 
 export const Container = {
-
 }
 
 /**
@@ -23,7 +22,8 @@ export const Container = {
     return function(target) {
         Container[meta.category] = {
             meta: meta,
-            clazz: target
+            clazz: target,
+            moodleCapable: target.getQuizz !=null
         }
     }
 

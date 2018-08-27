@@ -1,13 +1,12 @@
-import { WsSection } from '../worksheet/WsSection';
 import { Random } from '../util/Random';
 
 export interface Worksheet {
     sections: any[];
-    includeKeys: boolean;
+    includeKeys: number;    // 0=none, 1=one key, 2=all keys, -1: one step, -2: all steps
     title?: string,
     instructions?: string,
     fullname?: string,
-    showFirstQuestionAnswer: boolean
+    sectionless: boolean
 }
 
 export interface WsMathGenOpts {

@@ -59,8 +59,8 @@ export function editorRoute(router: Router, options: wsMathMdwOptions) {
             sections: [
                 { name: "Apartat", activities: [] }
             ],
-            sectionless: false,
-            includeKeys: false,
+            sectionless: true,
+            includeKeys: 0,
             visibility: 1
         };
         const sid = await options.storage.save(json, session.user.id);
@@ -175,10 +175,11 @@ export function editorRoute(router: Router, options: wsMathMdwOptions) {
         const uri = (options.basePrefix || '');
         res.render("generated", {
             url: uri,
-            report: report,
+            report: report || [],
             formatDate: formatDate,
             sid: sid,
-            amOwner: session.user.id === template.idUser
+            amOwner: session.user.id === template.idUser,
+            user: session.user
         });
     });
 

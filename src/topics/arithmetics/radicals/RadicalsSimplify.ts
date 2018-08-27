@@ -44,7 +44,7 @@ export class RadicalsSimplify implements QuestionGenInterface {
     }
 
     getFormulation(): string {        
-       return "$" + this.question + "={}$";
+       return "$" + this.question + "{}={}$";
     }
 
     getAnswer(): string {

@@ -99,7 +99,20 @@
                                 <br/>
                                 <p><span style="width: 200px; display: inline-block;"><b>Title</b></span> <input style="width:80%" type="text" ng-model="ws.title"/></p>
                                 <p><span style="width: 200px; display: inline-block;"><b>Instructions</b></span> <textarea type="text" ng-model="ws.instructions" rows="5" style="width:80%"></textarea></p>
-                                <p><span style="width: 200px; display: inline-block;"><b>Include keys</b></span> <input type="checkbox" ng-model="ws.includeKeys"/></p>
+                                                               
+                                <div><span style="width: 200px; display: inline-block;"><b>Type of answers</b></span>                                                                                                   
+                                    <div class="btn-group" style="display: inline-block;">
+                                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span>{{displayTypeOfKeys(ws.includeKeys)}}</span>
+                                            <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#" ng-click="ws.includeKeys=0">None</a>
+                                            <a class="dropdown-item" href="#" ng-click="ws.includeKeys=1">One key per activity</a>
+                                            <a class="dropdown-item" href="#" ng-click="ws.includeKeys=2">All keys</a>
+                                            <a class="dropdown-item" href="#" ng-click="ws.includeKeys=-1">One step per activity</a>                                        
+                                            <a class="dropdown-item" href="#" ng-click="ws.includeKeys=-2">All steps</a>                                        
+                                            </div>
+                                        </div>                                                                  
+                                    </div>
 
                                 <p><span style="width: 200px; display: inline-block;"><b>Sectionless</b></span> <input type="checkbox" ng-model="ws.sectionless"/></p>
                                <!-- <p><span style="width: 200px; display: inline-block;"><b>Show first question answer</b></span> <input type="checkbox" ng-model="ws.showFirstQuestionAnswer"/></p>-->
@@ -144,6 +157,19 @@
                                     <input style="width:80%" type="text" ng-model="ws.tags"/>                                                          
                                 </div>
                                 
+                                <br>
+
+                                <div><span style="width: 200px; display: inline-block;"><b>This sheet opens on</b></span>                                                                                                   
+                                    <input style="width:80%" type="text" ng-model="ws.opens"/>                                                          
+                                </div>
+
+                                <div><span style="width: 200px; display: inline-block;"><b>This sheet closes on</b></span>                                                                                                   
+                                    <input style="width:80%" type="text" ng-model="ws.closes"/>                                                          
+                                </div>
+
+                                <div><span style="width: 200px; display: inline-block;"><b>Keys opens on</b></span>                                                                                                   
+                                    <input style="width:80%" type="text" ng-model="ws.keysOpens"/>                                                          
+                                </div>
 
                                 <br/>
                                                         
@@ -216,15 +242,27 @@
                                 <p>
                                     <span style="width: 150px; display: inline-block;"><b>Seed:</b></span> <input ng-model="preview.seed" type="text" />
                                 </p>
-                                <p>
-                                    <span style="width: 150px; display: inline-block;"><b>includeKeys:</b></span> <input ng-model="preview.includeKeys" type="checkbox" />
-                                </p>
+                                                                  
+                                <div><span style="width: 200px; display: inline-block;"><b>Type of answers</b></span>                                                                                                   
+                                    <div class="btn-group" style="display: inline-block;">
+                                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span>{{displayTypeOfKeys(preview.includeKeys)}}</span>
+                                            <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#" ng-click="preview.includeKeys=0">None</a>
+                                            <a class="dropdown-item" href="#" ng-click="preview.includeKeys=1">One key per activity</a>
+                                            <a class="dropdown-item" href="#" ng-click="preview.includeKeys=2">All keys</a>
+                                            <a class="dropdown-item" href="#" ng-click="preview.includeKeys=-1">One step per activity</a>                                        
+                                            <a class="dropdown-item" href="#" ng-click="preview.includeKeys=-2">All steps</a>                                        
+                                            </div>
+                                        </div>                                                                  
+                                    </div>
                                 <br/>                                
                                 <p>
                                     <span style="width: 150px; display: inline-block;"><b>Type:</b></span>                                 
                                     <button class="btn btn-sm btn-info" ng-click="genWorksheet('latex')">LaTeX</button>
                                     <button class="btn btn-sm btn-info" ng-click="genWorksheet('html')">HTML</button>
                                     <button class="btn btn-sm btn-info" ng-click="genWorksheet('pdf')">PDF</button>
+                                    <button class="btn btn-sm btn-info" ng-click="genWorksheet('odt')">ODT</button> 
                                     <button class="btn btn-sm btn-info" ng-click="genWorksheet('moodlexml')">Moodle XML</button>
                                 </p>
                         </ul>
@@ -274,7 +312,20 @@
                 }
             }
 
-            $scope.preview = {seed: "", includeKeys: false};
+            $scope.preview = {seed: "", includeKeys: 0};
+
+            $scope.displayTypeOfKeys = function(k){
+                if(typeof(k)!=="number") {
+                    k = 0;
+                }
+                switch(k){
+                    case 1: return "One key per activity";
+                    case 2: return "All keys";
+                    case -1: return "One step per activity";
+                    case -2: return "All steps";
+                    default: return "None";
+                }
+            }
              
             $scope.questionTypesList = questionTypesList;
             $scope.generatorChanged = function(question, extend) {
@@ -446,7 +497,7 @@
             };
 
             $scope.genWorksheet = function(type) {
-                var link = "/wsmath/g/" + $scope.sid + "?seed="+$scope.preview.seed + "&includeKeys="+$scope.preview.includeKeys;
+                var link = "/wsmath/g/" + $scope.sid + "?seed="+$scope.preview.seed + "&includeKeys="+$scope.preview.includeKeys+"&type="+type;
                 window.open(link, "Wsmath preview", "width=500,height=800");
             };
 

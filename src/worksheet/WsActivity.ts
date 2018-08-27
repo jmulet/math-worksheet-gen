@@ -13,6 +13,7 @@ function removeLaTeXCmds(cmd: string): string {
 }
 
 export class WsActivity {
+    includeKeys: number;
     questions: WsQuestion[] = []
     constructor(public formulation: string, private opts: ActivityOptsInterface, private qClass?: GenClass, private qGenOpts?: any) {
         this.qGenOpts = this.qGenOpts || {}; 
@@ -78,8 +79,14 @@ export class WsActivity {
         latex.push("    \\item ");
         latex.push("    \\begin{tasks}(2)");
         // Skip activity with no questions
-        this.questions.forEach((question) => {
-            latex.push("      \\task " + question.answerToLaTeX());
+        this.questions.forEach((question, i) => {
+            if (Math.abs(this.includeKeys)===1) {
+                if (i === 0 ) {
+                    latex.push("      \\task " + question.answerToLaTeX());
+                }
+            } else {
+                latex.push("      \\task " + question.answerToLaTeX());
+            }
         });
         latex.push("    \\end{tasks}");
 
@@ -136,10 +143,15 @@ export class WsActivity {
             latex.push('  <li>');
             if (n > 1) {
                 latex.push('    <ol class="olalpha">');
-
                 // Skip activity with no questions
-                this.questions.forEach((question) => {
-                    latex.push('    <li> <p class="question-formulation">' + question.answerToHtml() + "</p></li>");
+                this.questions.forEach((question, i) => {
+                    if (Math.abs(this.includeKeys)===1) {
+                        if (i === 0 ) {
+                            latex.push('    <li> <p class="question-formulation">' + question.answerToHtml() + "</p></li>");
+                        }
+                    } else {
+                        latex.push('    <li> <p class="question-formulation">' + question.answerToHtml() + "</p></li>");
+                    }                    
                 });
                 latex.push("    </ol>");
             } else {

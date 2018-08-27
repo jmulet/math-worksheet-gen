@@ -5,6 +5,7 @@ import { Random } from '../../../util/Random';
 import { WsGenerator } from '../../../util/WsGenerator';
 import { Matrix } from '../../../math/Matrix';
 import { Numeric } from '../../../math/Numeric';
+import { QuizzStruct } from '../../../interfaces/QuizzStruct';
 
 @WsGenerator({
     category: "algebra/matrix/inverse",
@@ -25,23 +26,25 @@ export class MatrixInverse implements QuestionGenInterface {
     
     question: string;
     answer: string;
-    steps: string;
+    steps: string = "";
+    inverse: Matrix;
+    m: Matrix;
 
     constructor(private qGenOpts: QuestionOptsInterface) {
         const rnd: Random = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 5;
         const dim = qGenOpts.question.dim || 2;
        
-        const m = Matrix.fromDefinition(dim, dim, (i, j) => rnd.numericBetween(-r,r) );
+        this.m = Matrix.fromDefinition(dim, dim, (i, j) => rnd.numericBetween(-r,r) );
          
-        this.question = m.toTeX();
+        this.question = this.m.toTeX();
 
         try {
-            const inverse = m.inverse();
-            const transpose = m.transpose();
+            this.inverse = this.m.inverse();
+            const transpose = this.m.transpose();
             const adjunts = transpose.adjunts();
-            this.answer = "$" + inverse.toTeX() + "$";
-            const det = m.determinant();
+            this.answer = "$" + this.inverse.toTeX() + "$";
+            const det = this.m.determinant();
             this.steps = "$|M|=" + det.toTeX() + "$ $\\rightarrow$ ";
             if(det.isZero()) {
                 this.steps += " $\\nexists \\,  M^{-1}$ ";
@@ -49,8 +52,7 @@ export class MatrixInverse implements QuestionGenInterface {
                 this.steps += " $M^t = " + transpose.toTeX() + "$ $\\,\\rightarrow\\,$  adj$(M^t)=" + adjunts.toTeX() + 
                 "$ $\\,\\rightarrow\\,$ $M^{-1} = \\dfrac{1}{" + det.toTeX() + "} " + adjunts.toTeX() + "$ = " + this.answer;
             }
-        } catch(Ex) {
-            console.log(Ex)
+        } catch(Ex) { 
             this.answer = "$\\nexists \\, M^{-1}$";
         }
     }
@@ -67,7 +69,14 @@ export class MatrixInverse implements QuestionGenInterface {
         return this.steps;
     }
 
-    getDistractors(): string[] {
-        return [];
+    getQuizz(): QuizzStruct {
+        const mat = this.inverse? this.inverse : Matrix.fromDefinition(this.m.rows, this.m.cols, ()=>null);
+        return {
+            type: "cloze",
+            html: `
+                <p>\\(M^{-1}=\\) ${mat.toClozeForm()}</p>
+                <p><em>Deixa els quadres buits si la inversa no existeix.</em></p>
+            `
+        }
     }
 }

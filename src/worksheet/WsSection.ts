@@ -9,7 +9,7 @@ import { Numeric } from "../math/Numeric";
 import * as vm from 'vm';
 
 export class WsSection {
-
+    sectionless: boolean;
     activities: WsActivity[] = [];
 
     constructor(public title: string, private opts: SectionOptsInterface) {
@@ -44,12 +44,16 @@ export class WsSection {
 
     toLaTeX(): string[] {
         const latex = [];
-        latex.push("  \\section{" + this.title + "}");
-        latex.push("     \\begin{enumerate}[resume]");
+        if (!this.sectionless) {
+            latex.push("  \\section{" + this.title + "}");
+            latex.push("     \\begin{enumerate}[resume]");
+        }
         this.activities.forEach( (activity) => {
             latex.push(...activity.toLaTeX());
         })
-        latex.push("     \\end{enumerate}");
+        if (!this.sectionless) {
+            latex.push("     \\end{enumerate}");
+        }
         latex.push(" ");
         return latex;
     }
@@ -64,14 +68,18 @@ export class WsSection {
 
     toHtml(activityCounter: number): string[] {
         const latex = []; 
-        latex.push('<ol class="olsection">')
-        latex.push('  <li><h3 style="display: inline-block;"><b>' + this.title + "</b></h3></li>");
-        latex.push('  <ol start="' + activityCounter + '">');
+        if (!this.sectionless) {
+            latex.push('<ol class="olsection">')
+            latex.push('  <li><h3 style="display: inline-block;"><b>' + this.title + "</b></h3></li>");
+            latex.push('  <ol start="' + activityCounter + '">');
+        }
         this.activities.forEach( (activity) => {
             latex.push(...activity.toHtml());
         })
-        latex.push("  </ol>"); 
-        latex.push("</ol><hr/>"); 
+        if (!this.sectionless) {
+            latex.push("  </ol>"); 
+            latex.push("</ol><hr/>"); 
+        }
         return latex;
     }
 

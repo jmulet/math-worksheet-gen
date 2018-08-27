@@ -3,6 +3,7 @@ import { QuestionOptsInterface } from "../interfaces/QuestionOptsInterface";
 import { GenClass } from "../interfaces/GenClass";
 
 export class WsQuestion {
+    includeKeys: number;
     type: string;
     qsGen: QuestionGenInterface;
     constructor(private qsClass: GenClass, private qsGenOpts: QuestionOptsInterface) {
@@ -15,7 +16,15 @@ export class WsQuestion {
     }
 
     answerToLaTeX(): string {
-        return this.qsGen.getSteps("latex") || this.qsGen.getAnswer("latex");
+        let answer = "";
+        const stepsFun = this.qsGen.getSteps;
+        if (stepsFun && this.includeKeys < 0) {
+            answer = stepsFun.call(this.qsGen, "latex");
+        }
+        if (!answer) {
+            answer = this.qsGen.getAnswer("latex")
+        }
+        return answer;
     }
 
     toHtml(): string {
@@ -23,7 +32,15 @@ export class WsQuestion {
     }
 
     answerToHtml(): string {
-        return this.qsGen.getSteps("html") || this.qsGen.getAnswer("html");
+        let answer = ""; 
+        const stepsFun = this.qsGen.getSteps;
+        if (stepsFun && this.includeKeys < 0) {
+            answer = stepsFun.call(this.qsGen, "html");
+        }
+        if (!answer) {
+            answer = this.qsGen.getAnswer("html")
+        } 
+        return answer;
     }
 
     distractorsHtml(): string[] {
