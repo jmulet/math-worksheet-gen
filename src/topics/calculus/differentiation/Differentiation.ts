@@ -48,11 +48,11 @@ export class Differentiation implements QuestionGenInterface {
         this.answer = Giac.evaluate('latex(normal(simplify(diff(' + this.fun.toString() + ',x$' + degree + '))))').replace(/"/g, "");
     }
 
-    getFormulation(): string {        
+    async getFormulation(): Promise<string> {        
         return "$y = " + this.fun.toTeX() + "$";
     }
 
-    getAnswer(): string {        
+    async getAnswer(): Promise<string> {        
         return "$" + this.answer + "$";
     }
  

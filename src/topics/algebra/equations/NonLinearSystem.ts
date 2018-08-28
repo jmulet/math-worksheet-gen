@@ -180,15 +180,12 @@ export class EquationsNonlinearSystem implements QuestionGenInterface {
         this.answer = Giac.evaluate("latex(solve([" + eqns.join(", ") + "], [x,y]))").replace(/"/g, "");
     }
 
-    getFormulation(): string {
+    async getFormulation(): Promise<string> {
         return "$" + this.question + "$";
     }
 
-    getAnswer(): string {
+    async getAnswer(): Promise<string> {
         return "$" + this.answer + "$" ;
     }
-
-    getDistractors(): string[] {
-        return [];
-    }
+ 
 }

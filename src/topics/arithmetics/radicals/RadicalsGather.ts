@@ -74,15 +74,12 @@ export class RadicalsGather implements QuestionGenInterface {
         this.answer =  polyr.simplify().toTeX();                
     }
 
-    getFormulation(): string {        
+    async getFormulation(): Promise<string> {        
        return "$" + this.question + "$";
     }
 
-    getAnswer(): string {
+    async getAnswer(): Promise<string> {
         return "$" + this.answer + "$";
     }
 
-    getDistractors(): string[] {
-        return [];
-    }
 }

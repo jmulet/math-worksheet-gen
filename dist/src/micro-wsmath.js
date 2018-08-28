@@ -16,6 +16,7 @@ const sessionStore = new MemCachedStore({
     hosts: ['127.0.0.1:11211'],
     secret: "ñkj3499m_!EF"
 });
+const PROD = process.platform !== "darwin";
 app.set('trust proxy', true);
 app.use(session({
     name: "pwCookie",
@@ -24,7 +25,7 @@ app.use(session({
     saveUninitialized: true,
     proxy: true,
     cookie: {
-        secure: true,
+        secure: PROD,
         maxAge: 86400000,
         httpOnly: false,
         sameSite: true

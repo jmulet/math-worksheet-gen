@@ -68,15 +68,12 @@ export class PolyCommonFactor implements QuestionGenInterface {
         this.answer = factor.toTeX() + " \\cdot \\left(" + poly.toTeX() + "\\right)";
     }
 
-    getFormulation(): string {
+    async getFormulation(): Promise<string> {
         return "$" + this.question + " = {}$";
     }
 
-    getAnswer(): string {
+    async getAnswer(): Promise<string> {
         return "$" + this.answer + "$ ";
     }
-    
-    getDistractors(): string[] {
-        return [];
-    }
+     
 }

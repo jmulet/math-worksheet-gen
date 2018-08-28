@@ -61,15 +61,12 @@ export class SpecialComputed implements QuestionGenInterface {
         this.qDistractors = this.qDistractors.map( e => evalInContext(e, context));
     }
 
-    getFormulation(): string {        
+    async getFormulation(): Promise<string> {        
         return this.qFormulation;
     }
 
-    getAnswer(): string {        
+    async getAnswer(): Promise<string> {        
         return this.qAnswer;
     }
- 
-    getDistractors(): string[] {
-        return this.qDistractors;
-    }
+  
 }

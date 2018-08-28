@@ -111,7 +111,7 @@ export class MysqlStorage implements Storage {
             const post: any = {
                 uid: uid,
                 seed: seed,       
-                type: format,
+                format: format,
                 fullname: fullname,
                 keysType: keysType         
             };
@@ -132,7 +132,7 @@ export class MysqlStorage implements Storage {
             const [err, results] = await this.queryAsync(connection, sql, post);
             if (err) {
                 console.log(err);
-                return;
+                return null;
             }
             if (results.affectedRows) {
                 return uid;

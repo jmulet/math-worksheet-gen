@@ -10,7 +10,7 @@ const STORABLE_TYPES = ["json", "latex", "html", "pdf"];
 /**
  * This service is responsible for storing a given generated sheet into the database if the type is storable of course
  */
-export async function storeGeneratedSheets(workbook: Worksheet, sheets: {[s in WsExportTypes]: string | Buffer}, storage: Storage): Promise<string> {
+export async function storeGeneratedSheets(workbook: Worksheet, sheets: {[s in WsExportTypes]?: string | Buffer}, storage: Storage): Promise<string> {
     const uid: string = workbook.sid;
     const seed: string = workbook.seed;
     const fullname: string = workbook.fullname;

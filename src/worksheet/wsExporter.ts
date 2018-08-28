@@ -9,17 +9,20 @@ const i18n_TRANSLATIONS = {
     "en": {
         "ANSWERS": "Answers",
         "REFERENCE": "Reference",
-        "NAME": "Name and surname"
+        "NAME": "Name and surname",
+        "NO_ANSWER": "Manual correction"
     },
     "es": {
         "ANSWERS": "Respuestas",
         "REFERENCE": "Referencia",
-        "NAME": "Nombre y apellidos"
+        "NAME": "Nombre y apellidos",
+        "NO_ANSWER": "Correción manual"
     }, 
     "ca": {
         "ANSWERS": "Respostes",
         "REFERENCE": "Reference",
-        "NAME": "Nom i llinatges"
+        "NAME": "Nom i llinatges",
+        "NO_ANSWER": "Correció manual"
     }
 };
 

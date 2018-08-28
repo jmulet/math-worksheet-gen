@@ -47,12 +47,13 @@ export class ElementalFunctionGraph implements QuestionGenInterface {
 
     }
 
-    getFormulation(): string {
+    async getFormulation(): Promise<string> {
         return "$y = " + this.fun.toTeX() + "$";
     }
 
-    getAnswer(type: string): string {
-        if (type === "html") {
+    async getAnswer(): Promise<string> {
+         
+        /*
             const uid = "box" + Math.random().toString(32).substr(2);
             const [xmin, ymin, xmax, ymax] = this.fun.getBoundingBox();
             return `<div id="${uid}" class="jxgbox" style="width:400px; height:400px; display: inline-block"></div>
@@ -73,12 +74,10 @@ export class ElementalFunctionGraph implements QuestionGenInterface {
                                         ]);
                 var q = board.create('glider', [2, 1, curve], {withLabel:false});    
             </script>`;
-        } else {
-            return "Correcció manual";
-        }
+        */
+
+        return null;
+        
     }
 
-    getDistractors(): string[]  {
-        return [];
-    }
 }

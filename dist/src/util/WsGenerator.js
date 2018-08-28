@@ -9,7 +9,8 @@ function WsGenerator(meta) {
     return function (target) {
         exports.Container[meta.category] = {
             meta: meta,
-            clazz: target
+            clazz: target,
+            moodleCapable: target.getQuizz != null
         };
     };
 }

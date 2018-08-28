@@ -93,7 +93,7 @@ export class ScalarProduct implements QuestionGenInterface {
 
     }
 
-    getFormulation(): string {        
+    async getFormulation(): Promise<string> {        
         this.index += 1;
         if (this.index > this.apartats.length - 1) {
             this.index = -1;
@@ -101,11 +101,8 @@ export class ScalarProduct implements QuestionGenInterface {
         return this.apartats[this.index];
     }
 
-    getAnswer(): string {        
+    async getAnswer(): Promise<string> {        
         return '';
     }
- 
-    getDistractors(): string[] {
-        return [];
-    }
+  
 }

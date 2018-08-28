@@ -118,19 +118,12 @@ export class BinomicOperations implements QuestionGenInterface {
         }
     }
 
-    getFormulation(type?: string): string {
+    async getFormulation(): Promise<string> {
         return "$" + this.question + "$";
     }
 
-    getAnswer(type?: string): string {
+    async getAnswer(): Promise<string> {
         return "$" + this.answer.toTeX() + "$";
     }
-
-    getDistractors(type?: string): string[] {
-        return [];
-    }
     
-    getSteps(type?: string): string {
-         return "";
-    }
 }

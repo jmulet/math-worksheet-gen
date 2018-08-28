@@ -129,15 +129,12 @@ export class FractionsOperations implements QuestionGenInterface {
         }
     }
 
-    getFormulation(): string {
+    async getFormulation(): Promise<string> {
         return "$" + this.question + " = {}$";
     }
 
-    getAnswer(): string {
+    async getAnswer(): Promise<string> {
         return "$" + this.answer + "$ ";
     }
-
-    getDistractors(): string[] {
-        return [];
-    }
+ 
 }

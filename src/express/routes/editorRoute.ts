@@ -61,7 +61,9 @@ export function editorRoute(router: Router, options: wsMathMdwOptions) {
             ],
             sectionless: true,
             includeKeys: 0,
-            visibility: 1
+            visibility: 1,
+            author: session.user.fullname,
+            lang: "ca"
         };
         const sid = await options.storage.save(json, session.user.id);
         res.send({sid: sid});

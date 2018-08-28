@@ -20,13 +20,13 @@ export async function generateSheet(workbook: Worksheet, adt?: AbstractDocumentT
         keysPlacement: workbook.keysPlacement, sectionless: workbook.sectionless};
 
     let sheet = <{[k in WsExportTypes]: string | Buffer}> {};
-
-
-    if (!adt) {
+ 
+    if (!adt) { 
         // Create abstract document tree
-        adt = new WsMathGenerator().create(workbook);            
+        const gen = new WsMathGenerator({seed: workbook.seed});
+        adt = await gen.create(workbook);         
         //Add it to the generated types in order to be stored in database
-        sheet["json"] = wsExporter(adt, "json", exporterOpts);
+        sheet["json"] = wsExporter(adt, "json", exporterOpts); 
     }
 
     if ( LATEX_FORMATS.indexOf(type) >= 0) {

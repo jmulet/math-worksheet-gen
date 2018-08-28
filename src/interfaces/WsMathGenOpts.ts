@@ -40,8 +40,7 @@ export interface Worksheet {
 }
 
 export interface WsMathGenOpts {
-    seed?: number,
+    seed?: string,
     rand?: Random,
-    worksheet?: Worksheet,
     uniqueQuestionsMap?: any
 }

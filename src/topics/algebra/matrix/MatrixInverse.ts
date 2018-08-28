@@ -57,19 +57,19 @@ export class MatrixInverse implements QuestionGenInterface {
         }
     }
 
-    getFormulation(): string {
+    async getFormulation(): Promise<string> {
         return "$M = " + this.question + "$";
     }
 
-    getAnswer(): string {
+    async getAnswer(): Promise<string> {
         return this.answer;
     }
 
-    getSteps(): string {
+    async getSteps(): Promise<string> {
         return this.steps;
     }
 
-    getQuizz(): QuizzStruct {
+    async getQuizz(): Promise<QuizzStruct> {
         const mat = this.inverse? this.inverse : Matrix.fromDefinition(this.m.rows, this.m.cols, ()=>null);
         return {
             type: "cloze",

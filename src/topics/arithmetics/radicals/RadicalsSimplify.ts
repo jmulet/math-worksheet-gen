@@ -43,15 +43,12 @@ export class RadicalsSimplify implements QuestionGenInterface {
         this.answer =  radical.simplify().toTeX();                
     }
 
-    getFormulation(): string {        
+    async getFormulation(): Promise<string> {        
        return "$" + this.question + "{}={}$";
     }
 
-    getAnswer(): string {
+    async getAnswer(): Promise<string> {
         return "$" + this.answer + "$";
     }
 
-    getDistractors(): string[] {
-        return [];
-    }
 }

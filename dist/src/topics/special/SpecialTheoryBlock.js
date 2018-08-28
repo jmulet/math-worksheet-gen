@@ -45,10 +45,6 @@ let SpecialTheoryBlock = class SpecialTheoryBlock {
         // Skip this answer      
         return null;
     }
-    getDistractors() {
-        // Skip these distractors
-        return null;
-    }
 };
 SpecialTheoryBlock = __decorate([
     WsGenerator_1.WsGenerator({

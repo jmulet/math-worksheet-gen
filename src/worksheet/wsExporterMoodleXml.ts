@@ -2,7 +2,20 @@ import { AbstractDocumentTree } from "../interfaces/AbstractDocumentTree";
 import * as xmlBuilder from 'xmlbuilder';
 
 export function wsExporterMoodleXml (adt: AbstractDocumentTree, opts: any): string {
-    return "";
+    var quiz = xmlBuilder.create('quiz', { encoding: 'utf-8' });
+    this.sections.forEach((section) => {
+       // Add a category           
+       quiz.ele("question", {type: "category"}).ele("category").ele("text", {}, "$course$/"+section.title);
+       section.activities.forEach( (activity) => {                
+            activity.questions.forEach( (question) => {
+                let formulation = activity.formulation.replace("\n", "<br/>");
+                formulation += ". " + question.toHtml();
+                const type = question.type;
+                createQuestion(quiz, formulation, type, question.answerToHtml(), question.distractorsHtml());
+            });
+       })
+    });        
+    return quiz.end({pretty: true});    
 }
 
 

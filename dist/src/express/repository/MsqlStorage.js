@@ -1,0 +1,451 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const mysql = require("mysql");
+const shortid = require("shortid");
+const MConfig = require("../../../../micro-config.json");
+const sqlListTemplate = "SELECT * FROM `wsmath` WHERE `idUser`=?";
+const sqlDeleteTemplate1 = "DELETE FROM `wsmath` WHERE `uid`=? LIMIT 1;";
+const sqlDeleteTemplate2 = "DELETE FROM `wsmath_generated` WHERE `uid`=?";
+const sqlUpdateTemplate = "UPDATE `wsmath` SET `json`=?, `visibility`=?, `title`=?, `tags`=?, `levels`=? WHERE `uid`=?";
+const sqlEmptyGeneratedTemplate = "UPDATE `wsmath_generated` SET `html`=NULL, `html_keys`=NULL, `latex`=NULL, `latex_keys`=NULL, `pdf`=NULL, `pdf_keys`=NULL WHERE `uid`=? AND `seed`=?";
+const sqlEmptyAllGeneratedTemplate = "UPDATE `wsmath_generated` SET `html`=NULL, `html_keys`=NULL, `latex`=NULL, `latex_keys`=NULL, `pdf`=NULL, `pdf_keys`=NULL WHERE `uid`=?";
+class MysqlStorage {
+    emptyGenerated(uid, seed) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let connection;
+            let nup = 0;
+            try {
+                connection = yield this.getConnection();
+                let sql;
+                let params;
+                if (seed) {
+                    sql = sqlEmptyGeneratedTemplate;
+                    params = [uid, seed];
+                }
+                else {
+                    sql = sqlEmptyAllGeneratedTemplate;
+                    params = [uid];
+                }
+                const [err, results] = yield this.queryAsync(connection, sql, params);
+                if (!err) {
+                    nup = results.affectedRows;
+                }
+                else {
+                    console.log(err);
+                }
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+            return nup;
+        });
+    }
+    update(sid, json) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let connection;
+            let nup = 0;
+            try {
+                connection = yield this.getConnection();
+                const params = [JSON.stringify(json), json.visibility || 1, json.title || "", json.tags || "", json.levels || "*", sid];
+                const [err, results] = yield this.queryAsync(connection, sqlUpdateTemplate, params);
+                if (!err) {
+                    nup = results.affectedRows;
+                }
+                else {
+                    console.log(err);
+                }
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+            return nup;
+        });
+    }
+    delete(sid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connection = yield this.getConnection();
+            let nup = 0;
+            try {
+                let [err, results] = yield this.queryAsync(connection, sqlDeleteTemplate1, [sid]);
+                nup += results.affectedRows;
+                [err, results] = yield this.queryAsync(connection, sqlDeleteTemplate2, [sid]);
+                nup += results.affectedRows;
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+            return nup;
+        });
+    }
+    listTemplatesByUser(idTeacher) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const connection = yield this.getConnection();
+            let list;
+            try {
+                const [err, results] = yield this.queryAsync(connection, sqlListTemplate, [idTeacher]);
+                if (err) {
+                    list = [];
+                }
+                list = results.map(e => {
+                    try {
+                        e.json = JSON.parse(e.json);
+                    }
+                    catch (Ex) { }
+                    return e;
+                });
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+            return list;
+        });
+    }
+    saveGenerated(uid, seed, fullname, format, doc, keysType) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const found = yield this.loadGenerated(uid, seed, format, keysType);
+            let connection;
+            try {
+                connection = yield this.getConnection();
+                const post = {
+                    uid: uid,
+                    seed: seed,
+                    type: format,
+                    fullname: fullname,
+                    keysType: keysType
+                };
+                if (doc instanceof Buffer) {
+                    post["docBuffer"] = doc;
+                }
+                else {
+                    post["doc"] = doc;
+                }
+                let sql;
+                if (found && found.length) {
+                    sql = "UPDATE wsmath_generated SET ? WHERE id=" + found[0].id;
+                }
+                else {
+                    sql = "INSERT INTO wsmath_generated SET ?";
+                    post.created = new Date();
+                }
+                const [err, results] = yield this.queryAsync(connection, sql, post);
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                if (results.affectedRows) {
+                    return uid;
+                }
+                else {
+                    return null;
+                }
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+        });
+    }
+    /**
+     *
+     * @param uid is the uid of the worksheet
+     * @param seed is optional - if not set then generates the report of that worksheet
+     */
+    loadGenerated(uid, seed, format, keysType) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let connection;
+            try {
+                connection = yield this.getConnection();
+                let sql, params;
+                if (seed) {
+                    params = [uid, seed];
+                    sql = "SELECT * FROM `wsmath_generated` WHERE `uid`=? AND `seed`=?";
+                    if (format) {
+                        sql += " AND `format`=?";
+                        params.push(format);
+                    }
+                    if (keysType) {
+                        sql += " AND `keysType`=?";
+                        params.push(keysType);
+                    }
+                    sql += " ORDER BY `id` DESC";
+                }
+                else {
+                    sql = "SELECT wsg.seed, min(wsg.created) as created, u.fullname, ws.levels, ws.tags, ws.title, ws.uid FROM wsmath_generated as wsg LEFT JOIN users as u ON u.username=wsg.seed INNER JOIN wsmath as ws ON ws.uid=wsg.uid WHERE wsg.uid=? group by u.id ORDER BY wsg.created, u.fullname";
+                    params = [uid];
+                }
+                const [err, results] = yield this.queryAsync(connection, sql, params);
+                if (err) {
+                    console.log(err);
+                    return [];
+                }
+                return results;
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+            return [];
+        });
+    }
+    constructor() {
+        const config = {
+            connectionLimit: MConfig.Pool.connectionLimit || 10,
+            host: MConfig.Pool.host,
+            user: MConfig.Pool.user,
+            password: MConfig.Pool.password,
+            database: MConfig.Pool.database
+        };
+        this.pool = mysql.createPool(config);
+        this.synchronizeDB();
+    }
+    getConnection() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                this.pool.getConnection(function (err, connection) {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(connection);
+                });
+            });
+        });
+    }
+    queryAsync(connection, sql, obj) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve) => {
+                connection.query(sql, obj, function (err, results, fields) {
+                    resolve([err, results, fields]);
+                });
+            });
+        });
+    }
+    synchronizeDB() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let connection;
+            try {
+                connection = yield this.getConnection();
+                let [err, results, fields] = yield this.queryAsync(connection, "SHOW TABLES LIKE 'wsmath'");
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                if (results.length === 0) {
+                    // Create a new table
+                    const sql = `
+                        CREATE TABLE \`wsmath\` (
+                            \`id\` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                            \`uid\` varchar(255) DEFAULT '',
+                            \`levels\` varchar(255) NOT NULL DEFAULT '*',
+                            \`title\` longtext DEFAULT NULL,
+                            \`tags\` longtext DEFAULT NULL,                            
+                            \`json\` json DEFAULT NULL,
+                            \`idUser\` int(11) DEFAULT NULL,
+                            \`created\` datetime DEFAULT NULL,
+                            \`visibility\` tinyint(11) NOT NULL DEFAULT '1',
+                            \`opens\` datetime DEFAULT NULL,
+                            \`keysOpens\` datetime DEFAULT NULL,
+                            \`closes\` datetime DEFAULT NULL,
+                            PRIMARY KEY (\`id\`)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+                    `;
+                    const [err, results, fields] = yield this.queryAsync(connection, sql);
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    console.log("Created table wsmath");
+                }
+                else {
+                    console.log("OK table wsmath");
+                }
+                // Check if generated table has been created
+                [err, results, fields] = yield this.queryAsync(connection, "SHOW TABLES LIKE 'wsmath_generated'");
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                if (results.length === 0) {
+                    // Create a new table
+                    const sql = `
+                        CREATE TABLE \`wsmath_generated\` (
+                            \`id\` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                            \`uid\` varchar(255) DEFAULT '',
+                            \`seed\` varchar(255) DEFAULT '',
+                            \`type\` varchar(25) DEFAULT '',
+                            \`keysType\` int(4) DEFAULT 0,
+                            \`fullname\` varchar(255) DEFAULT '',
+                            \`doc\` longtext DEFAULT NULL, 
+                            \`docBuffer\` longblob DEFAULT NULL, 
+                            \`created\` datetime DEFAULT NULL,                           
+                            PRIMARY KEY (\`id\`)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+                    `;
+                    const [err, results, fields] = yield this.queryAsync(connection, sql);
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    console.log("Created table wsmath_generated");
+                }
+                else {
+                    console.log("OK wsmath_generated table");
+                }
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+        });
+    }
+    /**
+     * Loads the definition with a given uid
+     * If uid is not passed, then it will load all public sheet definitions
+     * @param uid
+     */
+    load(uid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let connection;
+            let output = null;
+            try {
+                connection = yield this.getConnection();
+                if (uid) {
+                    const [err, results] = yield this.queryAsync(connection, "SELECT * FROM wsmath WHERE uid=? LIMIT 1", [uid]);
+                    output = results;
+                }
+                else {
+                    const [err, results] = yield this.queryAsync(connection, "SELECT w.*, u.fullname FROM wsmath as w INNER JOIN users as u ON u.id=w.idUser WHERE visibility=2");
+                    output = results;
+                }
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+            if (output && output.length) {
+                if (uid) {
+                    output.forEach(e => e.json = JSON.parse(e.json));
+                    if (output.length === 1) {
+                        output = output[0];
+                    }
+                }
+            }
+            else {
+                return null;
+            }
+            return output;
+        });
+    }
+    save(json, idUser = 0) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let connection;
+            try {
+                connection = yield this.getConnection();
+                const uid = shortid.generate(); //sheet id
+                const post = {
+                    uid: uid,
+                    json: JSON.stringify(json),
+                    idUser: idUser,
+                    visibility: json.visibility,
+                    title: json.title || "",
+                    tags: json.tags || "",
+                    levels: json.levels || "*",
+                    created: new Date()
+                };
+                const [err, results] = yield this.queryAsync(connection, "INSERT INTO wsmath SET ?", post);
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                if (results.affectedRows) {
+                    return uid;
+                }
+                else {
+                    return null;
+                }
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+        });
+    }
+    userByUsername(username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let connection;
+            try {
+                connection = yield this.getConnection();
+                const [err, results, fields] = yield this.queryAsync(connection, "SELECT * FROM users WHERE username='" + username.trim() + "'");
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                if (results.length) {
+                    return results[0];
+                }
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+            return {};
+        });
+    }
+    userByIdUser(idUser) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let connection;
+            try {
+                connection = yield this.getConnection();
+                const [err, results] = yield this.queryAsync(connection, "SELECT * FROM users WHERE id='" + idUser + "'");
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                if (results.length) {
+                    return results[0];
+                }
+            }
+            catch (Ex) {
+                console.log(Ex);
+            }
+            finally {
+                connection && connection.release();
+            }
+            return {};
+        });
+    }
+}
+exports.MysqlStorage = MysqlStorage;
+//# sourceMappingURL=MsqlStorage.js.map

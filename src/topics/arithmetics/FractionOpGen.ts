@@ -28,17 +28,14 @@ export class FractionOpGen implements QuestionGenInterface {
         this.answer = (f1.add(f2)).divide( <Numeric> (f3.substract(f4)).multiply(f5) );
     }
 
-    getFormulation(): string {        
+    async getFormulation(): Promise<string> {        
         const [f1, f2, f3, f4, f5] = this.fractions;
         return "$\\frac{" + f1.toTeX() + " + " + f2.toTeX()  + "}{\\left(" + f3.toTeX() + "-" + f4.toTeX() + 
         "\\right)\\cdot " + f5.toTeX() + " }$";
     }
 
-    getAnswer(): string {
+    async getAnswer(): Promise<string> {
         return "$" + this.answer.toTeX() + "$";
     }
 
-    getDistractors(): string[] {
-        return [];
-    }
 }

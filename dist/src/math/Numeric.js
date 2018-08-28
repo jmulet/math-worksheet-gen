@@ -166,6 +166,9 @@ class Numeric {
     isNegative() {
         return this.Re["s"] < 0;
     }
+    isPositive() {
+        return this.Re["s"] > 0;
+    }
     isEqual(n) {
         const thisRE = this.Re["s"] * this.Re["n"] / this.Re["d"];
         const nRE = n.Re["s"] * n.Re["n"] / n.Re["d"];
@@ -236,19 +239,27 @@ class Numeric {
             tex += "\\frac{" + Numeric.factorize(this.Re["n"], opts) + "}{" + Numeric.factorize(this.Re["d"], opts) + "}";
         }
         if (this.Im["n"]) {
+            if (this.Re["n"] === 0) {
+                //Prevent writing 0 + 2i
+                tex = "";
+            }
             if (this.Im["s"] > 0) {
-                tex += " + ";
+                if (this.Re["n"] !== 0) {
+                    tex += " + ";
+                }
             }
             else {
                 tex += " - ";
             }
             if (this.Im["d"] === 1) {
-                tex += Numeric.factorize(this.Im["n"], opts);
+                if (this.Im["n"] !== 1) {
+                    tex += Numeric.factorize(this.Im["n"], opts);
+                }
             }
             else {
-                tex = "\\frac{" + Numeric.factorize(this.Im["n"], opts) + "}{" + Numeric.factorize(this.Im["d"], opts) + "}";
+                tex += "\\frac{" + Numeric.factorize(this.Im["n"], opts) + "}{" + Numeric.factorize(this.Im["d"], opts) + "}";
             }
-            tex += "\\cdot i";
+            tex += "\\, i";
         }
         return tex;
     }

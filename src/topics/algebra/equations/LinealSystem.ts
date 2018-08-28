@@ -166,15 +166,12 @@ export class EquationsLinealSystem implements QuestionGenInterface {
         this.question += "\\end{array} \\right.";
     }
 
-    getFormulation(): string {
+    async getFormulation(): Promise<string> {
         return "$" + this.question + "$";
     }
 
-    getAnswer(): string {
+    async getAnswer(): Promise<string> {
         return "$ \\left(" + this.answer + " \\right)$" ;
     }
-
-    getDistractors(): string[] {
-        return [];
-    }
+ 
 }

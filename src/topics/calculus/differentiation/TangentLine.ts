@@ -55,11 +55,11 @@ export class TangentLine implements QuestionGenInterface {
         this.answer = Giac.evaluate('latex(equation(LineTan('+this.fun.toString()+','+ a +')))').replace("(", "").replace(")", "");
     }
 
-    getFormulation(): string {        
+    async getFormulation(): Promise<string> {        
         return "$y = " + this.fun.toTeX() + "$";
     }
 
-    getAnswer(): string {        
+    async getAnswer(): Promise<string> {        
         return "$" + this.answer + "$";
     }
  

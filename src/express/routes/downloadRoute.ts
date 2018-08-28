@@ -31,6 +31,7 @@ export function downloadRoute(router: Router, options) {
         const isTeacher = loggedUser && loggedUser.idRole < 200;
         const forceGen = assertTrue(req.query.force);
 
+        
         if (!uid) {
             res.status(404).render("notfound.ejs", {
                 id: "?"
@@ -49,8 +50,32 @@ export function downloadRoute(router: Router, options) {
             return;
         }
 
+        // The sheet must be generated
+        // Load the worksheet definition which will be used to generate the sheet
+        const doc = <Worksheet> worksheet.json;
+        doc.sid = uid;
+        doc.lang = doc.lang || "ca";
+        const isShared = worksheet.visibility !== 0;
+
+        // Override db worksheet information with extra information passed from query params
+        if (isTeacher && req.query.keys != null) {
+            try {
+                doc.includeKeys = parseInt(req.query.keys);
+            } catch (Ex) { }
+        }
+        if (req.query.seed) {
+            doc.seed = req.query.seed;
+        }
+        if (req.query.type) {
+            doc.type = req.query.type;
+        }
+        if (req.query.fullname) {
+            doc.fullname = req.query.fullname;
+        }
+
         const now = new Date();
 
+       
         // Te una data d'apertura
         if (!isTeacher && worksheet.opens) {
             const opens = new Date(worksheet.opens);
@@ -80,11 +105,11 @@ export function downloadRoute(router: Router, options) {
         }
 
         // Te una data d'apertura de solucions
-        if (!isTeacher && worksheet.keysOpens && assertTrue(req.query.includeKeys)) {
+        if (!isTeacher && worksheet.keysOpens && assertTrue(req.query.keys)) {
             // Try to see if we are asking more keys than those in json includeKeys 
             let showKeys = worksheet.includeKeys;
             try {
-                showKeys = parseInt(req.query.includeKeys);
+                showKeys = parseInt(req.query.keys);
             } catch (Ex) { }
             if (showKeys > worksheet.includeKeys) {
                 const keysOpens = new Date(worksheet.keysOpens);
@@ -102,18 +127,31 @@ export function downloadRoute(router: Router, options) {
 
         const type = (req.query.type ||  worksheet.json.type ||  "html").toLowerCase().trim();
         let keysType = 0;
-        if (req.query.includeKeys) {
+        if (req.query.keys) {
             try {
-                keysType = parseInt(req.query.includeKeys);
+                keysType = parseInt(req.query.keys);
             } catch (Ex) { }
         } else {
             keysType = worksheet.json.includeKeys ||  0;
         }
         let seed = req.query.seed;
 
+         // Es tracta de l'ADT
+         if (!isTeacher && type === "json") {
+            res.status(200).render("notavailable.ejs", {
+                id: uid,
+                keysOpens: "",
+                closes: "",
+                opens: ""
+            });
+            return;
+         }
+
+
         // pseudo seeds are
         // request IP  %IP%
 
+      
         //seed-less requests must Always be generated!
         let adt: AbstractDocumentTree;
         const loadedADT = (await options.storage.loadGenerated(uid, seed, "json", keysType))[0];
@@ -127,12 +165,15 @@ export function downloadRoute(router: Router, options) {
             if (type === "json") {
 
                 sendGeneratedSheet("json", loadedADT.doc, res);
+                return;
 
             } else if (["pdf", "odt", "docx"].indexOf(type) >= 0) {
 
                 if (type === "pdf")  {
                     const loadedPDF = (await options.storage.loadGenerated(uid, seed, "pdf", keysType))[0];
                     if (loadedPDF) {
+                        res.setHeader("Content-Disposition", "attachment; filename=\"" + uid + "." + type + "\"");
+                        res.setHeader("Content-Length", loadedPDF.docBuffer.byteLength);
                         sendGeneratedSheet("pdf", loadedPDF.docBuffer, res);
                         return;
                     }
@@ -146,9 +187,11 @@ export function downloadRoute(router: Router, options) {
                     let ooo;
                     if (type === "pdf") {
                         ooo = await latexToPdf(generated);                        
+                        // store
+                        storeGeneratedSheets(doc, {"pdf": ooo}, options.storage)
                     } else {
                         ooo = await latexToOOO(generated, { type: type });                        
-                    }
+                    }                    
                     res.setHeader("Content-Disposition", "attachment; filename=\"" + uid + "." + type + "\"");
                     res.setHeader("Content-Length", ooo.byteLength);
                     sendGeneratedSheet(type, ooo, res);
@@ -164,28 +207,7 @@ export function downloadRoute(router: Router, options) {
 
         }
 
-        // The sheet must be generated
-        // Load the worksheet definition which will be used to generate the sheet
-        const doc = <Worksheet>worksheet.json;
-        doc.sid = uid;
-        doc.lang = doc.lang ||  "ca";
-        const isShared = worksheet.saved;
 
-        // Override db worksheet information with extra information passed from query params
-        if (isTeacher && req.query.includeKeys != null) {
-            try {
-                doc.includeKeys = parseInt(req.query.includeKeys);
-            } catch (Ex) { }
-        }
-        if (req.query.seed) {
-            doc.seed = req.query.seed;
-        }
-        if (req.query.type) {
-            doc.type = req.query.type;
-        }
-        if (req.query.fullname) {
-            doc.fullname = req.query.fullname;
-        }
         if (req.query.seed && !req.query.username && !req.query.idUser) {
             req.query.username = req.query.seed;
         }
@@ -209,8 +231,10 @@ export function downloadRoute(router: Router, options) {
         // Parse document, generate sheet and send
         try {
             const sheetInstance = await generateSheet(doc, adt);
+            console.log(doc.seed, isShared);
             if (doc.seed && isShared) {
                 //Storable document
+                console.log("store")
                 storeGeneratedSheets(doc, sheetInstance, options.storage);
             }
             // Finally display sheet to the end user
@@ -218,6 +242,7 @@ export function downloadRoute(router: Router, options) {
             await sendGeneratedSheet(type, docToDisplay, res);
 
         } catch (Ex) {
+            console.log(Ex);
             if (!res.headersSent) {
                 res.status(500).render("internalError.ejs", {
                     msg: Ex

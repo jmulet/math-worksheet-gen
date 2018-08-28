@@ -8,6 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const Random_1 = require("../../util/Random");
 const WsGenerator_1 = require("../../util/WsGenerator");
@@ -18,7 +26,7 @@ function displayPower(base, n) {
         return "1";
     }
     else if (n === 1) {
-        return base.replace("(", "").replace(")", "");
+        return base.replace("\\left(", "").replace("\\right)", "");
     }
     else {
         if (n % 2 === 0) {
@@ -109,7 +117,7 @@ let PowerOperations = class PowerOperations {
                 const b3 = rnd.intBetween(2, r, condition);
                 this.question = "\\dfrac{ " + b1 + "^{" + e1 + "} \\cdot " + b2 + "^{" + e1 + "} }{" + b3 + "^{" + e1 + "}}";
                 const baseOp = Numeric_1.Numeric.fromNumber(b1).multiply(Numeric_1.Numeric.fromNumber(b2)).divide(Numeric_1.Numeric.fromNumber(b3)).toTeX();
-                this.answer = displayPower("\\left(" + baseOp + "\\right)", e1);
+                this.answer = displayPower(baseOp, e1); // "\\left(" +  "\\right)"
             }
         }
         else {
@@ -139,13 +147,14 @@ let PowerOperations = class PowerOperations {
         }
     }
     getFormulation() {
-        return "$" + this.question + "={}$";
+        return __awaiter(this, void 0, void 0, function* () {
+            return "$" + this.question + "={\\,}$";
+        });
     }
     getAnswer() {
-        return "$" + this.answer + "$";
-    }
-    getDistractors() {
-        return [];
+        return __awaiter(this, void 0, void 0, function* () {
+            return "$" + this.answer + "$";
+        });
     }
 };
 PowerOperations = __decorate([
@@ -161,7 +170,7 @@ PowerOperations = __decorate([
             {
                 name: "domain",
                 defaults: "Z",
-                description: "Type of coefficent number generated"
+                description: "Type of coefficient number generated"
             },
             {
                 name: "minExp",

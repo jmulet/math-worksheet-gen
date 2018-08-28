@@ -105,19 +105,19 @@ export class MatrixEquations implements QuestionGenInterface {
  
     }
 
-    getFormulation(): string {
+    async getFormulation(): Promise<string> {
         return this.question;
     }
 
-    getAnswer(): string {
+    async getAnswer(): Promise<string> {
         return "$" + this.answer.toTeX() + "$"
     }
 
-    getSteps(): string { 
+    async getSteps(): Promise<string> { 
         return this.steps;
     }
 
-    getQuizz(): QuizzStruct {        
+    async getQuizz(): Promise<QuizzStruct> {        
         return {
             type: "cloze",
             html: `

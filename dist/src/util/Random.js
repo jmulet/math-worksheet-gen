@@ -21,6 +21,17 @@ const Vector_1 = require("../math/Vector");
 exports.VECTOR_NAMES = ['u', 'v', 'w', 'a', 'b', 'c'];
 exports.BAR_NAMES = ['x', 'y', 'z', 't', 'a', 'b', 'c', 'n', 'm'];
 class Random {
+    static shuffle(a) {
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+    static fillRange(start, end) {
+        return Array(end - start + 1).fill(0).map((item, index) => start + index);
+    }
+    ;
     constructor(seed) {
         this.seed = seed;
         if (!seed) {

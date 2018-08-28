@@ -76,17 +76,14 @@ export class PolyDivision implements QuestionGenInterface {
         }        
     }
 
-    getFormulation(): string {
+    async getFormulation(): Promise<string> {
         const bar = this.qGenOpts.question.bar || "x";
         return "$\\left(" + this.polyD.toTeX(bar)  + "\\right) : \\left(" + this.polyd.toTeX(bar) + "\\right)$";
     }
 
-    getAnswer(): string {
+    async getAnswer(): Promise<string> {
         const bar = this.qGenOpts.question.bar || "x";
         return "$Q(x)=" + this.answers.quotient.toTeX(bar)  + "$; $R=" + this.answers.remainder.toTeX(bar) + "$ ";
     }
-
-    getDistractors(): string[] {
-        return [];
-    }
+ 
 }

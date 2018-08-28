@@ -1,4 +1,4 @@
-import { Worksheet, WsMathGenOpts } from '../interfaces/WsMathGenOpts';
+import { Worksheet, WsMathGenOpts, QuestionWs, ActivityWs } from '../interfaces/WsMathGenOpts';
 import { Container } from '../util/WsGenerator';
 import * as path from 'path';
 import { importClassesFromDirectories } from '../util/importClassesFromDirectories';
@@ -10,9 +10,9 @@ import * as vm from 'vm';
 import { QuestionOptsInterface } from '../interfaces/QuestionOptsInterface';
 
 // Utility
-function callOptionalFun(obj: any, fun: Function, params?: any[]): any {     
+async function callOptionalFun(obj: any, fun: Function, params?: any[]): Promise<any> {     
     if (fun) {
-        return fun.call(obj, ...params);
+        return await fun.call(obj, ...params);
     } 
     return null;
 }
@@ -59,17 +59,17 @@ export class WsMathGenerator {
     uid: string;
 
  
-    constructor(wsGenOpts?: WsMathGenOpts) {
+    constructor(wsGenOpts: WsMathGenOpts) {
         this.wsGenOpts = wsGenOpts;
-        if (!wsGenOpts.rand) {
-            const seed = (wsGenOpts.seed || new Date().getTime()).toString(36);
+        if (!this.wsGenOpts.rand) {
+            const seed = this.wsGenOpts.seed || new Date().getTime().toString(36);
             this.rand = new Random(seed);
             wsGenOpts.rand = this.rand;
         }
         wsGenOpts.uniqueQuestionsMap = {};
     }
 
-    create(worksheet: Worksheet): AbstractDocumentTree  {
+    async create(worksheet: Worksheet): Promise<AbstractDocumentTree>  {
         this.worksheet = worksheet;
         const adt = <AbstractDocumentTree> {
             lang: worksheet.lang || "en",
@@ -83,7 +83,9 @@ export class WsMathGenerator {
             sections: null,
             activities: null
         };  
-        
+
+        const promises = [];
+
         if (worksheet.sectionless) {
             adt.activities = <ActivityTree[]>[];
             worksheet.sections.forEach( (wsection) => {                
@@ -93,37 +95,39 @@ export class WsMathGenerator {
                     adt.activities.push(activity);
                     wactivity.questions.forEach( (wquestion) => {
                         wquestion.parent = wactivity;
-                        const questions = this.buildQuestions(wquestion);
-                        activity.questions.push(...questions);
+                        const p = this.buildQuestions(wquestion);
+                        promises.push(p);
+                        p.then((questions) => activity.questions.push(...questions));   
                     });
                 })
             });
         } else {
-            adt.sections = <SectionTree[]>[];
+            adt.sections = <SectionTree[]>[];           
             worksheet.sections.forEach( (wsection) => {
                 const section: SectionTree = {
                     title: wsection.name,
                     activities: []
                 };
                 adt.sections.push(section);
-                wsection.activities.forEach( (wactivity) => {
+                    wsection.activities.forEach( (wactivity) => {
                     wactivity.parent = wsection; 
                     const activity = this.buildActivity(wactivity);
-                    section.activities.push(activity);
+                    section.activities.push(activity);                     
                     wactivity.questions.forEach( (wquestion) => {
                         wquestion.parent = wactivity;
-                        const questions = this.buildQuestions(wquestion);
-                        activity.questions.push(...questions);
+                        const p = this.buildQuestions(wquestion);
+                        promises.push(p);
+                        p.then((questions) => activity.questions.push(...questions));                        
                     });
                 })
             });
         }
+        await Promise.all(promises);
         return adt;
     }
 
     // Build an ActivityTree and parse the scope
-    private buildActivity(wActivity): ActivityTree {
-        
+    private buildActivity(wActivity: ActivityWs): ActivityTree {
         let formulation = wActivity.formulation;
         
         // Eval scope in a context     
@@ -144,7 +148,7 @@ export class WsMathGenerator {
             } catch(Ex) {
                 console.log(Ex);
             }
-        }            
+        }     
         return {
             formulation: formulation,
             questions: []
@@ -153,37 +157,51 @@ export class WsMathGenerator {
 
 
     // Build a QuestionTree and call the generator classes
-    private buildQuestions(wQuestion): QuestionTree[] {
+    private async buildQuestions(wQuestion: QuestionWs): Promise<QuestionTree[]> {
         const questions = <QuestionTree[]>[];
-
+        const promises = [];
         let qsClass = (Container[wQuestion.gen] || {}).clazz;
         // Special generators only allow for one repetition
         if (wQuestion.gen.indexOf("special/") === 0) {
             wQuestion.repeat = 1;
         }
-        if (qsClass) {
-            wQuestion.options.uniqueQuestionsMap = this.wsGenOpts.uniqueQuestionsMap; 
- 
-            const qGenOpts: QuestionOptsInterface = {
+        if (qsClass) { 
+           const qGenOpts: QuestionOptsInterface = {
                 rand: this.rand,
                 scope: wQuestion.parent.scope,
                 question: wQuestion.options
             };
 
             let qsGen;
-            for (let i = 0; i < wQuestion.repeat || 1 ; i++ ) {                
-                qsGen = <QuestionGenInterface> new qsClass(qGenOpts);                     
-                questions.push({
-                    formulation: qsGen.getFormulation(),
-                    answer: qsGen.getAnswer(),
-                    steps: <string> callOptionalFun(qsGen, qsClass.getSteps),
-                    quizz: <string> callOptionalFun(qsGen, qsClass.getQuizz)
-                });
+            for (let i = 0; i < wQuestion.repeat; i++ ) {                
+                qsGen = <QuestionGenInterface> new qsClass(qGenOpts);      
+                const p1 = qsGen.getFormulation();
+                const p2 = qsGen.getAnswer();
+                const p3 = callOptionalFun(qsGen, qsClass.getSteps);
+                const p4 = callOptionalFun(qsGen, qsClass.getQuizz);
+                promises.push(p1);
+                promises.push(p2);
+                promises.push(p3);
+                promises.push(p4);
+
+                const q = {
+                    formulation: "",
+                    answer: "",
+                    steps: "",
+                    quizz: "" 
+                };   
+
+                p1.then((formulation) => q.formulation = formulation);
+                p2.then((answer) => q.answer = answer);
+                p3.then((steps) => q.steps = <string> steps);
+                p4.then((quizz) => q.quizz = <string> quizz);
+                questions.push(q);
             } 
         } else {
             console.log("Error:: generator class for ", wQuestion, " not found");
         }
 
+        await Promise.all(promises);
         return questions;
     }
 

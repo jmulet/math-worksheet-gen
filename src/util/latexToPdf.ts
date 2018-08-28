@@ -62,7 +62,7 @@ export async function latexToPdf(src: string | Stream, options?: any): Promise<a
       const errMessage = `LaTeX Syntax Error\n${errors.join('\n')}`
       const error = new Error(errMessage)
       //outputStream.emit('error', error);
-      console.log(src);
+      console.log(error, src);
       reject(error);
     })
   }

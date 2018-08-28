@@ -8,6 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const WsGenerator_1 = require("../../../util/WsGenerator");
 const Random_1 = require("../../../util/Random");
@@ -25,37 +33,36 @@ let ElementalFunctionGraph = class ElementalFunctionGraph {
         this.fun = rnd.elementalFunction(types, { range: r, complexity: complexity, domain: domain });
     }
     getFormulation() {
-        return "$y = " + this.fun.toTeX() + "$";
+        return __awaiter(this, void 0, void 0, function* () {
+            return "$y = " + this.fun.toTeX() + "$";
+        });
     }
-    getAnswer(type) {
-        if (type === "html") {
-            const uid = "box" + Math.random().toString(32).substr(2);
-            const [xmin, ymin, xmax, ymax] = this.fun.getBoundingBox();
-            return `<div id="${uid}" class="jxgbox" style="width:400px; height:400px; display: inline-block"></div>
-            <script>
-                var board = JXG.JSXGraph.initBoard("${uid}",
-                            {axis:true, boundingbox:[${xmin}, ${ymax}, ${xmax}, ${ymin}], showCopyright: false});
- 
-                var f = board.jc.snippet("${this.fun.toString()}", true, 'x', true);
-                var curve = board.create('functiongraph',[f,
-                                          function(){ 
-                                            var c = new JXG.Coords(JXG.COORDS_BY_SCREEN,[0,0],board);
-                                            return c.usrCoords[1];
-                                          },
-                                          function(){ 
-                                            var c = new JXG.Coords(JXG.COORDS_BY_SCREEN,[board.canvasWidth,0],board);
-                                            return c.usrCoords[1];
-                                          }
-                                        ]);
-                var q = board.create('glider', [2, 1, curve], {withLabel:false});    
-            </script>`;
-        }
-        else {
-            return "Correcció manual";
-        }
-    }
-    getDistractors() {
-        return [];
+    getAnswer() {
+        return __awaiter(this, void 0, void 0, function* () {
+            /*
+                const uid = "box" + Math.random().toString(32).substr(2);
+                const [xmin, ymin, xmax, ymax] = this.fun.getBoundingBox();
+                return `<div id="${uid}" class="jxgbox" style="width:400px; height:400px; display: inline-block"></div>
+                <script>
+                    var board = JXG.JSXGraph.initBoard("${uid}",
+                                {axis:true, boundingbox:[${xmin}, ${ymax}, ${xmax}, ${ymin}], showCopyright: false});
+     
+                    var f = board.jc.snippet("${this.fun.toString()}", true, 'x', true);
+                    var curve = board.create('functiongraph',[f,
+                                              function(){
+                                                var c = new JXG.Coords(JXG.COORDS_BY_SCREEN,[0,0],board);
+                                                return c.usrCoords[1];
+                                              },
+                                              function(){
+                                                var c = new JXG.Coords(JXG.COORDS_BY_SCREEN,[board.canvasWidth,0],board);
+                                                return c.usrCoords[1];
+                                              }
+                                            ]);
+                    var q = board.create('glider', [2, 1, curve], {withLabel:false});
+                </script>`;
+            */
+            return null;
+        });
     }
 };
 ElementalFunctionGraph = __decorate([

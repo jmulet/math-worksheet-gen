@@ -179,15 +179,12 @@ export class EquationsLinealSystem implements QuestionGenInterface {
         this.answer = problem.answer;
     }
 
-    getFormulation(): string {
+    async getFormulation(): Promise<string> {
         return  this.question ;
     }
 
-    getAnswer(): string {
+    async getAnswer(): Promise<string> {
         return  this.answer;
     }
-
-    getDistractors(): string[] {
-        return [];
-    }
+ 
 } 

@@ -48,7 +48,6 @@ class AlgebraicFraction {
     }
     simplified() {
         const res = Giac_1.Giac.simplify(this.toString(), AlgebraicFraction);
-        console.log(res.toString());
         return res;
     }
     isPolynomial() {

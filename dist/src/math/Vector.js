@@ -2,6 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Numeric_1 = require("./Numeric");
 const mathjs = require("mathjs");
+function trimArray(arr, len) {
+    const clen = arr.length;
+    const out = new Array(len);
+    for (var i = 0; i < len; i++) {
+        if (i < clen) {
+            out[i] = arr[i];
+        }
+        else {
+            out[i] = Numeric_1.Numeric.fromNumber(0);
+        }
+    }
+    return out;
+}
 class Vector {
     static fromPoints(A, B) {
         if (!A || !B) {
@@ -63,6 +76,20 @@ class Vector {
                 scalar = scalar.add(products[i]);
             }
             return scalar;
+        }
+        else {
+            throw "Invalid vector dimension";
+        }
+    }
+    crossProduct(v) {
+        const n = this.dimension();
+        if (v.dimension() <= 3 && n <= 3) {
+            const a = trimArray(this.components, 3);
+            const b = trimArray(v.components, 3);
+            const c1 = a[1].multiply(b[2]).substract(b[1].multiply(a[2]));
+            const c2 = a[2].multiply(b[0]).substract(b[2].multiply(a[0]));
+            const c3 = a[0].multiply(b[1]).substract(b[0].multiply(a[1]));
+            return new Vector([c1, c2, c3]);
         }
         else {
             throw "Invalid vector dimension";
