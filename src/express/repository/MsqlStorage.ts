@@ -1,6 +1,7 @@
 import * as mysql from 'mysql';
 import * as shortid from 'shortid';
 import { Storage } from './Storage';
+import { WsExportTypes } from '../../worksheet/wsExporter';
 
 const MConfig = require("../../../../micro-config.json");
 
@@ -101,27 +102,34 @@ export class MysqlStorage implements Storage {
         return list;
     }
 
-    async saveGenerated(uid: string, seed: string, format: "html" | "latex" | "pdf", doc: string | Buffer, docWithKeys: string | Buffer): Promise<string> {
+    async saveGenerated(uid: string, seed: string, fullname: string, format: WsExportTypes, doc: string | Buffer, keysType: number): Promise<string> {
         
-        const found = await this.loadGenerated(uid, seed);
+        const found = await this.loadGenerated(uid, seed, format, keysType);
         let connection;
         try {
             connection = await this.getConnection();
             const post: any = {
                 uid: uid,
-                seed: seed,                
+                seed: seed,       
+                type: format,
+                fullname: fullname,
+                keysType: keysType         
             };
-            post[format] = doc;
-            post[format+"_keys"] = docWithKeys;
+            if (doc instanceof Buffer) {
+                post["docBuffer"] = doc; 
+            } else {
+                post["doc"] = doc; 
+            }
+            
             
             let sql;
-            if (found) {
-                sql = "UPDATE wsmath_generated SET ? WHERE id=" + found.id;
+            if (found && found.length) {
+                sql = "UPDATE wsmath_generated SET ? WHERE id=" + found[0].id;
             } else {
                 sql = "INSERT INTO wsmath_generated SET ?";
                 post.created = new Date();
             }
-            const [err, results, fields] = await this.queryAsync(connection, sql, post);
+            const [err, results] = await this.queryAsync(connection, sql, post);
             if (err) {
                 console.log(err);
                 return;
@@ -142,38 +150,40 @@ export class MysqlStorage implements Storage {
      * @param uid is the uid of the worksheet
      * @param seed is optional - if not set then generates the report of that worksheet
      */
-    async loadGenerated(uid: string, seed: string): Promise<any> {
+    async loadGenerated(uid: string, seed: string, format?: WsExportTypes, keysType?: number): Promise<any> {
         let connection;
         try {
             connection = await this.getConnection();
             let sql, params;
             if (seed) {
-                sql = "SELECT * FROM wsmath_generated WHERE uid=? AND seed=? ORDER BY id desc LIMIT 1 ";
                 params = [uid, seed];
+                sql = "SELECT * FROM `wsmath_generated` WHERE `uid`=? AND `seed`=?";
+                if (format) {
+                    sql += " AND `format`=?";
+                    params.push(format);
+                }
+                if (keysType) {
+                    sql += " AND `keysType`=?";
+                    params.push(keysType);
+                }
+                sql += " ORDER BY `id` DESC";
+                
             } else {
-                sql = "SELECT wsg.seed, max(wsg.created) as created, u.fullname, ws.json, ws.uid FROM wsmath_generated as wsg LEFT JOIN users as u ON u.username=wsg.seed INNER JOIN wsmath as ws ON ws.uid=wsg.uid WHERE wsg.uid=? group by u.id ORDER BY wsg.created, u.fullname";
+                sql = "SELECT wsg.seed, min(wsg.created) as created, u.fullname, ws.levels, ws.tags, ws.title, ws.uid FROM wsmath_generated as wsg LEFT JOIN users as u ON u.username=wsg.seed INNER JOIN wsmath as ws ON ws.uid=wsg.uid WHERE wsg.uid=? group by u.id ORDER BY wsg.created, u.fullname";
                 params = [uid];
             } 
             const [err, results] = await this.queryAsync(connection, sql, params);
             if (err) {
                 console.log(err);
-                return;
+                return [];
             }
-            if (results.length) {
-               if (seed) {                  
-                    return results[0];
-               } else {
-                    return results;
-                }
-            } else {
-                return null;
-            }
+            return results;
         } catch(Ex) {
             console.log(Ex);
         } finally {
             connection && connection.release();
         }
-        return seed? null: [];
+        return [];
     }
     
 
@@ -264,12 +274,11 @@ export class MysqlStorage implements Storage {
                             \`id\` int(11) unsigned NOT NULL AUTO_INCREMENT,
                             \`uid\` varchar(255) DEFAULT '',
                             \`seed\` varchar(255) DEFAULT '',
-                            \`html\` longtext DEFAULT NULL,
-                            \`html_keys\` longtext DEFAULT NULL,
-                            \`latex\` longtext DEFAULT NULL,
-                            \`latex_keys\` longtext DEFAULT NULL,
-                            \`pdf\` longblob DEFAULT NULL,
-                            \`pdf_keys\` longblob DEFAULT NULL,
+                            \`type\` varchar(25) DEFAULT '',
+                            \`keysType\` int(4) DEFAULT 0,
+                            \`fullname\` varchar(255) DEFAULT '',
+                            \`doc\` longtext DEFAULT NULL, 
+                            \`docBuffer\` longblob DEFAULT NULL, 
                             \`created\` datetime DEFAULT NULL,                           
                             PRIMARY KEY (\`id\`)
                         ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

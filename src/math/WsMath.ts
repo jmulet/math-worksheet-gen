@@ -1,69 +1,43 @@
+import { Vector } from "./Vector";
+import { Polynomial } from "./Polynomial";
+import { PolyMonomial } from "./PolyMonomial";
 import { Numeric } from "./Numeric";
+import { AlgebraicFraction } from "./AlgebraicFraction";
+import { Conics } from "./Conics";
+import { ElementalFunction } from "./ElementalFunction";
+import { Equation } from "./Equation";
+import { Expression } from "./Expression";
+import { Giac } from "./Giac";
+import { Interval } from "./Interval";
+import { Literal } from "./Literal";
+import { Line } from "./Line";
+import { Matrix } from "./Matrix";
 import { Monomial } from "./Monomial";
+import { Point } from "./Point";
+import { PolyRadical } from "./PolyRadical";
 import { Power } from "./Power";
+import { Radical } from "./Radical";
+import { Triangle } from "./Triangle";
 
-export function typed(args: IArguments, rules) {
-    const types = Array.from(args).map(a => a.constructor? a.constructor.name : typeof(a)).join(", ");
-    const fun = rules[types];
-    if (fun) {
-        return fun(args);
-    } else {
-        throw "Not found typed rule for " + types;
-    }
-}
-
-export class WsMath {
-    static add(a, b){
-        typed(arguments, {
-            "Numeric, Numeric": function(x: Numeric, y: Numeric) {
-                return x.add(y);  
-            }            
-        });
-    }
-    static substract(a, b){
-        typed(arguments, {
-            "Numeric, Numeric": function(x: Numeric, y: Numeric) {
-                return x.substract(y);  
-            }            
-        });
-    }
-    static multiply(a, b) {
-        typed(arguments, {
-            "Numeric, Numeric": function(x: Numeric, y: Numeric): Numeric {
-                return <Numeric> x.multiply(y);  
-            },
-            "Numeric, Monomial": function(x: Numeric, y: Monomial): Monomial {
-                return new Monomial(<Numeric> y.coef.multiply(x), y.literals);
-            },
-            "Monomial, Monomial": function(x: Monomial, y: Monomial): Monomial {
-                return x.multiply(y);
-            }             
-        });
-    }
-    static divide(a, b){
-        typed(arguments, {
-            "Numeric, Numeric": function(x: Numeric, y: Numeric): Numeric {
-                return <Numeric> x.divide(y);  
-            },
-            "Monomial, Numeric": function(x: Monomial, y: Numeric): Monomial {
-                return new Monomial(<Numeric> x.coef.divide(y), x.literals);
-            },
-            "Monomial, Monomial": function(x: Monomial, y: Monomial): Monomial {
-                return x.divide(y);
-            }              
-        });
-    }
-    static pow(a, n){
-        typed(arguments, {
-            "Numeric, number": function(x: Numeric, y: number): Numeric {
-                return <Numeric> x.power(Numeric.fromNumber(y));  
-            },
-            "Numeric, Numeric": function(x: Numeric, y: Numeric): Numeric | Power {
-                return x.power(y);  
-            }             
-        });
-    }
-    static root(a, n){
-
-    }
+export const wsMath = {
+    Vector: Vector, 
+    Polynomial: Polynomial,
+    PolyMonomial: PolyMonomial, 
+    Numeric: Numeric, 
+    AlgebraicFraction: AlgebraicFraction,
+    Conics: Conics,
+    ElementalFunction: ElementalFunction,
+    Equation: Equation,
+    Expression: Expression,
+    Giac: Giac,
+    Interval: Interval,
+    Line: Line,
+    Literal: Literal,
+    Matrix: Matrix,
+    Monomial: Monomial,
+    Point: Point,
+    PolyRadical: PolyRadical,
+    Power: Power,
+    Radical: Radical,
+    Triangle: Triangle
 }

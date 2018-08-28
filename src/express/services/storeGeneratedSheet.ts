@@ -1,29 +1,31 @@
-import { Storage } from "../repository/Storage"; 
-import { SheetStruct } from "./generateSheet";
+import { Storage } from "../repository/Storage";  
+import { Worksheet } from "../../interfaces/WsMathGenOpts";
+import { WsExportTypes } from "../../worksheet/wsExporter";
 
 /**
  * Types that can be stored in the database structure; all other will be generated every time
  */
-const STORABLE_TYPES = ["latex", "html", "pdf"];
-const LATEX_TYPES = ["odt", "docx"];
+const STORABLE_TYPES = ["json", "latex", "html", "pdf"]; 
 
 /**
  * This service is responsible for storing a given generated sheet into the database if the type is storable of course
  */
-export async function storeGeneratedSheet(sheetInstance: SheetStruct, storage: Storage): Promise<string> {
-    let nupdates: string;
-    let type = (sheetInstance.workbook.type || "").toLowerCase().trim();
-    if (type == "tex") {
-        type = "latex";
-    }
-    const uid: string = sheetInstance.uid;
-    const seed: string = sheetInstance.workbook.seed;
+export async function storeGeneratedSheets(workbook: Worksheet, sheets: {[s in WsExportTypes]: string | Buffer}, storage: Storage): Promise<string> {
+    const uid: string = workbook.sid;
+    const seed: string = workbook.seed;
+    const fullname: string = workbook.fullname;
 
-    if (STORABLE_TYPES.indexOf(type) >= 0) {
-        //uid: string, seed: string, format: "html" | "latex", doc: string, docWithKeys: string
-        nupdates =  await storage.saveGenerated(uid, seed, type, sheetInstance.sheet, sheetInstance.sheetWithkeys);
-    } else if (LATEX_TYPES.indexOf(type) >= 0) {
-        nupdates =  await storage.saveGenerated(uid, seed, "latex", sheetInstance.sheet, sheetInstance.sheetWithkeys);
-    }
-    return nupdates;
+    const promises = [];
+
+    Object.keys(sheets).forEach( (type: WsExportTypes) => {
+        if (STORABLE_TYPES.indexOf(type) >= 0) {            
+            const sheet = sheets[type];
+            promises.push(storage.saveGenerated(uid, seed, fullname, type, sheet, workbook.includeKeys));
+        }    
+    });
+
+    
+    const [errs, updates] = await Promise.all(promises);
+
+    return updates.reduce( (a, b) => a + b, 0 );
 }
