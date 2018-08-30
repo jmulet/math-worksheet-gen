@@ -54,7 +54,7 @@ export function downloadRoute(router: Router, options) {
         // Load the worksheet definition which will be used to generate the sheet
         const doc = <Worksheet> worksheet.json;
         doc.sid = uid;
-        doc.lang = doc.lang || "ca";
+        doc.lang = doc.lang || res.locals.lang || "en";
         const isShared = worksheet.visibility !== 0;
 
         // Override db worksheet information with extra information passed from query params

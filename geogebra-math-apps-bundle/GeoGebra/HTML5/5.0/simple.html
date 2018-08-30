@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name=viewport content="width=device-width,initial-scale=1">
+    <script src="../../deployggb.js"></script>
+    <title>Simple - GeoGebra</title>	
+</head>
+<body>
+    <div id="ggb-element"></div>  
+    
+    <script type="text/javascript">
+        var opts = {"app": false,
+                    "appName": "classic", //"classic graphing, geometry, 3d"
+                    "width": 800,
+                    "height": 800, 
+                    "showToolBar":false,
+                    "showMenuBar":false,
+                    "showAlgebraInput":false,
+                    "showResetIcon":false,
+                    "enableLabelDrags":false,
+                    "enableShiftDragZoom":true,
+                    "enableRightClick":false,
+                    "showToolBarHelp":false,
+                    "errorDialogsActive":true,
+                    "useBrowserForJS":true,
+                    "showAppsPicker": false
+                 };
+        /* is3D=is 3D applet using 3D view, AV=Algebra View, SV=Spreadsheet View, CV=CAS View, EV2=Graphics View 2, CP=Construction Protocol, PC=Probability Calculator, DA=Data Analysis, FI=Function Inspector, PV=Python, macro=Macro View */
+                 
+        var views = {"is3D":false,"AV":false,"SV":true,"CV":false,"EV2":true,"CP":false,"PC":false,"DA":false,"FI":false,"PV":false,"macro":false};                 
+        var ggbApp = new GGBApplet(opts, false);      
+        ggbApp.setHTML5Codebase("./web")
+        window.addEventListener("load", function() { 
+            ggbApp.inject('ggb-element');            
+        });
+    </script>
+</body>
+</html>

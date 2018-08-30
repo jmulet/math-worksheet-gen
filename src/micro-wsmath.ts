@@ -2,12 +2,15 @@
 import * as express from 'express'; 
 import { wsMathMiddleware } from './express/wsMathMiddleware';
 import * as session from 'express-session';
+const languageMdw = require('./express/middlewares/languageMdw');
+
 const connectMemCached: any = require('connect-memcached'); 
 // Manually lauch
 // /usr/local/opt/memcached/bin/memcached
 const app = express();
 app.use(express.urlencoded({ extended: true })); 
 app.use(express.json());    
+app.use(languageMdw);
 app.set('view engine', 'ejs');  
 
 const MemCachedStore = connectMemCached(session);

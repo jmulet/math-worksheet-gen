@@ -1,23 +1,33 @@
 import { AbstractDocumentTree, ActivityTree } from "../interfaces/AbstractDocumentTree";
 import { i18n } from "./wsExporter";
 import * as MarkdownIt from "markdown-it";
+import * as attrs from "markdown-it-attrs";
+import { latexRenderer } from "../util/latexRenderer";
 
 const md = new MarkdownIt();
+md.use(attrs);
 
 const PREAMBLE = `
 \\documentclass[a4paper]{article}
+\\usepackage{pgfplots}
 \\usepackage{geometry}
 \\geometry{a4paper, total={170mm,257mm}, left=20mm, top=20mm}
-\\usepackage{tasks}
+\\usepackage{tasks} 
 \\usepackage[utf8]{inputenc}
 \\usepackage[T1]{fontenc}
 \\usepackage{enumitem}
-\\usepackage{amsmath}
+\\usepackage{amsmath,amssymb}
 \\usepackage{eurosym}
 \\usepackage{xcolor}
+\\usepackage{cancel}
+\\usepackage{hyperref}
+\\usepackage{csquotes}
 \\definecolor{BLAUCLAR}{RGB}{240,240,255}
 \\definecolor{MORAT}{RGB}{240,230,255}
+\\definecolor{light-gray}{RGB}{244,246,249}
 \\renewcommand{\\thesection}{\\Roman{section}}
+\\newcommand{\\hr}{\\noindent\\textcolor[RGB]{218,221,227}{\\rule{\\textwidth}{0.2pt}}}
+\\newcommand{\\quadrecolor}[3]{\\fcolorbox{#1}{#2}{\\parbox{0.93\\textwidth}{#3}\\vspace{0.5cm}}}
 \\begin{document}
 `;
 
@@ -29,7 +39,7 @@ export function wsExporterLatex(adt: AbstractDocumentTree, opts: any): string {
         builder.push("\\begin{center}\\large \\textbf{ \\color{blue} " + adt.title + "} \\end{center}\n\\vspace{0.5cm}\n");
     }
     if (adt.instructions) {
-        builder.push("\\fcolorbox{blue}{BLAUCLAR}{ \\parbox{0.93\\textwidth}{" + adt.instructions + "}}\n\\vspace{0.5cm}\n");
+        builder.push("\\quadrecolor{blue}{BLAUCLAR}{" + adt.instructions + "}\n");
     }
 
     builder.push(`\n {\\small \\textbf{${i18n('REFERENCE', opts.lang)}}   ${adt.sid}  /  ${adt.seed} .} \\textbf{${i18n('NAME', opts.lang)}:}  
@@ -100,15 +110,14 @@ function renderActivity(activity: ActivityTree, opts: any): string[] {
 
     if (activity.questions.length === 0) {
         // Assume that this is a theory box
-        latex.push("\\par \\noindent \\vspace{0.25cm} \\fcolorbox{purple}{MORAT}{ \\parbox{0.88\\textwidth}{" + 
-        activity.formulation  + "}}\n\\vspace{0.25cm}\n\n");
+        latex.push("\\par \\quadrecolor{purple}{MORAT}{" + activity.formulation  + "} \n\n");
 
     } else if (activity.questions.length === 1) {
         activity.questions.forEach((question) => {
-            latex.push("    \\item " + activity.formulation + markdownToLatex(question.formulation));
+            latex.push("    \n\\item " + activity.formulation + markdownToLatex(question.formulation));
         });           
     } else { 
-        latex.push("    \\item " + activity.formulation);
+        latex.push("    \n\\item " + activity.formulation);
 
         // Try to guess the number of columns
         const lengths = activity.questions.map(question => removeLaTeXCmds(question.formulation).length);
@@ -134,7 +143,7 @@ function renderActivity(activity: ActivityTree, opts: any): string[] {
 function renderActivityAnswer(activity: ActivityTree, opts: any): string[] {
     const latex = [];
     if (!opts.keysPlacement) {
-        latex.push("    \\item ");
+        latex.push("    \n\\item ");
     }
     let startLi = "";
     if (activity.questions.length > 1) {
@@ -172,15 +181,16 @@ function markdownToLatex(str: string): string {
         return str;
     }
     //Parse tree into latex format
-    const tree = md.parse(str, {}); 
-    return str;
+    //The file text parser inline sets \ as end char so it removes it from text token
+    str = str.replace(/\\\\/gm, "\\\\\\ ").replace(/\\,/gm, "\\\\,").replace(/\\;/gm, "\\\\;").replace(/\\{/gm, "\\\\{");
+    let tree = md.parse(str, {});     
+    return latexRenderer(tree);
 }
 
 function filterLatex(mdw: string): string {
 
     mdw = mdw.replace(/’/g, "'").replace(/€/g, "\\euro{} ").
-        replace(/’/g, "'").replace(/€/g, "\\euro{} ")
-        .replace(/_/gmi, "\\_");
+        replace(/’/g, "'").replace(/€/g, "\\euro{} ");
 
     return mdw;
 }

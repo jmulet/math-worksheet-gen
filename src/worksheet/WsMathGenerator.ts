@@ -95,7 +95,7 @@ export class WsMathGenerator {
                     adt.activities.push(activity);
                     wactivity.questions.forEach( (wquestion) => {
                         wquestion.parent = wactivity;
-                        const p = this.buildQuestions(wquestion);
+                        const p = this.buildQuestions(wquestion, {lang: adt.lang});
                         promises.push(p);
                         p.then((questions) => activity.questions.push(...questions));   
                     });
@@ -115,7 +115,7 @@ export class WsMathGenerator {
                     section.activities.push(activity);                     
                     wactivity.questions.forEach( (wquestion) => {
                         wquestion.parent = wactivity;
-                        const p = this.buildQuestions(wquestion);
+                        const p = this.buildQuestions(wquestion, {lang: adt.lang});
                         promises.push(p);
                         p.then((questions) => activity.questions.push(...questions));                        
                     });
@@ -157,7 +157,7 @@ export class WsMathGenerator {
 
 
     // Build a QuestionTree and call the generator classes
-    private async buildQuestions(wQuestion: QuestionWs): Promise<QuestionTree[]> {
+    private async buildQuestions(wQuestion: QuestionWs, opts: any): Promise<QuestionTree[]> {
         const questions = <QuestionTree[]>[];
         const promises = [];
         let qsClass = (Container[wQuestion.gen] || {}).clazz;
@@ -169,7 +169,8 @@ export class WsMathGenerator {
            const qGenOpts: QuestionOptsInterface = {
                 rand: this.rand,
                 scope: wQuestion.parent.scope,
-                question: wQuestion.options
+                question: wQuestion.options,
+                ...opts
             };
 
             let qsGen;

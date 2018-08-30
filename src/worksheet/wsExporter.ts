@@ -5,26 +5,7 @@ import { wsExporterMoodleXml } from "./wsExporterMoodleXml";
 
 export type WsExportTypes = "html" | "latex" | "pdf" | "moodlexml" | "odt" | "docx" | "json";
     
-const i18n_TRANSLATIONS = {
-    "en": {
-        "ANSWERS": "Answers",
-        "REFERENCE": "Reference",
-        "NAME": "Name and surname",
-        "NO_ANSWER": "Manual correction"
-    },
-    "es": {
-        "ANSWERS": "Respuestas",
-        "REFERENCE": "Referencia",
-        "NAME": "Nombre y apellidos",
-        "NO_ANSWER": "Correción manual"
-    }, 
-    "ca": {
-        "ANSWERS": "Respostes",
-        "REFERENCE": "Reference",
-        "NAME": "Nom i llinatges",
-        "NO_ANSWER": "Correció manual"
-    }
-};
+const i18n_TRANSLATIONS = require("../translations.json");
 
 export function i18n(key: string, lang: string): string {
     const dict = i18n_TRANSLATIONS[lang] || i18n_TRANSLATIONS["en"];

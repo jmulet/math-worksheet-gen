@@ -54,16 +54,16 @@ export function editorRoute(router: Router, options: wsMathMdwOptions) {
          // create an new sheet
          const json = {
             type: "html",
-            title: "Full d'activitats",
+            title: res.locals.__("WORKSHEET"),
             baseURL: options.basePrefix,
             sections: [
-                { name: "Apartat", activities: [] }
+                { name: res.locals.__("SECTION"), activities: [] }
             ],
             sectionless: true,
             includeKeys: 0,
             visibility: 1,
             author: session.user.fullname,
-            lang: "ca"
+            lang: res.locals.lang || "en"
         };
         const sid = await options.storage.save(json, session.user.id);
         res.send({sid: sid});

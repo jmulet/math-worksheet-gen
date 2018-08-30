@@ -16,6 +16,7 @@ const fse = require('fs-extra')
  */
 export async function latexToOOO(src: string, options?: any): Promise<Buffer> {
 
+  // Pandoc does not recognize tasks
 
   src = src.replace(/\\dfrac/gmi, "\\, \\dfrac").replace(/\\frac/gmi, "\\, \\frac").
   replace(/\\begin\{tasks\}\(1\)/gmi, "\n \\begin{enumerate}[a)]").replace(/\\begin\{tasks\}\(2\)/gmi, "\\begin{enumerate}[a)]\n")

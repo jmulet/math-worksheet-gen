@@ -1,0 +1,27 @@
+
+{
+    "en": {
+        "ANSWERS": "Answers",
+        "REFERENCE": "Reference",
+        "NAME": "Name and surname",
+        "NO_ANSWER": "Manual correction",
+        "WORKSHEET": "Worksheet",
+        "SECTION": "Section"
+    },
+    "es": {
+        "ANSWERS": "Respuestas",
+        "REFERENCE": "Referencia",
+        "NAME": "Nombre y apellidos",
+        "NO_ANSWER": "Correción manual",
+        "WORKSHEET": "Hoja de actividades",
+        "SECTION": "Sección"
+    }, 
+    "ca": {
+        "ANSWERS": "Respostes",
+        "REFERENCE": "Reference",
+        "NAME": "Nom i llinatges",
+        "NO_ANSWER": "Correció manual",
+        "WORKSHEET": "Full d'activitats",
+        "SECTION": "Secció"
+    }
+}

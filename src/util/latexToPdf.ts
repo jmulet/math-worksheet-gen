@@ -181,9 +181,9 @@ export async function latexToPdf(src: string | Stream, options?: any): Promise<a
            reject(err);
            return;
          }
-         fse.removeSync(tempPath);
          //Resolve the promise
          resolve(buffer);
+         fse.remove(tempPath);         
       });
     }
 

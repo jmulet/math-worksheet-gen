@@ -4,6 +4,7 @@ import { Storage } from './repository/Storage';
 import { downloadRoute } from './routes/downloadRoute';
 import { homeRoute } from './routes/homeRoute';
 import { editorRoute } from './routes/editorRoute';
+import { dynImgRoute } from './routes/dynImgRoute';
  
 export interface wsMathMdwOptions {
     basePrefix?: string;
@@ -24,6 +25,7 @@ export function wsMathMiddleware(options?: wsMathMdwOptions) {
     downloadRoute(router, options);
     homeRoute(router, options);
     editorRoute(router, options);
+    dynImgRoute(router, options);
 
     return router;
 }

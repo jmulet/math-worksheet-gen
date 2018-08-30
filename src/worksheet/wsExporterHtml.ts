@@ -2,8 +2,10 @@ import { AbstractDocumentTree, ActivityTree } from "../interfaces/AbstractDocume
 import * as MarkdownIt from "markdown-it";
 import { i18n } from "./wsExporter";
 import {toRoman} from 'roman-numerals';
+import * as attrs from "markdown-it-attrs";
 
-const md = new MarkdownIt({html: true});
+const md = new MarkdownIt();
+md.use(attrs);
 
 export function wsExporterHtml (adt: AbstractDocumentTree, opts: any): string {
 
@@ -264,6 +266,7 @@ function renderActivity(activity: ActivityTree, opts: any): string[] {
         if (!str) {
             return str;
         } 
+        //The file text parser inline sets \ as end char so it removes it from text token
         str = str.replace(/\\\\/gm, "\\\\\\ ").replace(/\\,/gm, "\\\\,").replace(/\\;/gm, "\\\\;").replace(/\\{/gm, "\\\\{");
         const html = md.render(str, {});
         return html;
