@@ -29,6 +29,7 @@
     "markdown-it-attrs": "^2.3.1",
     "mathjs": "4.4.2",
     "method-override": "^2.3.10",
+    "mime-types": "^2.1.20",
     "mysql": "^2.16.0",
     "nerdamer": "^0.7.16",
     "puppeteer": "^1.7.0",

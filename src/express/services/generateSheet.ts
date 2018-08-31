@@ -26,12 +26,12 @@ export async function generateSheet(workbook: Worksheet, adt?: AbstractDocumentT
         const gen = new WsMathGenerator({seed: workbook.seed});
         adt = await gen.create(workbook);         
         //Add it to the generated types in order to be stored in database
-        sheet["json"] = wsExporter(adt, "json", exporterOpts); 
+        sheet["json"] = await wsExporter(adt, "json", exporterOpts); 
     }
 
     if ( LATEX_FORMATS.indexOf(type) >= 0) {
         
-        sheet["latex"] = wsExporter(adt, "latex", exporterOpts);
+        sheet["latex"] = await wsExporter(adt, "latex", exporterOpts);
 
         if (type === "pdf") {
             try {
@@ -43,7 +43,7 @@ export async function generateSheet(workbook: Worksheet, adt?: AbstractDocumentT
                 sheet[type] = await latexToOOO(<string> sheet["latex"], {type: type});                   
         }
     } else if (type !== 'json') {
-        sheet[type] = wsExporter(adt, type, exporterOpts);
+        sheet[type] = await wsExporter(adt, type, exporterOpts);
     }     
 
     return sheet;

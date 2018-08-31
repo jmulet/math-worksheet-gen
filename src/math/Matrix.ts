@@ -250,7 +250,7 @@ export class Matrix {
             //escalar
             str += this.elems[0][0].toTeX();
         } else {
-            str += "\\left( \\begin{array}{" + new Array(this.cols).fill("c").join("") + "}\n" + rows.join(" \\\\[2mm]") + "\n\\end{array} \\right)";
+            str += "\\left( \\begin{array}{" + new Array(this.cols).fill("c").join("") + "}\n" + rows.join(" \\\\[2mm] ") + "\n\\end{array} \\right)";
         }
         return str;
     }

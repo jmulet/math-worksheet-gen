@@ -8,6 +8,7 @@ import { QuestionGenInterface } from '../interfaces/QuestionGenInterface';
 import { wsMath } from '../math/wsMath';
 import * as vm from 'vm';
 import { QuestionOptsInterface } from '../interfaces/QuestionOptsInterface';
+import { WsDynImg } from '../interfaces/WsDynImg';
 
 // Utility
 async function callOptionalFun(obj: any, fun: Function, params?: any[]): Promise<any> {     
@@ -81,7 +82,8 @@ export class WsMathGenerator {
             author: worksheet.author || "",
             created: new Date(),
             sections: null,
-            activities: null
+            activities: null,
+            graphics: []
         };  
 
         const promises = [];
@@ -95,7 +97,7 @@ export class WsMathGenerator {
                     adt.activities.push(activity);
                     wactivity.questions.forEach( (wquestion) => {
                         wquestion.parent = wactivity;
-                        const p = this.buildQuestions(wquestion, {lang: adt.lang});
+                        const p = this.buildQuestions(wquestion, {lang: adt.lang}, adt.graphics);
                         promises.push(p);
                         p.then((questions) => activity.questions.push(...questions));   
                     });
@@ -115,7 +117,7 @@ export class WsMathGenerator {
                     section.activities.push(activity);                     
                     wactivity.questions.forEach( (wquestion) => {
                         wquestion.parent = wactivity;
-                        const p = this.buildQuestions(wquestion, {lang: adt.lang});
+                        const p = this.buildQuestions(wquestion, {lang: adt.lang}, adt.graphics);
                         promises.push(p);
                         p.then((questions) => activity.questions.push(...questions));                        
                     });
@@ -157,7 +159,7 @@ export class WsMathGenerator {
 
 
     // Build a QuestionTree and call the generator classes
-    private async buildQuestions(wQuestion: QuestionWs, opts: any): Promise<QuestionTree[]> {
+    private async buildQuestions(wQuestion: QuestionWs, opts: any, graphics: WsDynImg[]): Promise<QuestionTree[]> {
         const questions = <QuestionTree[]>[];
         const promises = [];
         let qsClass = (Container[wQuestion.gen] || {}).clazz;
@@ -173,13 +175,13 @@ export class WsMathGenerator {
                 ...opts
             };
 
-            let qsGen;
+            
             for (let i = 0; i < wQuestion.repeat; i++ ) {                
-                qsGen = <QuestionGenInterface> new qsClass(qGenOpts);      
+                const qsGen = <QuestionGenInterface> new qsClass(qGenOpts);      
                 const p1 = qsGen.getFormulation();
                 const p2 = qsGen.getAnswer();
                 const p3 = callOptionalFun(qsGen, qsClass.getSteps);
-                const p4 = callOptionalFun(qsGen, qsClass.getQuizz);
+                const p4 = callOptionalFun(qsGen, qsClass.getQuizz);                
                 promises.push(p1);
                 promises.push(p2);
                 promises.push(p3);
@@ -195,7 +197,14 @@ export class WsMathGenerator {
                 p1.then((formulation) => q.formulation = formulation);
                 p2.then((answer) => q.answer = answer);
                 p3.then((steps) => q.steps = <string> steps);
-                p4.then((quizz) => q.quizz = <string> quizz);
+                p4.then((quizz) => q.quizz = <string> quizz);       
+                
+                Promise.all([p1,p2,p3,p4]).then(() => {
+                    console.log(qsGen);
+                    if (qsGen.graphics && Array.isArray(qsGen.graphics)) {
+                        graphics.push(...qsGen.graphics);
+                    }
+                });
                 questions.push(q);
             } 
         } else {
@@ -203,6 +212,7 @@ export class WsMathGenerator {
         }
 
         await Promise.all(promises);
+         
         return questions;
     }
 

@@ -17,14 +17,14 @@ export function i18n(key: string, lang: string): string {
  * 
  * wsEditor ---> sheetDefinition ---> wsMathGenerator ---> ADT ---> wsExporter ---> output document
  */
-export function wsExporter(adt: AbstractDocumentTree, type: WsExportTypes, options?: any): string {
+export async function wsExporter(adt: AbstractDocumentTree, type: WsExportTypes, options?: any): Promise<string> {
 
             const opts = { lang: "ca", includeKeys: 0, keysPlacement: 0, ...options}; 
 
             if (type === "html") {
-                return wsExporterHtml(adt, opts);               
+                return await wsExporterHtml(adt, opts);               
             } else if (type === "moodlexml") {
-                return wsExporterMoodleXml(adt, opts);
+                return await wsExporterMoodleXml(adt, opts);
             } if (type === "json") {
                 return JSON.stringify(adt, null, 2);
             } else {

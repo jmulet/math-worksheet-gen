@@ -11,7 +11,7 @@ export function homeRoute(router: Router, options: wsMathMdwOptions) {
         res.render("home.ejs", {
             templates: publicTemplates || [],
             amTeacher: amTeacher,
-            formatDate: formatDate
+            formatDate: formatDate            
         });
     });
 }

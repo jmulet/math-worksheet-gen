@@ -1,8 +1,10 @@
 import { Token } from "markdown-it";
+import { AbstractDocumentTree } from "../interfaces/AbstractDocumentTree";
+ 
  
 // TODO : handle token attrs and images
 
-function renderToken(token: Token, builder: string[]) {
+function renderToken(adt: AbstractDocumentTree, token: Token, builder: string[]) {
     
     let processChildren = true;
     
@@ -80,17 +82,16 @@ function renderToken(token: Token, builder: string[]) {
     else if (token.type === 'image') {
         processChildren = false;
         const src = token.attrGet("src");
-        const search = "wsmath/tikz/svg?cmd=";
-        const indx = src.indexOf(search);
-        if (indx >= 0) {
-            const tikzEncoded = src.substr(indx + search.length);
-            let scale = "1";
-            if (token.attrGet("scale")) {
-                scale = token.attrGet("scale") || "1";
+
+        const graph = adt.graphics.filter( (g)=> g.id = src)[0];
+        if (graph) {
+            if (graph.engine==="tikz") {
+                builder.push(`\n\\begin{tikzpicture}[scale=1]\n`)
+                builder.push(graph.script);
+                builder.push("\\end{tikzpicture}\n")
+            } else if(graph.base64) {
+                builder.push(" \\includegraphics[]{" + graph.id + ".pdf} ");
             }
-            builder.push(`\n\\begin{tikzpicture}[scale=${scale}]\n`)
-            builder.push(decodeURIComponent(tikzEncoded));
-            builder.push("\\end{tikzpicture}\n")
         }
     }  
     //-------------------------------------------------- tables
@@ -135,16 +136,16 @@ function renderToken(token: Token, builder: string[]) {
     }
 
     if (token.children && processChildren) {
-        token.children.forEach(childToken => renderToken(childToken, builder));
+        token.children.forEach(childToken => renderToken(adt, childToken, builder));
     }
 }
 
-export function latexRenderer(parsed: Token[]) {
+export function latexRenderer(adt: AbstractDocumentTree, parsed: Token[]) {
     const builder = [];
     //Get rid of the first and last token if they are of type paragraph_open/close
     if (parsed[0].type === "paragraph_open" && parsed[parsed.length-1].type === "paragraph_close") {
         parsed.splice(0,1).splice(parsed.length-1,1);
     }
-    parsed.forEach(token => renderToken(token, builder));
+    parsed.forEach(token => renderToken(adt, token, builder));
     return builder.join(" ");
 }

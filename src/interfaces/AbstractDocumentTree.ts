@@ -1,3 +1,5 @@
+import { WsDynImg } from "./WsDynImg";
+
 export interface SectionTree {
     title: string,
     activities: ActivityTree[]
@@ -25,5 +27,6 @@ export interface AbstractDocumentTree {
     author: string,
     created: Date,
     sections?: SectionTree[],
-    activities?: ActivityTree[]
+    activities?: ActivityTree[],
+    graphics: WsDynImg[]
 }

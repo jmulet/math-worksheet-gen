@@ -3,13 +3,40 @@ import * as MarkdownIt from "markdown-it";
 import { i18n } from "./wsExporter";
 import {toRoman} from 'roman-numerals';
 import * as attrs from "markdown-it-attrs";
+import {mdImgProcessor} from "../util/md-img-processor";
+import { gnp2Img } from "../dynimg/gnp2Img";
+import { tikz2Img } from "../dynimg/tikz2img";
+
+const LATEX_RENDERER: string = "mathjax"; //mathjax or katex
 
 const md = new MarkdownIt();
 md.use(attrs);
 
-export function wsExporterHtml (adt: AbstractDocumentTree, opts: any): string {
+export async function wsExporterHtml (adt: AbstractDocumentTree, opts: any): Promise<string> {
 
-const PREAMBLE = `
+// start generating all the images for this document (preferred svg)
+var promises = [];
+adt.graphics.forEach( (g) => {
+    if (g.engine==="gnuplot") {
+        const p = gnp2Img(g.script, "svg"+g.dimensions.join(","), true);
+        p.then((base64) => g.base64 = <string> base64);
+        promises.push(p);
+    } else if(g.engine==="tikz") {
+        const p = tikz2Img(g.script, "svg", true);
+        p.then((base64) => g.base64 = <string> base64);
+        promises.push(p);
+    }
+});
+try {
+    await Promise.all(promises);
+} catch(Ex) {
+    console.log(Ex);
+}
+// Ok now, all images have been correctly generated
+// Pass them to the markdown image processor
+md.use(mdImgProcessor(adt.graphics));
+
+let PREAMBLE = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,11 +45,31 @@ const PREAMBLE = `
 <meta author="${adt.author}">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/contrib/auto-render.min.js" integrity="sha384-IiI65aU9ZYub2MY9zhtKd1H2ps7xxf+eb2YFG9lX6uRqpXCvBTOidPRCXCrQ++Uc" crossorigin="anonymous"></script>
-<script type="text/javascript" charset="UTF-8" src="//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.3/jsxgraphcore.js"></script>
-<style>
+`;
+
+if (LATEX_RENDERER === "katex") {
+
+    PREAMBLE += `
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/contrib/auto-render.min.js" integrity="sha384-IiI65aU9ZYub2MY9zhtKd1H2ps7xxf+eb2YFG9lX6uRqpXCvBTOidPRCXCrQ++Uc" crossorigin="anonymous"></script>
+    `;
+
+} else {
+    PREAMBLE += `
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+        tex2jax: {
+                inlineMath: [['$','$'], ['\\\\(','\\\\)']],
+                displayMath: [['$$','$$'], ['\\\\[','\\\\]']]
+            }
+        });
+    </script>
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+    `;
+}
+
+PREAMBLE +=`<style>
 .olalpha {
     counter-reset: alphacounter;
     margin: 10px; 
@@ -82,8 +129,22 @@ const PREAMBLE = `
     .question-formulation {
         font-size: 12px;
     }
- }
-</style>
+ }`;
+
+ /*
+adt.graphics.forEach( (g) => {
+PREAMBLE +=`
+    #${g.id} {
+    width: ${g.dimensions[0]}px;
+    height: ${g.dimensions[1]}px;
+    background: url(${g.base64}) no-repeat;
+    display: inline;
+    }
+    `;
+});
+ */
+
+PREAMBLE +=` </style>
 </head>
 <body>
 `;
@@ -195,7 +256,7 @@ function renderActivityAnswer(activity: ActivityTree, opts: any): string[] {
 }
 
  
-
+if(LATEX_RENDERER==="katex") {
  builder.push(`
 <script>
  var options = {delimiters: [
@@ -207,8 +268,10 @@ function renderActivityAnswer(activity: ActivityTree, opts: any): string[] {
  document.addEventListener("DOMContentLoaded", function() {
    renderMathInElement(document.body, options);
  });
-</script>
- </body>
+</script>`);
+}
+
+ builder.push(`</body>
  </html>`);
  return filterHtml(builder.join("\n"));
 
@@ -267,7 +330,8 @@ function renderActivity(activity: ActivityTree, opts: any): string[] {
             return str;
         } 
         //The file text parser inline sets \ as end char so it removes it from text token
-        str = str.replace(/\\\\/gm, "\\\\\\ ").replace(/\\,/gm, "\\\\,").replace(/\\;/gm, "\\\\;").replace(/\\{/gm, "\\\\{");
+        str = str.replace(/\\\\\s/gm, "\\\\\\ ").replace(/\\\,/gm, "\\\\,").replace(/\\\;/gm, "\\\\;").replace(/\\{/gm, "\\\\{").replace(/\\\[/gm, "\\\\\\[");    
+        
         const html = md.render(str, {});
         return html;
     }

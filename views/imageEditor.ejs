@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>wsMath home page</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
+        crossorigin="anonymous">
+    <style>
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            margin-bottom: 60px;
+            padding-top: 60px;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+
+<body ng-app="image-editor" ng-controller="imageEditorCtrl">
+    <header>
+        <!-- Fixed navbar -->
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <a class="navbar-brand" href="/mnova"> Image Editor</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mr-auto">
+
+                </ul>
+            </div>
+            <div class="">
+                <ul class="navbar-nav">
+                    <li>
+                        <a href="/wsmath">wsMath</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-6">
+                <center>
+                    <h4>Image code</h4>
+                    <select ng-model="language" ng-options="item as item.label for item in languages track by item.id" ng-change="onLanguageChange()"></select>   
+                        <textarea ng-model="code" style="width: 95%" rows="15"></textarea>
+                        <br>
+                        <button class="btn btn-primary" ng-click="generate()">Generate</button>
+                </center>
+            </div>
+            <div class="col-sm-6" style="background-color:cornsilk">
+                <select ng-model="format" ng-options="item as item.label for item in formats track by item.id"></select>
+                <h4>Result</h4>
+                <img alt="Resulting image" ng-src="{{imageSrc}}" style="width:95%" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var app = angular.module("image-editor", []);
+        app.controller("imageEditorCtrl", ["$scope", function ($scope) {
+
+            $scope.formats = [
+                { id: "svg", label: "Scalar vector graphics" },
+                { id: "png", label: "PNG" },
+                { id: "pngalpha", label: "Transparent PNG" },
+                { id: "jpeg", label: "JPEG" },
+                { id: "pdf", label: "PDF" }
+            ];
+            $scope.format = $scope.formats[0];
+
+             $scope.languages = [
+                { id: "tikz", label: "Tikz/pgfplots" },
+                { id: "gnp", label: "Gnuplot" }                
+            ];
+            $scope.language = $scope.languages[0];
+
+            var SCRIPT_SAMPLES = {
+            "tikz":
+                ["\\begin{axis}[",
+                "  xlabel=$x$,",
+                "  ylabel={$f(x) = x^2 - x +4$},",
+                "  width=\\textwidth,",
+                "  height=0.5\\textwidth ",
+                "]",
+                "  \\addplot {x^2 + x +4};",
+                "\\end{axis}"].join("\n"),
+            
+            "gnp":
+                [
+                "set samples 400",
+                "set grid front",
+                "set xlabel \"x\"",
+                "set ylabel \"y\" norotate",
+                "plot [-10:10] [-2:2] sin(x), cos(x), tan(x)"
+                ].join("\n")
+            };
+         
+            $scope.code = "";
+
+            $scope.onLanguageChange = function(){
+                $scope.code = SCRIPT_SAMPLES[$scope.language.id];
+            };
+
+            $scope.generate = function () {
+                var scriptEncoded = encodeURIComponent($scope.code);
+                $scope.imageSrc = "/wsmath/i/" + $scope.language.id+"/" + $scope.format.id + "?cmd=" + scriptEncoded;
+                console.log($scope.imageSrc)
+            }
+        }]);  
+    </script>
+</body>
+
+</html>

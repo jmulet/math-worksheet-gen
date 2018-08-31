@@ -1,11 +1,16 @@
-\documentclass[crop,tikz,convert={outext=.svg,command=\unexpanded{pdf2svg \infile\space\outfile}},multi=false]{standalone}
-  %\usetikzlibrary{...}% tikz package already loaded by 'tikz' option
+\documentclass[crop,multi=false]{standalone}
+  \usepackage{pgfplots}
+  \pgfplotsset{compat=newest}
   \makeatletter
+  \nofiles
   \begin{document}
   \begin{tikzpicture}
-    \draw (0,0) -- (10,10); % ...
-    \draw (10,0) -- (0,10); % ...
-    \draw (5,0) -- (0,10); % ...
-    \node at (5,5) {Lorem ipsum at domine standalonus};
+  \begin{axis}[
+          xlabel=$x$,
+          ylabel={$f(x) = x^2 - x +4$}
+  ]
+  % use TeX as calculator:
+  \addplot {x^2 - x +4};
+  \end{axis}
   \end{tikzpicture}
   \end{document}

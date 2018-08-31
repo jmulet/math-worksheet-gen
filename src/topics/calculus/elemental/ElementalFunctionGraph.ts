@@ -1,10 +1,9 @@
 import { WsGenerator } from '../../../util/WsGenerator';
 import { QuestionGenInterface } from '../../../interfaces/QuestionGenInterface';
-import { QuestionOptsInterface } from '../../../interfaces/QuestionOptsInterface';
-import { Vector } from '../../../math/Vector';
-import { Random } from '../../../util/Random';
-import { Formatter } from '../../../util/Formatter';
-import { ElementalFunction, ElementalFunctionInterface } from '../../../math/ElementalFunction';
+import { QuestionOptsInterface } from '../../../interfaces/QuestionOptsInterface'; 
+import { Random } from '../../../util/Random'; 
+import { ElementalFunctionInterface } from '../../../math/ElementalFunction'; 
+import { WsDynImg } from '../../../interfaces/WsDynImg';
 
 @WsGenerator({
     category: "calculus/elemental/graph",
@@ -32,8 +31,9 @@ import { ElementalFunction, ElementalFunctionInterface } from '../../../math/Ele
     ]
 })
 export class ElementalFunctionGraph implements QuestionGenInterface {
-
     fun: ElementalFunctionInterface;
+    graphics: WsDynImg[] = [];
+
     constructor(private qGenOpts: QuestionOptsInterface) {
         const rnd = qGenOpts.rand || new Random();
         const r = qGenOpts.question.interval || 10;
@@ -52,7 +52,23 @@ export class ElementalFunctionGraph implements QuestionGenInterface {
     }
 
     async getAnswer(): Promise<string> {
-         
+        const [xmin, ymin, xmax, ymax] = this.fun.getBoundingBox();
+        //Generate a png from a gnuplot script
+        const script = `
+        set samples 400
+        set grid front
+        set xlabel "x"
+        set ylabel "y" norotate
+        plot [${xmin}:${xmax}] [${ymin}:${ymax}] ${this.fun.toString().replace(/\^/g,"**")}
+        `;
+
+        const graph = new WsDynImg(script, "gnuplot", [400, 300]);
+        this.graphics.push(graph);        
+        return "![]("+graph.id+")";
+    }
+}
+
+
         /*
             const uid = "box" + Math.random().toString(32).substr(2);
             const [xmin, ymin, xmax, ymax] = this.fun.getBoundingBox();
@@ -75,9 +91,4 @@ export class ElementalFunctionGraph implements QuestionGenInterface {
                 var q = board.create('glider', [2, 1, curve], {withLabel:false});    
             </script>`;
         */
-
-        return null;
-        
-    }
-
-}
+ 
