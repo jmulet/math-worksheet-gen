@@ -90,7 +90,9 @@ function renderToken(adt: AbstractDocumentTree, token: Token, builder: string[])
                 builder.push(graph.script);
                 builder.push("\\end{tikzpicture}\n")
             } else if(graph.base64) {
-                builder.push(" \\includegraphics[]{" + graph.id + ".pdf} ");
+                //Assume that 1 in = 2.54 cm = 150 px
+                let w = graph.dimensions[0]/150;
+                builder.push(" \\includegraphics[width="+w.toFixed(2)+"in]{./" + graph.id + "."+ graph["toFormat"]+"} ");
             }
         }
     }  

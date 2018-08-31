@@ -14,8 +14,7 @@ const strToStream = require('string-to-stream')
  * followed by dimensions width,height
  * and optionally -dpi for raster images
  */
-function parseDimensionsAndDpi(format: string) {
-    console.log("parseDimensions", format)
+function parseDimensionsAndDpi(format: string) { 
     let width;
     let height;
     let dpi;
@@ -57,6 +56,10 @@ function parseFormatString(format: string) {
         const [width2, height2] = parseDimensionsAndDpi(format.substring(3)); 
         width2 && (width = width2);
         height2 && (height = height2);
+        // DANGER: width and height are inches in pdf terminal so do this conversion
+        // ASSUME THAT 1in = 150px
+        width = parseInt(width)/150 + "";        
+        height = parseInt(height)/150 + "";
     } else if (format.startsWith("png")) {
         ext = "png";   
         const isAlpha = format.startsWith("pngalpha");

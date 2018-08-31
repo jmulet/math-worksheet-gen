@@ -6,7 +6,7 @@ export class WsDynImg {
     base64?: string;
 
     constructor(script: string, engine?: "gnuplot" | "tikz" | "ggb", dimensions?: number[]) {
-        this.id = "#dynimg-"+Math.random().toString(32).substring(2);
+        this.id = "dynimg"+Math.random().toString(32).substring(2);
         this.script = script;
         this.engine = engine;
         if (dimensions) {
