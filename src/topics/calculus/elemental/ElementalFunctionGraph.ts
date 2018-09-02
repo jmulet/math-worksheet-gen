@@ -53,16 +53,23 @@ export class ElementalFunctionGraph implements QuestionGenInterface {
 
     async getAnswer(): Promise<string> {
         const [xmin, ymin, xmax, ymax] = this.fun.getBoundingBox();
+
         //Generate a png from a gnuplot script
+      
+        /**
         const script = `
         set samples 400
         set grid front
         set xlabel "x"
         set ylabel "y" norotate
         plot [${xmin}:${xmax}] [${ymin}:${ymax}] ${this.fun.toString().replace(/\^/g,"**")}
-        `;
-
-        const graph = new WsDynImg(script, "gnuplot", [400, 300]);
+        `;**/
+   
+ 
+        //Generate a geogebra script
+        const script = `f=${this.fun.toString()}\nSetColor(f,blue)\nZoomIn(${xmin},${ymin},${xmax},${ymax})`;
+ 
+        const graph = new WsDynImg(script, "ggb", [400, 300]);
         this.graphics.push(graph);        
         return "![]("+graph.id+")";
     }

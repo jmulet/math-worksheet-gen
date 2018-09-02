@@ -5,7 +5,7 @@ import { Token } from "markdown-it";
 export function mdImgProcessor(graphics: WsDynImg[]) {
 
     function findGraph(id: string): WsDynImg {
-        return graphics.filter( (g)=> g.id = id)[0];
+        return graphics.filter( (g)=> g.id == id)[0];
     }
 
     return (markdown) => {

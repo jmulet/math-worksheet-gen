@@ -65,6 +65,7 @@
                         <textarea ng-model="code" style="width: 95%" rows="15"></textarea>
                         <br>
                         <button class="btn btn-primary" ng-click="generate()">Generate</button>
+                        
                 </center>
             </div>
             <div class="col-sm-6" style="background-color:cornsilk">
@@ -84,17 +85,25 @@
                 { id: "png", label: "PNG" },
                 { id: "pngalpha", label: "Transparent PNG" },
                 { id: "jpeg", label: "JPEG" },
-                { id: "pdf", label: "PDF" }
+                { id: "pdf", label: "PDF" }, 
+                { id: "ggb", label: "GGB file (only for ggb language)" }
             ];
             $scope.format = $scope.formats[0];
 
              $scope.languages = [
+                { id: "ggb", label: "GeogebraScript" },
                 { id: "tikz", label: "Tikz/pgfplots" },
                 { id: "gnp", label: "Gnuplot" }                
             ];
             $scope.language = $scope.languages[0];
 
             var SCRIPT_SAMPLES = {
+            "ggb":
+                ["f=cos(x)",
+                "A=(2,f(2))",
+                "t=Tangent(f,A)",
+                "LineStyle(t,1)"].join("\n"),
+
             "tikz":
                 ["\\begin{axis}[",
                 "  xlabel=$x$,",
@@ -124,6 +133,9 @@
             $scope.generate = function () {
                 var scriptEncoded = encodeURIComponent($scope.code);
                 $scope.imageSrc = "/wsmath/i/" + $scope.language.id+"/" + $scope.format.id + "?cmd=" + scriptEncoded;
+                if ($scope.format.id === "pdf" || $scope.format.id==="ggb") {
+                    window.location.href = $scope.imageSrc;
+                }
                 console.log($scope.imageSrc)
             }
         }]);  

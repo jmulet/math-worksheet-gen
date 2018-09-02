@@ -6,6 +6,7 @@ import * as attrs from "markdown-it-attrs";
 import {mdImgProcessor} from "../util/md-img-processor";
 import { gnp2Img } from "../dynimg/gnp2Img";
 import { tikz2Img } from "../dynimg/tikz2img";
+import { ggb2Img } from "../dynimg/ggb2Img";
 
 const LATEX_RENDERER: string = "mathjax"; //mathjax or katex
 
@@ -18,22 +19,27 @@ export async function wsExporterHtml (adt: AbstractDocumentTree, opts: any): Pro
 var promises = [];
 adt.graphics.forEach( (g) => {
     if (g.engine==="gnuplot") {
-        const p = gnp2Img(g.script, "svg"+g.dimensions.join(","), true);
-        p.then((base64) => g.base64 = <string> base64);
+        const p = gnp2Img(g.script, "svg"+g.dimensions.join(","), true); 
         promises.push(p);
     } else if(g.engine==="tikz") {
-        const p = tikz2Img(g.script, "svg", true);
-        p.then((base64) => g.base64 = <string> base64);
+        const p = tikz2Img(g.script, "svg", true); 
         promises.push(p);
+    } else if(g.engine==="ggb") {
+        const p = ggb2Img(g.script, "svg"+g.dimensions.join(","), true); 
+        promises.push(p);
+    } else {
+        promises.push(new Promise((resolve)=> {resolve()}));
     }
 });
 try {
-    await Promise.all(promises);
+    const bases64 = await Promise.all(promises);
+    adt.graphics.forEach( (g, i) => {g.base64 = <string> bases64[i]} );
 } catch(Ex) {
     console.log(Ex);
 }
 // Ok now, all images have been correctly generated
 // Pass them to the markdown image processor
+
 md.use(mdImgProcessor(adt.graphics));
 
 let PREAMBLE = `

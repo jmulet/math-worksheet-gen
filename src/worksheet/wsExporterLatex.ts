@@ -4,6 +4,8 @@ import * as MarkdownIt from "markdown-it";
 import * as attrs from "markdown-it-attrs";
 import { latexRenderer } from "../util/latexRenderer";
 import { gnp2Img } from "../dynimg/gnp2Img";
+import { ggb2Img } from "../dynimg/ggb2Img";
+import { tikz2Img } from "../dynimg/tikz2img";
  
 
 const md = new MarkdownIt();
@@ -46,14 +48,29 @@ export async function wsExporterLatex(adt: AbstractDocumentTree, opts: any): Pro
         g["toFormat"] = opts.toFormat;
         if (g.engine==="gnuplot") {
             const p = gnp2Img(g.script, opts.toFormat + g.dimensions.join(","), true);
-            p.then((base64) => g.base64 = (<string> base64).replace("data:application/pdf;base64,", "").replace("data:image/png;base64,", "") );
             promises.push(p);
         } else if(g.engine==="tikz") {
-            //tickz can be directly rendered in pdf, no need to convert to pdf
+            // tikz can be directly rendered in pdf, no need to convert to pdf
+            // unless it requires export to pandoc which requires png
+            if (opts.toFormat === "png") {
+                const p = tikz2Img(g.script, opts.toFormat + g.dimensions.join(","), true);
+                promises.push(p);
+            } else {
+                promises.push(new Promise((resolve)=> {resolve()}));
+            }
+        } else if(g.engine==="ggb") {
+            // TODO:: Problem with pdf in ggb -- Can't find the bug
+            const p = ggb2Img(g.script, "png" + g.dimensions.join(","), true);
+            promises.push(p);
+        } else {
+            promises.push(new Promise((resolve)=> {resolve()}));
         }
     });
     try {
-        await Promise.all(promises);
+        const bases64 = await Promise.all(promises);
+        adt.graphics.forEach( (g, i) => {
+            g.base64 = (<string> bases64[i]).replace("data:application/pdf;base64,", "").replace("data:image/png;base64,", "");   
+        });
     } catch(Ex) {
         console.log(Ex);
     }

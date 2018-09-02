@@ -14,7 +14,7 @@ const strToStream = require('string-to-stream')
  * followed by dimensions width,height
  * and optionally -dpi for raster images
  */
-function parseDimensionsAndDpi(format: string) { 
+export function parseDimensionsAndDpi(format: string) { 
     let width;
     let height;
     let dpi;
@@ -31,11 +31,11 @@ function parseDimensionsAndDpi(format: string) {
             }                    
     }
     }
-    console.log(width, height, dpi)
+    
     return [width, height, dpi];
 }
 
-function parseFormatString(format: string) {
+export function parseFormatString(format: string) {
     let term = "svg";
     let termOpts = "font 'Arial,12' linewidth 2 ";
     let ext = "svg";
